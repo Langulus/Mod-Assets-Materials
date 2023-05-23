@@ -8,33 +8,33 @@
 #include "../MContent.hpp"
 
 
-/// Raymarcher node creation																	
-///	@param parent - the parent node														
-///	@param verb - the raymarcher creator verb											
+/// Raymarcher node creation                                                   
+///   @param parent - the parent node                                          
+///   @param verb - the raymarcher creator verb                                 
 MaterialNodeRaymarch::MaterialNodeRaymarch(MaterialNode* parent, const Verb& verb)
    : MaterialNode{ MetaData::Of<MaterialNodeRaymarch>(), parent, verb } {
-   // Verb argument can provide additional traits for the rasterizer		
+   // Verb argument can provide additional traits for the rasterizer      
    verb.GetArgument().ForEachDeep([&](const Trait&) {
       TODO();
    });
    Verb vcopy = verb;
    MaterialNode::Create(vcopy);
 
-   // Verb argument can provide additional traits for the raymarcher		
-   // iPrecision = 0.008 (tolerance)												
-   // iDetail = 60 (max iterations)													
-   // iFarMax = 1000.0	(max raymarch distance)									
-   // iFarStride = 0.3 (used by the hybrid marcher)							
-   //		- if the distance from the root is high enough we use d			
-   //		- instead of log(d)															
-   // iBaseStride = 0.75																
-   //		- determines how fast the root finder moves in, needs to be		
-   //		- lowered when dealing with thin "slices". the potential			
-   //		- problem is the intersector crossing the function twice in		
-   //		- one step																		
-   // iMinStep = 0.1 (to cross faster, a minimum step size)					
+   // Verb argument can provide additional traits for the raymarcher      
+   // iPrecision = 0.008 (tolerance)                                    
+   // iDetail = 60 (max iterations)                                       
+   // iFarMax = 1000.0   (max raymarch distance)                           
+   // iFarStride = 0.3 (used by the hybrid marcher)                     
+   //      - if the distance from the root is high enough we use d         
+   //      - instead of log(d)                                             
+   // iBaseStride = 0.75                                                
+   //      - determines how fast the root finder moves in, needs to be      
+   //      - lowered when dealing with thin "slices". the potential         
+   //      - problem is the intersector crossing the function twice in      
+   //      - one step                                                      
+   // iMinStep = 0.1 (to cross faster, a minimum step size)               
 
-   // Set default values if none were provided in verb						
+   // Set default values if none were provided in verb                  
    if (!mSetup.IsDefined("iPrecision"))
       mSetup += "#define iPrecision 0.008\n";
    if (!mSetup.IsDefined("iDetail"))
@@ -48,14 +48,14 @@ MaterialNodeRaymarch::MaterialNodeRaymarch(MaterialNode* parent, const Verb& ver
    if (!mSetup.IsDefined("iMinStep"))
       mSetup += "#define iMinStep 0.1\n";
 
-   // Register the outputs																
+   // Register the outputs                                                
    Expose<Traits::Color, real>("rmrResult.mDepth");
 }
 
-/// Generate raymarcher definition code													
+/// Generate raymarcher definition code                                       
 void MaterialNodeRaymarch::GenerateDefinition() {
-   // In order to raymarch, we require the SDF functions						
-   // for each child scene																
+   // In order to raymarch, we require the SDF functions                  
+   // for each child scene                                                
    GLSL functions, sdf;
    ForEachChild([&](MaterialNodeScene& scene) {
       scene.GenerateSDFCode(functions, sdf);
@@ -64,13 +64,13 @@ void MaterialNodeRaymarch::GenerateDefinition() {
    if (sdf.IsEmpty())
       throw Except::Content(pcLogSelfError << "No SDF available for raymarcher");
 
-   // Generate SceneSDF()																
+   // Generate SceneSDF()                                                
    functions +=
       "float SceneSDF(in vec3 point) {\n"
       "   return " + sdf + ";\n"
       "\n}\n\n";
 
-   // Define the raymarching logic													
+   // Define the raymarching logic                                       
    functions += mSetup + "\n\n";
    functions +=
       "struct RaymarchResult {\n"
@@ -137,7 +137,7 @@ void MaterialNodeRaymarch::GenerateDefinition() {
    Commit(ShaderToken::Transform, usage);
 }
 
-/// Generate the shader stages																
+/// Generate the shader stages                                                
 void MaterialNodeRaymarch::Generate() {
    PC_VERBOSE_MATERIAL("Generating code...");
    Descend();

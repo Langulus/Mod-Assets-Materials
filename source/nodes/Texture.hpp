@@ -9,13 +9,13 @@
 #include "MaterialNode.hpp"
 
 
-///																									
-///	TEXTURIZER NODE																			
-///																									
-/// Utilizes available sampler traits, sets up uniform samplers and loads		
-/// or generates static textures if required. Supports texture animations of	
-/// all kinds, solid colors, etc.															
-///																									
+///                                                                           
+///   TEXTURIZER NODE                                                         
+///                                                                           
+/// Utilizes available sampler traits, sets up uniform samplers and loads      
+/// or generates static textures if required. Supports texture animations of   
+/// all kinds, solid colors, etc.                                             
+///                                                                           
 class MaterialNodeTexture : public MaterialNode {
    REFLECT(MaterialNodeTexture);
 public:
@@ -36,8 +36,8 @@ private:
    GLSL GetTextureCoordinates();
 
 private:
-   // Supports animating multiple texture channels								
-   // Index zero and one are reserved for front/back of polygons			
+   // Supports animating multiple texture channels                        
+   // Index zero and one are reserved for front/back of polygons         
    TMap<pcptr, KeyframeMap> mKeyframes;
    KeyframeMap mKeyframesGlobal;
 };

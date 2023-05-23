@@ -5,10 +5,11 @@
 /// Distributed under GNU General Public License v3+                          
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
-#include "../MContent.hpp"
+#include "../Node.hpp"
 
-/// Create an FBM node from a parent node													
-///	@param parent - the parent node														
+
+/// Create an FBM node from a parent node                                     
+///   @param parent - the parent node                                         
 MaterialNodeFBM::MaterialNodeFBM(MaterialNode* parent)
    : MaterialNode{ MetaData::Of<MaterialNodeFBM>(), parent, {} }
    , mCodePerUse{ parent->GetOutputSymbol() }
@@ -16,7 +17,7 @@ MaterialNodeFBM::MaterialNodeFBM(MaterialNode* parent)
    mRate = parent->GetRate();
 }
 
-/// For logging																					
+/// For logging                                                               
 MaterialNodeFBM::operator Debug() const {
    GASM result;
    result += MaterialNode::DebugBegin();
@@ -27,17 +28,17 @@ MaterialNodeFBM::operator Debug() const {
    return result;
 }
 
-/// Fractal brownian motion																	
-///	@param verb - the FBM verb																
+/// Fractal brownian motion                                                   
+///   @param verb - the FBM verb                                                
 void MaterialNodeFBM::FBM(Verb& verb) {
-   // Determine octave count, based on verb mass								
+   // Determine octave count, based on verb mass                        
    mOctaveCount = static_cast<pcptr>(verb.GetMass());
    if (mOctaveCount < 1) {
       throw Except::Content(pcLogSelfError
          << "Bad FBM cycle count: " << mOctaveCount);
    }
 
-   // Configure the brownian motion based on verb arguments					
+   // Configure the brownian motion based on verb arguments               
    PC_VERBOSE_MATERIAL("FBM: " << verb.GetArgument());
    verb.GetArgument().ForEachDeep([&](const Block& group) {
       EitherDoThis
@@ -59,15 +60,15 @@ void MaterialNodeFBM::FBM(Verb& verb) {
    verb.Done();
 }
 
-/// Generate FBM definition code																
+/// Generate FBM definition code                                                
 void MaterialNodeFBM::GenerateDefinition() {
-   // Parse the code for a single octave											
+   // Parse the code for a single octave                                 
    auto argument = Ptr<MaterialNodeValue>::New(
       MaterialNodeValue::Local(this, mArgument, mRate, "uv"));
    argument->DoGASM(mCodePerOctave);
    argument->Generate();
 
-   // Generate the FBM function														
+   // Generate the FBM function                                          
    real f = 0.5;
    GLSL definition = 
       "float FBM_"_glsl + GetNodeID() + "(" + argument->GetDeclaration() + ") {\n"
@@ -83,17 +84,17 @@ void MaterialNodeFBM::GenerateDefinition() {
    }
    definition += "   return f;\n}\n\n";
 
-   // Commit																				
+   // Commit                                                            
    Commit(ShaderToken::Functions, definition);
 }
 
-/// Generate FBM definition code																
+/// Generate FBM definition code                                                
 void MaterialNodeFBM::GenerateUsage() {
    const GLSL use = "FBM_" + GetNodeID() + "(" + mCodePerUse + ")";
    mOutputs.Add(Trait::From<Traits::Color, real>(), use);
 }
 
-/// Generate the shader stages																
+/// Generate the shader stages                                                
 void MaterialNodeFBM::Generate() {
    PC_VERBOSE_MATERIAL("Generating code...");
    Descend();

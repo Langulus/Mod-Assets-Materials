@@ -9,9 +9,9 @@
 #include "MaterialNode.hpp"
 
 
-///																									
-///	RESTERIZER MATERIAL NODE																
-///																									
+///                                                                           
+///   RESTERIZER MATERIAL NODE                                                
+///                                                                           
 class MaterialNodeRasterize : public MaterialNode {
    REFLECT(MaterialNodeRasterize);
 public:
@@ -26,14 +26,14 @@ private:
    void GeneratePerVertex();
 
 private:
-   // Code for the rasterizer															
+   // Code for the rasterizer                                             
    GASM mCode;
-   // Whether or not to rasterize both sides of triangles					
+   // Whether or not to rasterize both sides of triangles               
    bool mBilateral = false;
-   // Whether or not triangle faces are flipped									
+   // Whether or not triangle faces are flipped                           
    bool mSigned = false;
-   // Whether we're rasterizing triangles or lines								
+   // Whether we're rasterizing triangles or lines                        
    DMeta mTopology = nullptr;
-   // The depth range in which we're rasterizing								
+   // The depth range in which we're rasterizing                        
    range1 mDepth{ 0, 1000 };
 };

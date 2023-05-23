@@ -9,9 +9,9 @@
 #include "MaterialNode.hpp"
 
 
-///																									
-///	MATERIAL SCENE NODE																		
-///																									
+///                                                                           
+///   MATERIAL SCENE NODE                                                      
+///                                                                           
 class MaterialNodeScene : public MaterialNode {
    REFLECT(MaterialNodeScene);
 public:

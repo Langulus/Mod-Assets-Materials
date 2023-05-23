@@ -8,9 +8,9 @@
 #pragma once
 #include "MaterialNode.hpp"
 
-///																									
-///	ROOT MATERIAL NODE																		
-///																									
+///                                                                           
+///   ROOT MATERIAL NODE                                                      
+///                                                                           
 class MaterialNodeRoot : public MaterialNode {
    REFLECT(MaterialNodeRoot);
 public:

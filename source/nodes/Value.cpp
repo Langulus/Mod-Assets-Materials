@@ -7,15 +7,15 @@
 ///                                                                           
 #include "../MContent.hpp"
 
-///																									
+///                                                                           
 MaterialNodeValue::MaterialNodeValue(CGeneratorMaterial* producer)
    : MaterialNode {MetaData::Of<MaterialNodeValue>(), producer} {}
 
-///																									
+///                                                                           
 MaterialNodeValue::MaterialNodeValue(MaterialNode* parent, const Verb& creator)
    : MaterialNode {MetaData::Of<MaterialNodeValue>(), parent, creator} {}
 
-///																									
+///                                                                           
 MaterialNodeValue MaterialNodeValue::Input(CGeneratorMaterial* producer, const Trait& trait, RRate rate, const GLSL& name) {
    MaterialNodeValue result(producer);
    result.mType = ValueType::Input;
@@ -31,7 +31,7 @@ MaterialNodeValue MaterialNodeValue::Input(CGeneratorMaterial* producer, const T
    return result;
 }
 
-///																									
+///                                                                           
 MaterialNodeValue MaterialNodeValue::Input(MaterialNode* parent, const Trait& trait, RRate rate, const GLSL& name) {
    MaterialNodeValue result(parent);
    result.mType = ValueType::Input;
@@ -47,7 +47,7 @@ MaterialNodeValue MaterialNodeValue::Input(MaterialNode* parent, const Trait& tr
    return result;
 }
 
-///																									
+///                                                                           
 MaterialNodeValue MaterialNodeValue::Output(CGeneratorMaterial* producer, const Trait& trait, RRate rate, const GLSL& name) {
    MaterialNodeValue result(producer);
    result.mType = ValueType::Output;
@@ -63,7 +63,7 @@ MaterialNodeValue MaterialNodeValue::Output(CGeneratorMaterial* producer, const 
    return result;
 }
 
-///																									
+///                                                                           
 MaterialNodeValue MaterialNodeValue::Output(MaterialNode* parent, const Trait& trait, RRate rate, const GLSL& name) {
    MaterialNodeValue result(parent);
    result.mType = ValueType::Output;
@@ -79,7 +79,7 @@ MaterialNodeValue MaterialNodeValue::Output(MaterialNode* parent, const Trait& t
    return result;
 }
 
-///																									
+///                                                                           
 MaterialNodeValue MaterialNodeValue::Local(MaterialNode* parent, const Trait& trait, RRate rate, const GLSL& name) {
    MaterialNodeValue result(parent);
    result.mType = ValueType::Input;
@@ -93,10 +93,10 @@ MaterialNodeValue MaterialNodeValue::Local(MaterialNode* parent, const Trait& tr
    return result;
 }
 
-/// Bind to another node's output, or to an input/uniform							
-///	@param trait - the trait to search for												
-///	@param source - the source node - will be added globally as an				
-///						 input or a uniform if nullptr									
+/// Bind to another node's output, or to an input/uniform                     
+///   @param trait - the trait to search for                                    
+///   @param source - the source node - will be added globally as an            
+///                   input or a uniform if nullptr                           
 void MaterialNodeValue::BindTo(const Trait& trait, const MaterialNode* source) {
    mType = ValueType::Input;
    mTrait = trait;
@@ -116,24 +116,24 @@ void MaterialNodeValue::BindTo(const Trait& trait, const MaterialNode* source) {
    mOutputs.Add(mTrait, mName);
 }
 
-/// Decide trait type and symbol if not decided yet									
+/// Decide trait type and symbol if not decided yet                           
 void MaterialNodeValue::AutoCompleteTrait() {
    if (mTrait.IsUntyped()) {
-      // An input must always be declared with a type							
-      // If no such type is provided, try adding a built-in one			
+      // An input must always be declared with a type                     
+      // If no such type is provided, try adding a built-in one         
       mTrait.SetDataID(DefaultTraitType(mTrait.GetTraitMeta()), false);
    }
    else if (mTrait.Is<DataID>() && !mTrait.IsEmpty()) {
-      // Data ID provided, so make a new trait of this type					
+      // Data ID provided, so make a new trait of this type               
       mTrait = Trait::FromMeta(mTrait.GetTraitMeta(), mTrait.Get<DataID>().GetMeta());
    }
    else if (!mTrait.IsEmpty()) {
-      // Constant provided, just set name to it									
+      // Constant provided, just set name to it                           
       mName = pcSerialize<GLSL>(mTrait);
    }
 }
 
-/// For logging and serialization															
+/// For logging and serialization                                             
 MaterialNodeValue::operator Debug() const {
    GASM result;
    result += MaterialNode::DebugBegin();
@@ -148,10 +148,10 @@ MaterialNodeValue::operator Debug() const {
    return result;
 }
 
-/// Select a member inside this input by scanning reflected members				
-///	@param trait - the trait to select													
-///	@param found - [out] the trait type is carried inside							
-///	@return the symbol of the found trait (empty if nothing was found)		
+/// Select a member inside this input by scanning reflected members            
+///   @param trait - the trait to select                                       
+///   @param found - [out] the trait type is carried inside                     
+///   @return the symbol of the found trait (empty if nothing was found)      
 GLSL MaterialNodeValue::SelectMember(TraitID trait, Trait& found) {
    PC_VERBOSE_MATERIAL("Searching for member " << trait << " inside " << *this);
    for (auto& member : mTrait.GetMeta()->GetMemberList()) {
@@ -167,15 +167,15 @@ GLSL MaterialNodeValue::SelectMember(TraitID trait, Trait& found) {
    return {};
 }
 
-/// Get declaration for the input variable												
-///	@return a variable declaration that is similar to the input					
+/// Get declaration for the input variable                                    
+///   @return a variable declaration that is similar to the input               
 GLSL MaterialNodeValue::GetDeclaration() const {
    return GLSL::Type(mTrait.GetMeta()) + " " + mName;
 }
 
-/// Project the value by multiplying to a matrix										
-/// If value is smaller than the matrix ranks, it will be filled with 1			
-///	@param verb - the projector															
+/// Project the value by multiplying to a matrix                              
+/// If value is smaller than the matrix ranks, it will be filled with 1         
+///   @param verb - the projector                                             
 void MaterialNodeValue::Project(Verb& verb) {
    DMeta matrixType = nullptr;
    GLSL transfomation;
@@ -211,8 +211,8 @@ void MaterialNodeValue::Project(Verb& verb) {
    verb << this;
 }
 
-/// Attempt selecting traits inside this value, or any of its parents			
-///	@param verb - the selector																
+/// Attempt selecting traits inside this value, or any of its parents         
+///   @param verb - the selector                                                
 void MaterialNodeValue::Select(Verb& verb) {
    Trait found;
    GLSL symbol;
@@ -238,11 +238,11 @@ void MaterialNodeValue::Select(Verb& verb) {
    }
 }
 
-/// Add/subtract inputs																			
-///	@param verb - the addition/subtraction verb										
+/// Add/subtract inputs                                                         
+///   @param verb - the addition/subtraction verb                              
 void MaterialNodeValue::Add(Verb& verb) {
    if (verb.GetArgument().IsEmpty() && verb.GetMass() < 0) {
-      // Invert the input																
+      // Invert the input                                                
       mUse = "-(" + GetOutputSymbol() + ")";
       mOutputs.GetValue(0) = mUse;
       PC_VERBOSE_MATERIAL("Inverted (-): " << ccCyan << mUse);
@@ -250,14 +250,14 @@ void MaterialNodeValue::Add(Verb& verb) {
       return;
    }
 
-   // Gather numbers																		
+   // Gather numbers                                                      
    real numbers = 0;
    auto found = verb.GetArgument().ForEach([&](const real& number) {
       numbers += number;
       return true;
    });
 
-   // Gather symbols																		
+   // Gather symbols                                                      
    TAny<GLSL> symbols;
    found += verb.GetArgument().ForEach([&](const MaterialNode& node) {
       symbols << node.GetOutputSymbol();
@@ -269,7 +269,7 @@ void MaterialNodeValue::Add(Verb& verb) {
 
    const auto totalNumbers = pcAbs(verb.GetMass()) * numbers;
    if (totalNumbers) {
-      // Add numbers																		
+      // Add numbers                                                      
       mUse = "(" + GetOutputSymbol()
          + (verb.GetMass() > 0 ? " + " : " - ") + numbers + ")";
       mOutputs.GetValue(0) = mUse;
@@ -277,7 +277,7 @@ void MaterialNodeValue::Add(Verb& verb) {
    }
 
    if (!symbols.IsEmpty()) {
-      // Add symbols																		
+      // Add symbols                                                      
       mUse = "(" + GetOutputSymbol();
       for (const auto& s : symbols)
          mUse += GLSL(verb.GetMass() > 0 ? " + " : " - ") + s;
@@ -289,11 +289,11 @@ void MaterialNodeValue::Add(Verb& verb) {
    verb << this;
 }
 
-/// Multiply/divide inputs																		
-///	@param verb - the multiplication verb												
+/// Multiply/divide inputs                                                      
+///   @param verb - the multiplication verb                                    
 void MaterialNodeValue::Multiply(Verb& verb) {
    if (verb.GetArgument().IsEmpty() && verb.GetMass() < 0) {
-      // Invert the input																
+      // Invert the input                                                
       mUse = "1.0 / (" + GetOutputSymbol() + ")";
       mOutputs.GetValue(0) = mUse;
       PC_VERBOSE_MATERIAL("Inverted (/): " << ccCyan << mUse);
@@ -306,13 +306,13 @@ void MaterialNodeValue::Multiply(Verb& verb) {
    bool continueSearching = true;
    pcptr found = 0;
 
-   // Scan for relevant arguments, like numbers or symbols					
+   // Scan for relevant arguments, like numbers or symbols               
    verb.GetArgument().ForEachDeep([&](const Block& group) {
       group.ForEach([&](const real& number) {
          numbers *= number;
          if (0 == numbers) {
-            // If a zero exists in a chain of multiplications we can		
-            // immediately return													
+            // If a zero exists in a chain of multiplications we can      
+            // immediately return                                       
             verb << real(0);
             continueSearching = false;
             return continueSearching;
@@ -322,7 +322,7 @@ void MaterialNodeValue::Multiply(Verb& verb) {
          return continueSearching;
       });
 
-      // Gather symbols																
+      // Gather symbols                                                
       if (continueSearching) {
          group.ForEach([&](const MaterialNode& node) {
             symbols << node.GetOutputSymbol();
@@ -337,7 +337,7 @@ void MaterialNodeValue::Multiply(Verb& verb) {
    if (verb.IsDone() || !found)
       return;
 
-   // Modify usage																		
+   // Modify usage                                                      
    if (pcAbs(numbers) != 1) {
       mUse = "(" + GetOutputSymbol() 
          + (verb.GetMass() > 0 ? " * " : " / " ) + numbers + ")";
@@ -346,7 +346,7 @@ void MaterialNodeValue::Multiply(Verb& verb) {
    }
 
    if (!symbols.IsEmpty()) {
-      // Multiply symbols																
+      // Multiply symbols                                                
       mUse = "(" + GetOutputSymbol();
       for (const auto& s : symbols)
          mUse += GLSL(verb.GetMass() > 0 ? " * " : " / ") + s;
@@ -358,8 +358,8 @@ void MaterialNodeValue::Multiply(Verb& verb) {
    verb << this;
 }
 
-/// Modulate inputs																				
-///	@param verb - the modulation verb													
+/// Modulate inputs                                                            
+///   @param verb - the modulation verb                                       
 void MaterialNodeValue::Modulate(Verb& verb) {
    real accumulate = verb.GetMass();
    auto found = verb.GetArgument().ForEach([&](const real& number) {
@@ -370,15 +370,15 @@ void MaterialNodeValue::Modulate(Verb& verb) {
    if (!found)
       return;
 
-   // Modify usage																		
+   // Modify usage                                                      
    mUse = "mod(" + GetOutputSymbol() + ", " + accumulate + ")";
    mOutputs.GetValue(0) = mUse;
    PC_VERBOSE_MATERIAL("Modulated: " << ccCyan << mUse);
    verb << this;
 }
 
-/// Exponentiate inputs																			
-///	@param verb - the exponentiation verb												
+/// Exponentiate inputs                                                         
+///   @param verb - the exponentiation verb                                    
 void MaterialNodeValue::Exponent(Verb& verb) {
    real accumulate = verb.GetMass();
    auto found = verb.GetArgument().ForEach([&](const real& number) {
@@ -389,7 +389,7 @@ void MaterialNodeValue::Exponent(Verb& verb) {
    if (!found)
       return;
 
-   // Modify usage																		
+   // Modify usage                                                      
    if (pcAbs(accumulate) != 1) {
       mUse = "pow(" + GetOutputSymbol() + ", " + accumulate + ")";
       mOutputs.GetValue(0) = mUse;
@@ -398,8 +398,8 @@ void MaterialNodeValue::Exponent(Verb& verb) {
    verb << this;
 }
 
-/// Apply fractal brawnian motion to the input											
-///	@param verb - the randomization verb												
+/// Apply fractal brawnian motion to the input                                 
+///   @param verb - the randomization verb                                    
 void MaterialNodeValue::FBM(Verb& verb) {
    MaterialNodeFBM fbm(this);
    fbm.FBM(verb);
@@ -407,13 +407,13 @@ void MaterialNodeValue::FBM(Verb& verb) {
    mOutputs = fbm.GetOutputs();
 }
 
-/// Randomize inputs																				
-///	@param verb - the randomization verb												
+/// Randomize inputs                                                            
+///   @param verb - the randomization verb                                    
 void MaterialNodeValue::Randomize(Verb& verb) {
-   // Input type is the trait type													
+   // Input type is the trait type                                       
    const GLSL itype = GLSL::Type(GetOutputTrait().GetMeta());
 
-   // Check verb argument for the output type									
+   // Check verb argument for the output type                           
    GLSL otype;
    verb.GetArgument().ForEachDeep([&otype](const DataID& type) {
       otype = GLSL::Type(type.GetMeta());
@@ -422,8 +422,8 @@ void MaterialNodeValue::Randomize(Verb& verb) {
    if (otype.IsEmpty())
       otype = itype;
 
-   // Do the thingamagick, calling the appropriate noise/hash function	
-   // to modify the interfaced variable											
+   // Do the thingamagick, calling the appropriate noise/hash function   
+   // to modify the interfaced variable                                 
    GLSL noiseFunction;
    if (itype == "float") {
       noiseFunction = "SimplexNoise1D";
@@ -506,10 +506,10 @@ void MaterialNodeValue::Randomize(Verb& verb) {
    }
    else TODO();
 
-   // Wrap input into the noise function											
+   // Wrap input into the noise function                                 
    mUse = noiseFunction + "(" + GetOutputSymbol() + ")";
    if (otype != "float") {
-      // Cast the noise function output if required							
+      // Cast the noise function output if required                     
       mUse = otype + "(" + mUse + ")";
    }
 
@@ -518,8 +518,8 @@ void MaterialNodeValue::Randomize(Verb& verb) {
    verb << this;
 }
 
-/// Execute a GASM script in the context of the value node							
-///	@param code - the code to execute													
+/// Execute a GASM script in the context of the value node                     
+///   @param code - the code to execute                                       
 void MaterialNodeValue::DoGASM(const GASM& code) {
    pcLogSelfVerbose << "Executing: " << code << " inside " << this;
    auto parsed = code.Parse();
@@ -530,7 +530,7 @@ void MaterialNodeValue::DoGASM(const GASM& code) {
    }
 }
 
-/// Generate the shader stages																
+/// Generate the shader stages                                                
 void MaterialNodeValue::Generate() {
    PC_VERBOSE_MATERIAL("Generating code...");
    Descend();

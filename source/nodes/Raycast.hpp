@@ -9,9 +9,9 @@
 #include "MaterialNode.hpp"
 
 
-///																									
-///	RAYCASTER MATERIAL NODE																	
-///																									
+///                                                                           
+///   RAYCASTER MATERIAL NODE                                                   
+///                                                                           
 class MaterialNodeRaycast : public MaterialNode {
    REFLECT(MaterialNodeRaycast);
 public:

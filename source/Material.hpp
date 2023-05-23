@@ -15,10 +15,10 @@
 /// Manages and produces GUI items that interact with each other within an    
 /// isolated system                                                           
 ///                                                                           
-struct MaterialNode final : A::Unit, ProducedFrom<Material> {
+struct Material final : A::Material {
    LANGULUS(ABSTRACT) false;
-   LANGULUS(PRODUCER) Material;
-   LANGULUS_BASES(A::Unit);
+   LANGULUS(PRODUCER) MaterialLibrary;
+   LANGULUS_BASES(A::Material);
    LANGULUS_VERBS(Verbs::Create);
 
 private:
@@ -30,12 +30,14 @@ private:
    pcptr mConsumedLocations = 0;
 
    // Compiled GASM code																
-   CFlow mCompiled;
+   Temporal mCompiled;
 
 public:
-   MaterialNode(Material*, const Descriptor&);
-   ~MaterialNode();
+   Material(MaterialLibrary*, const Descriptor&);
+   ~Material();
 
    void Create(Verb&);
    void Refresh();
+
+   NOD() const A::Material* GetLOD(const Math::LOD&) const;
 };

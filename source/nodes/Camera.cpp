@@ -10,13 +10,13 @@
 using namespace Nodes;
 
 
-/// Camera/projection node creation															
-///	@param parent - the parent module													
-///	@param verb - the camera creation verb												
+/// Camera/projection node creation                                             
+///   @param parent - the parent module                                       
+///   @param verb - the camera creation verb                                    
 Camera::Camera(MaterialNode* parent, const Verb& verb)
    : MaterialNode{ MetaOf<Camera>(), parent, verb } { }
 
-/// Generate camera definition code, based on usage									
+/// Generate camera definition code, based on usage                           
 void Camera::GenerateDefinition() {
    GLSL types =
       "struct CameraResult {\n"
@@ -27,23 +27,23 @@ void Camera::GenerateDefinition() {
       "   mat4 mProjectedView;\n"
       "};\n\n";
 
-   // Check traits inside verb argument to figure out projection			
+   // Check traits inside verb argument to figure out projection         
    GLSL functions;
    bool explicitCamera = false;
    mConstruct.GetAll().ForEach([&](const TraitID& trait) {
       if (trait != Traits::ViewTransform::ID)
          return;
 
-      // Projection based on camera view transformation						
+      // Projection based on camera view transformation                  
       if (mRate == RefreshRate::PerPixel) {
          auto viewSymbol = GetSymbol<Traits::ViewTransform, mat4>(RRate::PerLevel);
          auto fovSymbol = GetSymbol<Traits::FOV, real>(RRate::PerCamera);
          auto projectedViewSymbol = GetSymbol<Traits::ViewProjectTransform, mat4>(RRate::PerLevel);
          auto resolution = GetSymbol<Traits::Resolution, vec2>(RefreshRate::PerTick);
 
-         // Combine pixel position with the view matrix to from			
-         // the projection per pixel. This allows for optically			
-         // realistic rendering (near and far planes are not flat)		
+         // Combine pixel position with the view matrix to from         
+         // the projection per pixel. This allows for optically         
+         // realistic rendering (near and far planes are not flat)      
          functions =
             "CameraResult Camera() {\n"
             "   CameraResult result;\n"
@@ -61,8 +61,8 @@ void Camera::GenerateDefinition() {
          auto viewSymbolInverse = GetSymbol<Traits::ViewTransformInverted, mat4>(RRate::PerLevel);
          auto posSymbol = GetSymbol<Traits::Position, mat4>(RRate::PerVertex);
 
-         // Combine vertex position with the view matrix to from			
-         // the projection per vertex												
+         // Combine vertex position with the view matrix to from         
+         // the projection per vertex                                    
          functions =
             "CameraResult Camera() {\n"
             "   CameraResult result;\n"
@@ -79,7 +79,7 @@ void Camera::GenerateDefinition() {
    if (!explicitCamera) {
       auto resolution = GetSymbol<Traits::Resolution, vec2>(RefreshRate::PerTick);
 
-      // By default it simply projects 2D based on the pixel position	
+      // By default it simply projects 2D based on the pixel position   
       pcLogSelfWarning << 
          "No explicit camera defined - using default 2D screen projection";
 
@@ -107,7 +107,7 @@ void Camera::GenerateDefinition() {
 
    Commit(ShaderToken::Functions, types + functions + constants);
 
-   // Expose the results to the rest of the nodes								
+   // Expose the results to the rest of the nodes                        
    Expose<Traits::Position, vec2>("camResult.mFragment");
    Expose<Traits::Sampler, vec2>("camResult.mScreenUV");
    Expose<Traits::Position, vec3>("camResult.mOrigin");
@@ -115,7 +115,7 @@ void Camera::GenerateDefinition() {
    Expose<Traits::Aim, vec3>("camResult.mDirection");
 }
 
-/// Generate the shader stages																
+/// Generate the shader stages                                                
 void Camera::Generate() {
    PC_VERBOSE_MATERIAL("Generating code...");
    Descend();

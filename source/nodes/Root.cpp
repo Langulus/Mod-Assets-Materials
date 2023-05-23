@@ -8,12 +8,12 @@
 #include "../MContent.hpp"
 
 
-/// Root node creation																			
-///	@param producer - the producer material											
+/// Root node creation                                                         
+///   @param producer - the producer material                                 
 MaterialNodeRoot::MaterialNodeRoot(CGeneratorMaterial* producer)
    : MaterialNode{ MetaData::Of<MaterialNodeRoot>(), producer } { }
 
-/// For logging																					
+/// For logging                                                               
 MaterialNodeRoot::operator Debug() const {
    GASM result;
    result += DataID::Of<ME>;
@@ -22,7 +22,7 @@ MaterialNodeRoot::operator Debug() const {
    return result;
 }
 
-/// Generate the shader stages																
+/// Generate the shader stages                                                
 void MaterialNodeRoot::Generate() {
    PC_VERBOSE_MATERIAL("Generating code...");
    Descend();

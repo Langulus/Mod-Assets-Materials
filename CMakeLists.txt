@@ -5,7 +5,8 @@ project(LangulusModAssetsMaterials)
 add_library(LangulusModAssetsMaterials SHARED
     source/MaterialLibrary.cpp
     source/Material.cpp
-    "source/Node.cpp"
+    source/Node.cpp
+    source/GLSL.cpp
     source/nodes/Camera.cpp
     source/nodes/FBM.cpp
     source/nodes/Light.cpp

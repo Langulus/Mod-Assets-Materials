@@ -9,9 +9,9 @@
 #include "MaterialNode.hpp"
 
 
-///																									
-///	FRACTAL BROWNIAN MOTION MATERIAL NODE												
-///																									
+///                                                                           
+///   FRACTAL BROWNIAN MOTION MATERIAL NODE                                    
+///                                                                           
 class MaterialNodeFBM : public MaterialNode {
    REFLECT(MaterialNodeFBM);
 public:

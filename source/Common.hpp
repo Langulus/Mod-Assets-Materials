@@ -14,14 +14,5 @@ using namespace Langulus::Anyness;
 using namespace Langulus::Entity;
 using namespace Langulus::Math;
 
-struct GUI;
-struct GUISystem;
-struct GUIItem;
-struct GUIFont;
-
-/// Include ImGui                                                             
-#include <imgui.h>
-
-#if LANGULUS(DEBUG)
-   #define IMGUI_VULKAN_DEBUG_REPORT
-#endif
+struct MaterialLibrary;
+struct Material;

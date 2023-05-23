@@ -8,9 +8,9 @@
 #pragma once
 #include "MaterialNode.hpp"
 
-///																									
-///	INPUT MATERIAL NODE																		
-///																									
+///                                                                           
+///   INPUT MATERIAL NODE                                                      
+///                                                                           
 class MaterialNodeValue : public MaterialNode {
    Trait mTrait;
    GLSL mUniform, mName, mUse;

@@ -8,18 +8,18 @@
 #include "../MContent.hpp"
 
 
-/// Raytracer node creation																	
-///	@param parent - the parent node														
-///	@param verb - the raymarcher creator verb											
+/// Raytracer node creation                                                   
+///   @param parent - the parent node                                          
+///   @param verb - the raymarcher creator verb                                 
 MaterialNodeRaytrace::MaterialNodeRaytrace(MaterialNode* parent, const Verb& verb)
    : MaterialNode{ MetaData::Of<MaterialNodeRaytrace>(), parent, verb } { }
 
-/// Generate raytracer definition code														
+/// Generate raytracer definition code                                          
 void MaterialNodeRaytrace::GenerateDefinition() {
    TODO();
 }
 
-/// Generate the shader stages																
+/// Generate the shader stages                                                
 void MaterialNodeRaytrace::Generate() {
    PC_VERBOSE_MATERIAL("Generating code...");
    Descend();

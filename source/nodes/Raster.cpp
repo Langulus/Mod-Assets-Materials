@@ -7,14 +7,14 @@
 ///                                                                           
 #include "../MContent.hpp"
 
-/// Rasterizer node creation																	
-///	@param parent - the parent node														
-///	@param verb - rasterizer creation verb												
+/// Rasterizer node creation                                                   
+///   @param parent - the parent node                                          
+///   @param verb - rasterizer creation verb                                    
 MaterialNodeRasterize::MaterialNodeRasterize(MaterialNode* parent, const Verb& verb)
    : MaterialNode{ MetaData::Of<MaterialNodeRasterize>(), parent, verb } {
    if (mRate == RRate::PerVertex) {
-      // We'll be using the fixed pipeline rasterizer							
-      // Nothing to really do here													
+      // We'll be using the fixed pipeline rasterizer                     
+      // Nothing to really do here                                       
       if (!verb.GetArgument().IsEmpty()) {
          pcLogSelfWarning 
             << "Using fixed-pipeline (PerVertex) rasterizer, "
@@ -24,32 +24,32 @@ MaterialNodeRasterize::MaterialNodeRasterize(MaterialNode* parent, const Verb& v
       return;
    }
 
-   // Verb argument can provide additional traits for the rasterizer		
+   // Verb argument can provide additional traits for the rasterizer      
    verb.GetArgument().ForEachDeep([&](const Block& group) {
       EitherDoThis
       group.ForEach([&](const Trait& trait) {
          if (trait.TraitIs<Traits::Bilateral>()) {
-            // Whether or not we're rasterizing double-sided triangles	
+            // Whether or not we're rasterizing double-sided triangles   
             PC_VERBOSE_MATERIAL("Configuring rasterizer: " << trait);
             mBilateral = trait.AsCast<bool>();
          }
          else if (trait.TraitIs<Traits::Signed>()) {
-            // Whether or not we're reverting face winding					
+            // Whether or not we're reverting face winding               
             PC_VERBOSE_MATERIAL("Configuring rasterizer: " << trait);
             mSigned = trait.AsCast<bool>();
          }
          else if (trait.TraitIs<Traits::Topology>()) {
-            // Configures the rasterizer to either triangles, or lines	
+            // Configures the rasterizer to either triangles, or lines   
             PC_VERBOSE_MATERIAL("Configuring rasterizer: " << trait);
             mTopology = trait.AsCast<DataID>().GetMeta();
          }
          else if (trait.TraitIs<Traits::Min>()) {
-            // Configures the rasterizer's min depth							
+            // Configures the rasterizer's min depth                     
             PC_VERBOSE_MATERIAL("Configuring rasterizer: " << trait);
             mDepth.mMin = trait.AsCast<real>();
          }
          else if (trait.TraitIs<Traits::Max>()) {
-            // Configures the rasterizer's max depth							
+            // Configures the rasterizer's max depth                     
             PC_VERBOSE_MATERIAL("Configuring rasterizer: " << trait);
             mDepth.mMax = trait.AsCast<real>();
          }
@@ -63,19 +63,19 @@ MaterialNodeRasterize::MaterialNodeRasterize(MaterialNode* parent, const Verb& v
    if (!mTopology)
       mTopology = ATriangle::Reflect();
 
-   // Register the outputs																
+   // Register the outputs                                                
    Expose<Traits::Color, real>("rasResult.mDepth");
    Expose<Traits::Sampler, vec2>("rasResult.mUV");
    Expose<Traits::Aim, vec3>("rasResult.mNormal");
    Expose<Traits::Texture, int>("int(rasResult.mFront)");
 }
 
-/// Generate rasterizer definition code													
-/// This is a 'fake' per-pixel rasterizer - very suboptimal, but useful in		
-/// various scenarios																			
+/// Generate rasterizer definition code                                       
+/// This is a 'fake' per-pixel rasterizer - very suboptimal, but useful in      
+/// various scenarios                                                         
 void MaterialNodeRasterize::GeneratePerPixel() {
-   // In order to rasterize, we require either triangle or line data		
-   // Scan all parent nodes for scenes in order to generate these			
+   // In order to rasterize, we require either triangle or line data      
+   // Scan all parent nodes for scenes in order to generate these         
    GLSL triangleDef, sceneTriangles, sceneLines;
    pcptr triangleCount = 0, lineCount = 0;
    ForEachChild([&](MaterialNodeScene& scene) {
@@ -93,7 +93,7 @@ void MaterialNodeRasterize::GeneratePerPixel() {
       (mBilateral ? "   bool mFront;\n" : "") +
       "};\n\n";
 
-   // Define the triangle rasterizing function									
+   // Define the triangle rasterizing function                           
    GLSL rasterizeTriangle =
       "void RasterizeTriangle(in CameraResult camera, in Triangle triangle, inout RasterizeResult result) {\n"
       "   // Transform to eye space\n"
@@ -107,7 +107,7 @@ void MaterialNodeRasterize::GeneratePerPixel() {
 
       "   float a = 0.5 * (-p1.y * p2.x + p0.y * (-p1.x + p2.x) + p0.x * (p1.y - p2.y) + p1.x * p2.y);\n";
 
-   // Do face culling if required													
+   // Do face culling if required                                       
    if (mBilateral)
       rasterizeTriangle += "   result.mFront = a <= 0.0;\n";
    else if (mSigned)
@@ -152,28 +152,28 @@ void MaterialNodeRasterize::GeneratePerPixel() {
       "   }\n"
       "}\n\n";
 
-   // Define the line rasterizing function										
+   // Define the line rasterizing function                              
    static const GLSL rasterizeLine =
       "void RasterizeLine(in CameraResult camera, in Line t, inout RasterizeResult result) {\n"
       "   TODO();\n"
       "}\n\n";
 
-   // Finish up the SceneRAS() if anything was defined in it				
+   // Finish up the SceneRAS() if anything was defined in it            
    GLSL sceneFunction = "void SceneRAS(in CameraResult camera, inout RasterizeResult result) {\n";
    if (!sceneTriangles.IsEmpty()) {
-      // Finish up the triangle array												
+      // Finish up the triangle array                                    
       sceneTriangles = triangleDef 
          + "const Triangle cTriangles[" + triangleCount + "] = Triangle["
          + triangleCount + "](\n" + sceneTriangles + "\n);\n\n";
 
-      // And iterate the triangles inside the SceneRAS()						
+      // And iterate the triangles inside the SceneRAS()                  
       sceneFunction += "   for(int triangleIndex = 0; triangleIndex < ";
       sceneFunction += triangleCount;
       sceneFunction += "; triangleIndex += 1) {\n";
       sceneFunction += "      RasterizeTriangle(camera, cTriangles[triangleIndex], result);\n";
       sceneFunction += "   }\n";
 
-      // Add the required rasterizer to the definitions						
+      // Add the required rasterizer to the definitions                  
       define += sceneTriangles;
       if (!define.Find(rasterizeTriangle))
          define += rasterizeTriangle;
@@ -201,7 +201,7 @@ void MaterialNodeRasterize::GeneratePerPixel() {
    sceneFunction += "}\n\n";
    define += sceneFunction;
 
-   // Rasterize usage																	
+   // Rasterize usage                                                   
    GLSL usage = 
       "RasterizeResult rasResult;\n"
       "rasResult.mDepth = "_glsl + mDepth.mMax + ";\n"
@@ -214,8 +214,8 @@ void MaterialNodeRasterize::GeneratePerPixel() {
    Commit(ShaderToken::Transform, usage);
 }
 
-/// Wrap a per vertex symbol to the built-in gl_PerVertex structure				
-///	@param vs - the vertex shader code													
+/// Wrap a per vertex symbol to the built-in gl_PerVertex structure            
+///   @param vs - the vertex shader code                                       
 template<RTTI::ReflectedTrait T>
 void AddPerVertexOutput(GLSL& vs, const GLSL& symbol) {
    if (vs.Find("out gl_PerVertex {"))
@@ -239,16 +239,16 @@ void AddPerVertexOutput(GLSL& vs, const GLSL& symbol) {
    //float gl_ClipDistance[];
 }
 
-/// Generate fixed-pipeline rasterization													
-/// Uses relevant attributes and rasterizes them, by forwarding them to the	
-/// pixel shader																					
+/// Generate fixed-pipeline rasterization                                       
+/// Uses relevant attributes and rasterizes them, by forwarding them to the   
+/// pixel shader                                                               
 void MaterialNodeRasterize::GeneratePerVertex() {
-   // If a pixel shader is missing, add a default one							
+   // If a pixel shader is missing, add a default one                     
    GLSL& ps = GetProducer()->GetStage(ShaderStage::Pixel);
    if (ps.IsEmpty())
       ps = GLSL::From(ShaderStage::Pixel);
 
-   // Wrap the output token															
+   // Wrap the output token                                             
    GLSL& vs = GetProducer()->GetStage(ShaderStage::Vertex);
    if (vs.IsEmpty())
       vs = GLSL::From(ShaderStage::Vertex);
@@ -262,7 +262,7 @@ void MaterialNodeRasterize::GeneratePerVertex() {
    //float gl_ClipDistance[];
 }
 
-/// Generate the shader stages																
+/// Generate the shader stages                                                
 void MaterialNodeRasterize::Generate() {
    PC_VERBOSE_MATERIAL("Generating code...");
 

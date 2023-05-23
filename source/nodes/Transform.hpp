@@ -9,9 +9,9 @@
 #include "MaterialNode.hpp"
 
 
-///																									
-///	MATERIAL TRANSFORMATION NODE															
-///																									
+///                                                                           
+///   MATERIAL TRANSFORMATION NODE                                             
+///                                                                           
 class MaterialNodeTransform : public MaterialNode {
    REFLECT(MaterialNodeTransform);
 public:
@@ -36,6 +36,6 @@ private:
    InstanceReal<3> GetInstance(pcptr idx);
 
 private:
-   // Keyframes																			
+   // Keyframes                                                         
    TMap<PCTime, Verb> mKeyframes;
 };

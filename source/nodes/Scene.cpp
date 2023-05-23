@@ -7,12 +7,12 @@
 ///                                                                           
 #include "../MContent.hpp"
 
-/// Material node from geometry generator													
-///	@param parent - the parent node														
-///	@param verb - the scene creator verb												
+/// Material node from geometry generator                                       
+///   @param parent - the parent node                                          
+///   @param verb - the scene creator verb                                    
 MaterialNodeScene::MaterialNodeScene(MaterialNode* parent, const Verb& verb)
    : MaterialNode{ MetaData::Of<MaterialNodeScene>(), parent, verb } {
-   // Request the geometry generator												
+   // Request the geometry generator                                    
    auto creator = Verb::From<Verbs::Create>({}, verb.GetArgument());
    GetContentManager()->Create(creator);
    creator.GetOutput().ForEachDeep([this](CGeneratorGeometry* g) {
@@ -20,7 +20,7 @@ MaterialNodeScene::MaterialNodeScene(MaterialNode* parent, const Verb& verb)
    });
 }
 
-/// For logging																					
+/// For logging                                                               
 MaterialNodeScene::operator Debug() const {
    GASM result;
    result += MaterialNode::DebugBegin();
@@ -29,35 +29,35 @@ MaterialNodeScene::operator Debug() const {
    return result;
 }
 
-/// Move/rotate/scale the scene																
-///	@param verb - the move verb															
+/// Move/rotate/scale the scene                                                
+///   @param verb - the move verb                                             
 void MaterialNodeScene::Move(Verb& verb) {
    if (verb.GetArgument().IsEmpty())
       return;
 
-   // Add/reuse a transform child node and relay the verb to it			
+   // Add/reuse a transform child node and relay the verb to it         
    auto transformer = EmplaceChildUnique(MaterialNodeTransform(this, verb));
    transformer->Move(verb);
 }
 
-/// Texturize scene, applying solid colors, color maps, normal	maps, etc.		
-///	@param verb - the texturization verb												
+/// Texturize scene, applying solid colors, color maps, normal   maps, etc.      
+///   @param verb - the texturization verb                                    
 void MaterialNodeScene::Texturize(Verb& verb) {
    if (verb.GetArgument().IsEmpty())
       return;
 
-   // Add/reuse a texturizer child node and relay the verb to it			
+   // Add/reuse a texturizer child node and relay the verb to it         
    auto texturizer = EmplaceChildUnique(MaterialNodeTexture(this, verb));
    texturizer->Texturize(verb);
 }
 
-/// Generate code for signed distance field from geometry							
-///	@param define - [in/out] code definitions											
-///	@param scene - [out] SDF code goes here											
+/// Generate code for signed distance field from geometry                     
+///   @param define - [in/out] code definitions                                 
+///   @param scene - [out] SDF code goes here                                 
 void MaterialNodeScene::GenerateSDFCode(GLSL& define, GLSL& scene) {
    if (!mGeometry->IsGenerated()) {
-      // By default, geometry doesn't generate GLSL code						
-      // and raymarcher requires it, so we create them						
+      // By default, geometry doesn't generate GLSL code                  
+      // and raymarcher requires it, so we create them                  
       auto additional = Any::Wrap(
          DataID::Of<ATriangle>,
          DataID::Of<GLSL>
@@ -69,25 +69,25 @@ void MaterialNodeScene::GenerateSDFCode(GLSL& define, GLSL& scene) {
       mGeometry->Generate();
    }
 
-   // Get the SDF code from the generated content								
+   // Get the SDF code from the generated content                        
    const auto codeTrait = mGeometry->GetData<Traits::Code>();
    if (!codeTrait || codeTrait->IsEmpty())
       throw Except::Content(pcLogSelfError 
          << "No SDF available for " << mGeometry);
 
-   // Add definition if not added yet												
+   // Add definition if not added yet                                    
    auto& definitionCode = codeTrait->As<GLSL>(0);
    if (!define.Find(definitionCode))
       define += definitionCode;
 
    auto& usageCode = codeTrait->As<GLSL>(1);
    if (scene.IsEmpty()) {
-      // First scene entry																
+      // First scene entry                                                
       scene += usageCode;
       return;
    }
 
-   // Define the union operation if not yet defined							
+   // Define the union operation if not yet defined                     
    static const GLSL unionFunction =
       "float opUnion(float d1, float d2) {\n"
       "   return min(d1,d2);\n"
@@ -96,22 +96,22 @@ void MaterialNodeScene::GenerateSDFCode(GLSL& define, GLSL& scene) {
    if (!define.Find(unionFunction))
       define += unionFunction;
 
-   // Then union the SDF to the rest of the SceneSDF()						
+   // Then union the SDF to the rest of the SceneSDF()                  
    scene = "opUnion(" + scene;
    scene += ", ";
    scene += usageCode;
    scene += ")";
 }
 
-/// Generate code for triangles from geometry											
-///	@param define - [in/out] code definitions											
-///	@param sceneTriangles - [out] triangle code goes here							
-///	@param triangleCount - [in/out] keeps track of generated triangles		
+/// Generate code for triangles from geometry                                 
+///   @param define - [in/out] code definitions                                 
+///   @param sceneTriangles - [out] triangle code goes here                     
+///   @param triangleCount - [in/out] keeps track of generated triangles      
 void MaterialNodeScene::GenerateTriangleCode(GLSL& define, GLSL& sceneTriangles, pcptr& triangleCount) {
    if (!mGeometry->IsGenerated()) {
-      // By default, geometry doesn't generate vertex positions			
-      // and rasterizer requires it, so we create them						
-      // We generate normals and texture coordinates while we're at it	
+      // By default, geometry doesn't generate vertex positions         
+      // and rasterizer requires it, so we create them                  
+      // We generate normals and texture coordinates while we're at it   
       auto additional = Any::Wrap(
          DataID::Of<ATriangle>,
          DataID::Of<Point3>,
@@ -129,7 +129,7 @@ void MaterialNodeScene::GenerateTriangleCode(GLSL& define, GLSL& sceneTriangles,
       throw Except::Content(pcLogSelfError
          << "Incompatible topology for: " << mGeometry);
 
-   // Triangles																			
+   // Triangles                                                         
    static const GLSL triangleStruct =
       "struct Triangle {\n"
       "   vec3 a; vec2 aUV;\n"
@@ -141,11 +141,11 @@ void MaterialNodeScene::GenerateTriangleCode(GLSL& define, GLSL& sceneTriangles,
    if (!define.Find(triangleStruct))
       define += triangleStruct;
 
-   // Aggregate all triangles in an array of sorts:							
-   // const Triangle cTriangles[N] = Triangle[N](								
-   //		Triangle(a, aUV, b, bUV, c, cUV, n),									
-   //		... N times																		
-   //	);																						
+   // Aggregate all triangles in an array of sorts:                     
+   // const Triangle cTriangles[N] = Triangle[N](                        
+   //      Triangle(a, aUV, b, bUV, c, cUV, n),                           
+   //      ... N times                                                      
+   //   );                                                                  
    const auto count = mGeometry->GetTriangleCount();
    for (pcptr i = 0; i < count; ++i) {
       auto position = mGeometry->GetTriangleTrait<Traits::Position>(i);
@@ -197,14 +197,14 @@ void MaterialNodeScene::GenerateTriangleCode(GLSL& define, GLSL& sceneTriangles,
    }
 }
 
-/// Generate code for lines from geometry													
-///	@param define - [in/out] code definitions											
-///	@param sceneLines - [out] line code goes here									
-///	@param lineCount - [in/out] keeps track of generated lines					
+/// Generate code for lines from geometry                                       
+///   @param define - [in/out] code definitions                                 
+///   @param sceneLines - [out] line code goes here                           
+///   @param lineCount - [in/out] keeps track of generated lines               
 void MaterialNodeScene::GenerateLineCode(GLSL& define, GLSL& sceneLines, pcptr& lineCount) {
    if (!mGeometry->IsGenerated()) {
-      // By default, geometry doesn't generate vertex positions			
-      // and rasterizer requires it, so we create them						
+      // By default, geometry doesn't generate vertex positions         
+      // and rasterizer requires it, so we create them                  
       auto additional = Any::Wrap(
          DataID::Of<ALine>,
          DataID::Of<Point3>,
@@ -221,7 +221,7 @@ void MaterialNodeScene::GenerateLineCode(GLSL& define, GLSL& sceneLines, pcptr& 
       throw Except::Content(pcLogSelfError
          << "Incompatible topology for: " << mGeometry);
 
-   // Lines																					
+   // Lines                                                               
    static const GLSL lineStruct =
       "struct Line {\n"
       "   vec3 a; vec2 aUV;\n"
@@ -231,11 +231,11 @@ void MaterialNodeScene::GenerateLineCode(GLSL& define, GLSL& sceneLines, pcptr& 
    if (!define.Find(lineStruct))
       define += lineStruct;
 
-   // Aggregate all lines in an array of sorts:									
-   // const Line cLines[N] = Line[N](												
-   //		Line(a, aUV, b, bUV),														
-   //		... N times																		
-   //	);																						
+   // Aggregate all lines in an array of sorts:                           
+   // const Line cLines[N] = Line[N](                                    
+   //      Line(a, aUV, b, bUV),                                          
+   //      ... N times                                                      
+   //   );                                                                  
    const auto count = mGeometry->GetLineCount();
    for (pcptr i = 0; i < count; ++i) {
       auto position = mGeometry->GetLineTrait<Traits::Position>(i);
@@ -267,7 +267,7 @@ void MaterialNodeScene::GenerateLineCode(GLSL& define, GLSL& sceneLines, pcptr& 
    }
 }
 
-/// Generate the shader stages																
+/// Generate the shader stages                                                
 void MaterialNodeScene::Generate() {
    PC_VERBOSE_MATERIAL("Generating code...");
    Descend();

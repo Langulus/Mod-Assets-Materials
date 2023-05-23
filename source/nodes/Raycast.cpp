@@ -8,18 +8,18 @@
 #include "../MContent.hpp"
 
 
-/// Raycaster node creation																	
-///	@param parent - the parent node														
-///	@param verb - the raycast creator verb												
+/// Raycaster node creation                                                   
+///   @param parent - the parent node                                          
+///   @param verb - the raycast creator verb                                    
 MaterialNodeRaycast::MaterialNodeRaycast(MaterialNode* parent, const Verb& verb)
    : MaterialNode{ MetaData::Of<MaterialNodeRaycast>(), parent, verb } { }
 
-/// Generate raycaster definition code														
+/// Generate raycaster definition code                                          
 void MaterialNodeRaycast::GenerateDefinition() {
    TODO();
 }
 
-/// Generate the shader stages																
+/// Generate the shader stages                                                
 void MaterialNodeRaycast::Generate() {
    PC_VERBOSE_MATERIAL("Generating code...");
    Descend();
