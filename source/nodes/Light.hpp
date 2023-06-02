@@ -6,24 +6,23 @@
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
 #pragma once
-#include "MaterialNode.hpp"
+#include "../Node.hpp"
 
 
-///                                                                           
-///   LIGHT MATERIAL NODE                                                      
-///                                                                           
-class MaterialNodeLight : public MaterialNode {
-   REFLECT(MaterialNodeLight);
-public:
-   MaterialNodeLight(MaterialNode*, const Verb&);
-   MaterialNodeLight(MaterialNodeLight&&) noexcept = default;
+namespace Nodes
+{
 
-public:
-   void Generate() final;
+   ///                                                                        
+   ///   Light material node                                                  
+   ///                                                                        
+   struct Light : Node {
+      Light(const Descriptor&);
 
-   PC_VERB(Illuminate);
+      void Generate() final;
 
-private:
-   void GenerateDefinition();
-   void GenerateUsage();
-};
+   private:
+      void GenerateDefinition();
+      void GenerateUsage();
+   };
+
+} // namespace Nodes

@@ -11,13 +11,13 @@
 
 
 ///                                                                           
-///   User interface module using ImGUI                                       
+///   Material library                                                        
 ///                                                                           
-/// Manages and produces GUI systems                                          
+/// Manages and produces Material(s)                                          
 ///                                                                           
-struct MaterialLibrary final : A::AssetsModule {
+struct MaterialLibrary final : A::AssetModule {
    LANGULUS(ABSTRACT) false;
-   LANGULUS_BASES(A::AssetsModule);
+   LANGULUS_BASES(A::AssetModule);
    LANGULUS_VERBS(Verbs::Create);
 
 private:

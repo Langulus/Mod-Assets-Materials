@@ -6,38 +6,41 @@
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
 #pragma once
-#include "Node.hpp"
+#include "nodes/Root.hpp"
 
 
 ///                                                                           
-///   GUI system                                                              
+///   A material generator                                                    
 ///                                                                           
-/// Manages and produces GUI items that interact with each other within an    
-/// isolated system                                                           
+/// Capable of generating HLSL/GLSL code and meta data for shader compilation 
+/// by parsing a material descriptor                                          
 ///                                                                           
 struct Material final : A::Material {
-   LANGULUS(ABSTRACT) false;
-   LANGULUS(PRODUCER) MaterialLibrary;
-   LANGULUS_BASES(A::Material);
-   LANGULUS_VERBS(Verbs::Create);
-
 private:
-   // Root node																			
-   MaterialNodeRoot mRoot;
+   // Root node                                                         
+   Nodes::Root mRoot;
 
-   // Consumed bindings																	
-   pcptr mConsumedSamplers = 0;
-   pcptr mConsumedLocations = 0;
+   // Default material rate                                             
+   Rate mDefaultRate = Rate::Auto;
 
-   // Compiled GASM code																
+   // Consumed bindings                                                 
+   Count mConsumedSamplers {};
+   Count mConsumedLocations {};
+
+   // Compiled flow                                                     
    Temporal mCompiled;
 
 public:
+   LANGULUS(ABSTRACT) false;
+   LANGULUS_BASES(A::Material);
+   LANGULUS_VERBS(Verbs::Create);
+
    Material(MaterialLibrary*, const Descriptor&);
-   ~Material();
 
    void Create(Verb&);
    void Refresh();
 
-   NOD() const A::Material* GetLOD(const Math::LOD&) const;
+   NOD() const A::Material* GetLOD(const LOD&) const;
+
+   NOD() const Rate& GetDefaultRate() const noexcept;
 };

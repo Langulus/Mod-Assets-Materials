@@ -15,7 +15,7 @@ add_library(LangulusModAssetsMaterials SHARED
     source/nodes/Raymarch.cpp
     source/nodes/Raytrace.cpp
     source/nodes/Root.cpp
-    source/nodes/Scene.cpp
+    "source/nodes/SceneSDF.cpp"
     source/nodes/Texture.cpp
     source/nodes/Transform.cpp
     source/nodes/Value.cpp

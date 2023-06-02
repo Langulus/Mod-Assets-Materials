@@ -5,26 +5,20 @@
 /// Distributed under GNU General Public License v3+                          
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
-#include "../MContent.hpp"
+#include "Root.hpp"
+
+using namespace Nodes;
 
 
-/// Root node creation                                                         
+/// Root node creation                                                        
 ///   @param producer - the producer material                                 
-MaterialNodeRoot::MaterialNodeRoot(CGeneratorMaterial* producer)
-   : MaterialNode{ MetaData::Of<MaterialNodeRoot>(), producer } { }
-
-/// For logging                                                               
-MaterialNodeRoot::operator Debug() const {
-   GASM result;
-   result += DataID::Of<ME>;
-   result += GASM::OpenScope;
-   result += GASM::CloseScope;
-   return result;
-}
+///   @param desc - the node descriptor                                       
+Root::Root(Material* producer, const Descriptor& desc)
+   : Node {MetaOf<Root>(), producer, desc} { }
 
 /// Generate the shader stages                                                
-void MaterialNodeRoot::Generate() {
-   PC_VERBOSE_MATERIAL("Generating code...");
+void Root::Generate() {
+   VERBOSE_NODE("Generating code...");
    Descend();
    Consume();
 }

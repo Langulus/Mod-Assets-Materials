@@ -6,60 +6,51 @@
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
 #pragma once
-#include "MaterialNode.hpp"
+#include "../Node.hpp"
 
-///                                                                           
-///   INPUT MATERIAL NODE                                                      
-///                                                                           
-class MaterialNodeValue : public MaterialNode {
-   Trait mTrait;
-   GLSL mUniform, mName, mUse;
-   GLSL mDependencies;
 
-public:
-   REFLECT(MaterialNodeValue);
-   MaterialNodeValue(CGeneratorMaterial*);
-   //MaterialNodeValue(const MaterialNodeValue&) = default;
-   //MaterialNodeValue(MaterialNodeValue&&) noexcept = default;
-   MaterialNodeValue(MaterialNode*, const Verb& = {});
+namespace Nodes
+{
 
-   NOD() static MaterialNodeValue Input(CGeneratorMaterial*, const Trait&, RRate = RRate::PerAuto, const GLSL& name = {});
-   NOD() static MaterialNodeValue Output(CGeneratorMaterial*, const Trait&, RRate = RRate::PerAuto, const GLSL& name = {});
-   NOD() static MaterialNodeValue Input(MaterialNode*, const Trait&, RRate = RRate::PerAuto, const GLSL& name = {});
-   NOD() static MaterialNodeValue Output(MaterialNode*, const Trait&, RRate = RRate::PerAuto, const GLSL& name = {});
-   NOD() static MaterialNodeValue Local(MaterialNode*, const Trait&, RRate = RRate::PerAuto, const GLSL& name = {});
+   ///                                                                        
+   ///   Value node                                                           
+   ///                                                                        
+   struct Value : Node {
+   private:
+      Trait mTrait;
+      GLSL mUniform, mName, mUse;
+      GLSL mDependencies;
 
-   //MaterialNodeValue& operator = (const MaterialNodeValue&) = default;
-   //MaterialNodeValue& operator = (MaterialNodeValue&&) = default;
+   public:
+      LANGULUS_VERBS(Verbs::Do);
 
-public:
-   void Generate() override;
+      Value(const Descriptor&);
 
-   PC_VERB(Project);
-   PC_VERB(Select);
-   PC_VERB(Add);
-   PC_VERB(Multiply);
-   PC_VERB(Modulate);
-   PC_VERB(Exponent);
-   PC_VERB(Randomize);
-   PC_VERB(FBM);
+      NOD() static Value Input(Node*,  const Trait& = {}, Rate = Rate::Auto, const GLSL& name = {});
+      NOD() static Value Output(Node*, const Trait& = {}, Rate = Rate::Auto, const GLSL& name = {});
+      NOD() static Value Local(Node*,  const Trait& = {}, Rate = Rate::Auto, const GLSL& name = {});
 
-   void DoGASM(const GASM&);
-   NOD() GLSL SelectMember(TraitID, Trait&);
-   NOD() GLSL GetDeclaration() const;
+      void Generate() override;
 
-   NOD() inline TMeta GetTrait() const noexcept {
-      return mTrait.GetTraitMeta();
-   }
+      void Do(Verb&);
 
-   void BindTo(const Trait&, const MaterialNode*);
+      NOD() GLSL SelectMember(TraitID, Trait&);
+      NOD() GLSL GetDeclaration() const;
 
-   inline bool IsValid() const {
-      return !mName.IsEmpty();
-   }
+      NOD() TMeta GetTrait() const noexcept {
+         return mTrait.GetTraitMeta();
+      }
 
-   NOD() operator Debug() const;
+      void BindTo(const Trait&, const Node*);
 
-private:
-   void AutoCompleteTrait();
-};
+      bool IsValid() const {
+         return !mName.IsEmpty();
+      }
+
+      NOD() operator Debug() const;
+
+   private:
+      void AutoCompleteTrait();
+   };
+
+} // namespace Nodes

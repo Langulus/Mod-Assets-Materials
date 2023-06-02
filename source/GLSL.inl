@@ -1,6 +1,5 @@
 #pragma once
 #include "GLSL.hpp"
-#include "Vulkan.hpp"
 
 
 /// Construct by copying text                                                 
@@ -212,7 +211,7 @@ inline GLSL GLSL::Type(DMeta meta) {
 
       return token;
    }
-   else if (meta->CastsTo<VulkanTexture>()) {
+   else if (meta->CastsTo<A::Texture>()) {
       return "sampler2D";
       //TODO distinguish these:
       //gsampler1D   GL_TEXTURE_1D   1D texture
@@ -230,39 +229,6 @@ inline GLSL GLSL::Type(DMeta meta) {
 
    LANGULUS_THROW(GLSL, "Unsupported GLSL type");
 }
-
-/// Concatenate GLSL with GLSL                                                
-///   @param lhs - left operand                                               
-///   @param rhs - right operand                                              
-///   @return the concatenated operands                                       
-/*LANGULUS(INLINED)
-GLSL operator + (const GLSL& lhs, const GLSL& rhs) {
-   // It's essentially the same, as concatenating Text with Text        
-   // with the only difference being, that it retains GLSL type         
-   return static_cast<const Text&>(lhs) + static_cast<const Text&>(rhs);
-}
-
-/// Concatenate any Text with GLSL                                            
-///   @param lhs - left operand                                               
-///   @param rhs - right operand                                              
-///   @return the concatenated operands as GLSL                               
-LANGULUS(INLINED)
-GLSL operator + (const Text& lhs, const GLSL& rhs) {
-   // It's essentially the same, as concatenating Text with Text        
-   // with the only difference being, that it retains GLSL type         
-   return lhs + static_cast<const Text&>(rhs);
-}
-
-/// Concatenate GLSL with any Text                                            
-///   @param lhs - left operand                                               
-///   @param rhs - right operand                                              
-///   @return the concatenated operands as GLSL                               
-LANGULUS(INLINED)
-GLSL operator + (const GLSL& lhs, const Text& rhs) {
-   // It's essentially the same, as concatenating Text with Text        
-   // with the only difference being, that it retains GLSL type         
-   return static_cast<const Text&>(lhs) + rhs;
-}*/
 
 /// Destructive concatenation of GLSL with anything                           
 /// Attempts to serialize right operand to GLSL, or GASM as an alternative    
@@ -285,29 +251,3 @@ GLSL& GLSL::operator += (const T& rhs) {
    else LANGULUS_ERROR("GLSL converter not implemented");
    return *this;
 }
-
-/// Concatenate anything with GLSL                                            
-/// Attempts to serialize left operand to GLSL, or Flow::Code                 
-///   @param lhs - left operand                                               
-///   @param rhs - right operand                                              
-///   @return a reference to lhs                                              
-/*LANGULUS(INLINED)
-GLSL operator + (const CT::NotText auto& lhs, const GLSL& rhs) {
-   GLSL converted;
-   converted += lhs;
-   converted += rhs;
-   return converted;
-}
-
-/// Concatenate anything with GLSL                                            
-/// Attempts to serialize right operand to GLSL, or Flow::Code                
-///   @param lhs - left operand                                               
-///   @param rhs - right operand                                              
-///   @return a reference to lhs                                              
-LANGULUS(INLINED)
-GLSL operator + (const GLSL& lhs, const CT::NotText auto& rhs) {
-   GLSL converted;
-   converted += lhs;
-   converted += rhs;
-   return converted;
-}*/

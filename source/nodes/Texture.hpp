@@ -6,38 +6,39 @@
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
 #pragma once
-#include "MaterialNode.hpp"
+#include "../Node.hpp"
+#include <Anyness/TMap.hpp>
 
 
-///                                                                           
-///   TEXTURIZER NODE                                                         
-///                                                                           
-/// Utilizes available sampler traits, sets up uniform samplers and loads      
-/// or generates static textures if required. Supports texture animations of   
-/// all kinds, solid colors, etc.                                             
-///                                                                           
-class MaterialNodeTexture : public MaterialNode {
-   REFLECT(MaterialNodeTexture);
-public:
-   MaterialNodeTexture(MaterialNode*, const Verb&);
-   MaterialNodeTexture(MaterialNodeTexture&&) noexcept = default;
+namespace Nodes
+{
 
-public:
-   void Generate() final;
+   ///                                                                        
+   ///   Texture node                                                         
+   ///                                                                        
+   /// Utilizes available sampler traits, sets up uniform samplers and loads  
+   /// or generates static textures if required. Supports texture animations  
+   /// of all kinds, solid colors, etc.                                       
+   ///                                                                        
+   struct Texture : Node {
+   private:
+      // Supports animating multiple texture channels                   
+      // Index zero and one are reserved for front/back of polygons     
+      using KeyframeMap = TMap<Time, Verb>;
+      TMap<Offset, KeyframeMap> mKeyframes;
+      KeyframeMap mKeyframesGlobal;
 
-   PC_VERB(Texturize);
+   public:
+      Texture(const Descriptor&);
 
-   NOD() operator Debug() const;
+      void Generate() final;
 
-private:
-   using KeyframeMap = TMap<PCTime, Verb>;
-   GLSL GenerateDefinition(KeyframeMap*, const GLSL&);
-   GLSL GetKeyframe(KeyframeMap*, pcptr, const GLSL&);
-   GLSL GetTextureCoordinates();
+      NOD() operator Debug() const;
 
-private:
-   // Supports animating multiple texture channels                        
-   // Index zero and one are reserved for front/back of polygons         
-   TMap<pcptr, KeyframeMap> mKeyframes;
-   KeyframeMap mKeyframesGlobal;
-};
+   private:
+      GLSL GenerateDefinition(KeyframeMap*, const GLSL&);
+      GLSL GetKeyframe(KeyframeMap*, Offset, const GLSL&);
+      GLSL GetTextureCoordinates();
+   };
+
+} // namespace Nodes

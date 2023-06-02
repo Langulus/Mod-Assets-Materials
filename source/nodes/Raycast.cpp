@@ -5,25 +5,25 @@
 /// Distributed under GNU General Public License v3+                          
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
-#include "../MContent.hpp"
+#include "Raycast.hpp"
+
+using namespace Nodes;
 
 
-/// Raycaster node creation                                                   
-///   @param parent - the parent node                                          
-///   @param verb - the raycast creator verb                                    
-MaterialNodeRaycast::MaterialNodeRaycast(MaterialNode* parent, const Verb& verb)
-   : MaterialNode{ MetaData::Of<MaterialNodeRaycast>(), parent, verb } { }
+/// Raycaster node descriptor-constructor                                     
+///   @param desc - raycast descriptor                                        
+Raycast::Raycast(const Descriptor& desc)
+   : Node {MetaOf<Raycast>(), desc} { }
 
-/// Generate raycaster definition code                                          
-void MaterialNodeRaycast::GenerateDefinition() {
+/// Generate raycaster definition code                                        
+void Raycast::GenerateDefinition() {
    TODO();
 }
 
 /// Generate the shader stages                                                
-void MaterialNodeRaycast::Generate() {
-   PC_VERBOSE_MATERIAL("Generating code...");
+void Raycast::Generate() {
+   VERBOSE_NODE("Generating...");
    Descend();
    Consume();
-
    GenerateDefinition();
 }

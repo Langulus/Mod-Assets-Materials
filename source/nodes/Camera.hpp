@@ -8,6 +8,7 @@
 #pragma once
 #include "../Node.hpp"
 
+
 namespace Nodes
 {
 
@@ -15,9 +16,7 @@ namespace Nodes
    ///   Camera node                                                          
    ///                                                                        
    struct Camera : Node {
-   public:
-      MaterialNodeCamera(MaterialNode*, const Verb&);
-      MaterialNodeCamera(MaterialNodeCamera&&) noexcept = default;
+      Camera(const Descriptor&);
 
       void Generate() final;
 

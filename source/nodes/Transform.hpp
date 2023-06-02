@@ -6,36 +6,38 @@
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
 #pragma once
-#include "MaterialNode.hpp"
+#include "../Node.hpp"
+#include <Anyness/TMap.hpp>
+#include <Math/TInstance.hpp>
 
 
-///                                                                           
-///   MATERIAL TRANSFORMATION NODE                                             
-///                                                                           
-class MaterialNodeTransform : public MaterialNode {
-   REFLECT(MaterialNodeTransform);
-public:
-   MaterialNodeTransform(MaterialNode*, const Verb&);
-   MaterialNodeTransform(MaterialNodeTransform&&) noexcept = default;
+namespace Nodes
+{
 
-public:
-   void Generate() final;
+   ///                                                                        
+   ///   Transform node                                                       
+   ///                                                                        
+   struct Transform : Node {
+   private:
+      // Keyframes                                                      
+      TMap<Time, Verb> mKeyframes;
 
-   PC_VERB(Move);
+   public:
+      Transform(const Descriptor&);
 
-   NOD() operator Debug() const;
+      void Generate() final;
 
-private:
-   void GenerateDefinition();
+      NOD() operator Debug() const;
 
-   GLSL GetPosition(pcptr idx, bool& runtime);
-   GLSL GetScale(pcptr idx, bool& runtime);
-   GLSL GetAim(pcptr idx, bool& runtime);
-   GLSL GetInterpolator(pcptr idx);
-   GLSL GetTimer(pcptr idx);
-   InstanceReal<3> GetInstance(pcptr idx);
+   private:
+      void GenerateDefinition();
 
-private:
-   // Keyframes                                                         
-   TMap<PCTime, Verb> mKeyframes;
-};
+      GLSL GetPosition(Offset, bool& runtime);
+      GLSL GetScale(Offset, bool& runtime);
+      GLSL GetAim(Offset, bool& runtime);
+      GLSL GetInterpolator(Offset);
+      GLSL GetTimer(Offset);
+      TInstance<Vec3> GetInstance(Offset);
+   };
+
+} // namespace Nodes

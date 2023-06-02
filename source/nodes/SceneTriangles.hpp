@@ -13,15 +13,19 @@ namespace Nodes
 {
 
    ///                                                                        
-   ///   Raytracing material node                                             
+   ///   Scene node                                                           
    ///                                                                        
-   struct Raytrace : Node {
-      Raytrace(const Descriptor&);
+   /// Can generate shader code that resermbles the described scene, either   
+   /// by adding signed distance field functions, or triangles/lines          
+   ///                                                                        
+   struct SceneTriangles : Node {
+      SceneTriangles(const Descriptor&);
 
       void Generate() final;
 
-   private:
-      void GenerateDefinition();
+      void GenerateCode(GLSL& define, GLSL& scene, Count&);
+
+      NOD() operator Debug() const;
    };
 
 } // namespace Nodes

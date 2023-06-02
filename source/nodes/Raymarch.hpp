@@ -6,24 +6,32 @@
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
 #pragma once
-#include "MaterialNodeScene.hpp"
+#include "../Node.hpp"
+#include "SceneSDF.hpp"
 
+namespace Nodes
+{
 
-///                                                                           
-///   RAYMARCHER MATERIAL NODE                                                
-///                                                                           
-class MaterialNodeRaymarch : public MaterialNode {
-   REFLECT(MaterialNodeRaymarch);
-public:
-   MaterialNodeRaymarch(MaterialNode*, const Verb&);
-   MaterialNodeRaymarch(MaterialNodeRaymarch&&) noexcept = default;
+   ///                                                                        
+   ///   Raymarch material node                                               
+   ///                                                                        
+   struct Raymarch : Node {
+   private:
+      float mPrecision;
+      float mFarMax;
+      float mFarStride;
+      float mBaseStride;
+      float mMinStep;
+      int mDetail;
+      SceneSDF mScene;
 
-public:
-   void Generate() final;
+   public:
+      Raymarch(const Descriptor&);
 
-private:
-   void GenerateDefinition();
+      void Generate() final;
 
-private:
-   GLSL mSetup;
-};
+   private:
+      void GenerateDefinition();
+   };
+
+} // namespace Nodes

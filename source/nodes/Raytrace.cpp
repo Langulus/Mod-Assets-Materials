@@ -5,25 +5,25 @@
 /// Distributed under GNU General Public License v3+                          
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
-#include "../MContent.hpp"
+#include "Raytrace.hpp"
+
+using namespace Nodes;
 
 
-/// Raytracer node creation                                                   
-///   @param parent - the parent node                                          
-///   @param verb - the raymarcher creator verb                                 
-MaterialNodeRaytrace::MaterialNodeRaytrace(MaterialNode* parent, const Verb& verb)
-   : MaterialNode{ MetaData::Of<MaterialNodeRaytrace>(), parent, verb } { }
+/// Raytracer node descriptor-constructor                                     
+///   @param desc - raytrace descriptor                                       
+Raytrace::Raytrace(const Descriptor& desc)
+   : Node {MetaOf<Raytrace>(), desc} { }
 
-/// Generate raytracer definition code                                          
-void MaterialNodeRaytrace::GenerateDefinition() {
+/// Generate raytracer definition code                                        
+void Raytrace::GenerateDefinition() {
    TODO();
 }
 
 /// Generate the shader stages                                                
-void MaterialNodeRaytrace::Generate() {
-   PC_VERBOSE_MATERIAL("Generating code...");
+void Raytrace::Generate() {
+   VERBOSE_NODE("Generating code...");
    Descend();
    Consume();
-
    GenerateDefinition();
 }

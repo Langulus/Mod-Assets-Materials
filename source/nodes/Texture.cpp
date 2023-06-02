@@ -5,58 +5,47 @@
 /// Distributed under GNU General Public License v3+                          
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
-#include "../MContent.hpp"
+#include "Texture.hpp"
 
-/// Material node for combining and animating textures                        
-///   @param parent - the parent node                                          
-///   @param verb - the texturizer creator verb                                 
-MaterialNodeTexture::MaterialNodeTexture(MaterialNode* parent, const Verb& verb)
-   : MaterialNode {MetaData::Of<MaterialNodeTexture>(), parent, verb} {}
+using namespace Nodes;
 
-/// For logging                                                               
-MaterialNodeTexture::operator Debug() const {
-   GASM result;
-   result += MaterialNode::DebugBegin();
-      //result += mKeyframes;
-   result += MaterialNode::DebugEnd();
-   return result;
-}
 
-/// Texturizer, applying solid colors, color maps, normal maps, etc.            
-///   @param verb - the texturization verb                                    
-void MaterialNodeTexture::Texturize(Verb& verb) {
-   PC_VERBOSE_MATERIAL("Texturizing: " << verb);
-   pcptr textureId = 0;
+/// Texture node descriptor-constructor                                       
+///   @param desc - the node descriptor                                       
+Texture::Texture(const Descriptor& desc)
+   : Node {MetaOf<Texture>(), desc} {
+   // Parse texture-related descriptor                                  
+   Offset textureId = 0;
    bool usingTextureId = false;
    bool relative = false;
-   verb.GetArgument().ForEachDeep([&](const Block& group) {
-      EitherDoThis
-      group.ForEach([&](const Trait& trait) {
-         if (trait.TraitIs<Traits::Texture>()) {
-            // Texture id                                                
-            PC_VERBOSE_MATERIAL("Configuring texturizer: " << trait);
-            textureId = trait.AsCast<pcptr>();
-            usingTextureId = true;
-         }
-         else if (trait.TraitIs<Traits::Relative>()) {
-            // Relativity                                                
-            PC_VERBOSE_MATERIAL("Configuring texturizer: " << trait);
-            relative = trait.AsCast<bool>();
-         }
-      })
-      OrThis
-      group.ForEach([&](const real& id) {
-         // Texture id                                                   
-         PC_VERBOSE_MATERIAL("Configuring texturizer: " << id);
-         textureId = static_cast<pcptr>(id);
+
+   for (auto pair : mDescriptor.mTraits) {
+      if (pair.mKey->template Is<Traits::Texture>()) {
+         // Texture id                                                  
+         VERBOSE_NODE("Configuring texturizer: ", pair.mValue);
+         textureId = pair.mValue.AsCast<pcptr>();
          usingTextureId = true;
-      });
-   });
+      }
+      else if (pair.mKey->template Is<Traits::Relative>()) {
+         // Relativity                                                  
+         VERBOSE_NODE("Configuring texturizer: ", pair.mValue);
+         relative = pair.mValue.AsCast<bool>();
+      }
+   }
+
+   for (auto pair : mDescriptor.mAnythingElse) {
+      if (pair.mKey->template CastsTo<A::Number>()) {
+         // Texture id                                                  
+         VERBOSE_NODE("Configuring texturizer: ", pair.mValue);
+         textureId = pair.mValue.AsCast<Offset>();
+         usingTextureId = true;
+      }
+   }
 
    const auto time = PCTime::FromSeconds(verb.GetTime());
    KeyframeMap* frameMap = nullptr;
    if (usingTextureId) {
-      // Check if keyframe channel exists                                 
+      // Check if keyframe channel exists                               
       if (mKeyframes.FindKey(textureId) == uiNone)
          mKeyframes.Add(textureId, {});
 
@@ -68,27 +57,33 @@ void MaterialNodeTexture::Texturize(Verb& verb) {
    }
 
    if (frameMap->FindKey(time) == uiNone) {
-      // No such keyframe exists, so create it                           
-      PC_VERBOSE_MATERIAL("Texture #" << textureId << " keyframe added at "
-         << time << ": " << verb);
+      // No such keyframe exists, so create it                          
+      VERBOSE_NODE("Texture #", textureId, " keyframe added at ", time, ": ", verb);
       frameMap->Add(time, verb);
       verb << this;
       return;
    }
 
-   // Combine the keyframes' verbs                                       
+   // Combine the keyframes' verbs                                      
    if (relative)
       (*frameMap)[time].GetArgument() << verb.GetArgument();
    else
       (*frameMap)[time] = verb;
-
-   verb << this;
 }
 
-/// Retrieves sampler coordinates from the node environment                     
+/// For logging                                                               
+Texture::operator Debug() const {
+   Code result;
+   result += Node::DebugBegin();
+      //result += mKeyframes;
+   result += Node::DebugEnd();
+   return result;
+}
+
+/// Retrieves sampler coordinates from the node environment                   
 /// May either return a local 'uv' symbol, or a uniform/varying               
-///   @return the texture coordinate symbol                                    
-GLSL MaterialNodeTexture::GetTextureCoordinates() {
+///   @return the texture coordinate symbol                                   
+GLSL Texture::GetTextureCoordinates() {
    auto sampler = GetValue(Traits::Sampler::Reflect(), nullptr, GetRate(), false);
    if (!sampler.IsValid())
       throw Except::Content(pcLogSelfError
@@ -97,7 +92,7 @@ GLSL MaterialNodeTexture::GetTextureCoordinates() {
 }
 
 /// Assembles a GLSL texture(...) function                                    
-///   @param textureSymbol - the name of the sampler                           
+///   @param textureSymbol - the name of the sampler                          
 ///   @param meta - the format of the texture                                 
 ///   @return the resulting texture(...) code                                 
 GLSL GetPixel(const GLSL& textureSymbol, const GLSL& uvSymbol, DMeta meta) {
@@ -120,29 +115,29 @@ GLSL GetPixel(const GLSL& textureSymbol, const GLSL& uvSymbol, DMeta meta) {
 }
 
 /// Turn a keyframe and all of its dependencies to GLSL code                  
-///   @param frameMap - the texture channel keyframes                           
-///   @param keyIdx - the index of the keyframe                                 
-///   @param uv - the texture coordinate symbol                                 
-///   @return the generated GLSL code                                          
-GLSL MaterialNodeTexture::GetKeyframe(KeyframeMap* frameMap, pcptr keyIdx, const GLSL& uv) {
+///   @param frameMap - the texture channel keyframes                         
+///   @param keyIdx - the index of the keyframe                               
+///   @param uv - the texture coordinate symbol                               
+///   @return the generated GLSL code                                         
+GLSL Texture::GetKeyframe(KeyframeMap* frameMap, pcptr keyIdx, const GLSL& uv) {
    // Scan the keyframe arguments                                       
    GLSL symbol;
    auto& keyframe = frameMap->GetValue(keyIdx);
-   PC_VERBOSE_MATERIAL("Analyzing keyframe #" << keyIdx << ": " << keyframe);
+   VERBOSE_NODE("Analyzing keyframe #", keyIdx, ": ", keyframe);
 
-   // Scan the keyframe verb                                             
+   // Scan the keyframe verb                                            
    bool usingChannelId = false;
    pcptr channelId = 0;
    keyframe.GetArgument().ForEachDeep([&](const Block& group) {
       EitherDoThis
       group.ForEach([&](const real& id) {
-         // Get a channel ID                                             
+         // Get a channel ID                                            
          usingChannelId = true;
          channelId = static_cast<pcptr>(id);
       })
       OrThis
       group.ForEach([&](const GASM& code) {
-         // Generate keyframe from GASM code                              
+         // Generate keyframe from GASM code                            
          auto uvNode = MaterialNodeValue::Local(
             this, Trait::From<Traits::Sampler, vec2>(), mRate, 
             uv.IsEmpty() ? GetTextureCoordinates() : uv
@@ -152,14 +147,14 @@ GLSL MaterialNodeTexture::GetKeyframe(KeyframeMap* frameMap, pcptr keyIdx, const
       })
       OrThis
       group.ForEach([&](const rgba& color) {
-         // Generate keyframe from a static color                        
+         // Generate keyframe from a static color                       
          symbol += color;
       })
       OrThis
       group.ForEach([&](const Construct& construct) {
          bool relevantConstruct = false;
          if (construct.InterpretsAs<AFile>()) {
-            // Generate keyframe from a texture file                     
+            // Generate keyframe from a texture file                    
             auto creator = Verb::From<Verbs::Create>({}, &construct);
             Any environment = mProducer->GetOwners();
             Verb::ExecuteVerb(environment, creator);
@@ -188,7 +183,7 @@ GLSL MaterialNodeTexture::GetKeyframe(KeyframeMap* frameMap, pcptr keyIdx, const
       });
    });
 
-   // Fallback for when only channel ID is available                     
+   // Fallback for when only channel ID is available                    
    if (symbol.IsEmpty() && usingChannelId) {
       const auto texture = GetValue<Traits::Texture>();
       const auto& trait = texture.GetOutputTrait();
@@ -204,25 +199,25 @@ GLSL MaterialNodeTexture::GetKeyframe(KeyframeMap* frameMap, pcptr keyIdx, const
    return symbol;
 }
 
-/// Generate sampler definitions                                                
-///   @param frameMap - the keyframe map to generate                           
-///   @param uv - the texture coordinate symbol                                 
-///   @return the generated GLSL code                                          
-GLSL MaterialNodeTexture::GenerateDefinition(KeyframeMap* frameMap, const GLSL& uv) {
+/// Generate sampler definitions                                              
+///   @param frameMap - the keyframe map to generate                          
+///   @param uv - the texture coordinate symbol                               
+///   @return the generated GLSL code                                         
+GLSL Texture::GenerateDefinition(KeyframeMap* frameMap, const GLSL& uv) {
    if (frameMap->IsEmpty())
       return {};
 
    const GLSL functionId = pcToHex(frameMap);
    if (frameMap->GetCount() == 1) {
-      // A single keyframe just returns itself                           
+      // A single keyframe just returns itself                          
       return GetKeyframe(frameMap, 0, uv);
    }
 
-   // Number of keyframes available                                       
+   // Number of keyframes available                                     
    const auto count = frameMap->GetCount();
    const auto animationStart = frameMap->GetKey(0).SecondsReal();
 
-   // The animate function picks the keyframes depending on time         
+   // The animate function picks the keyframes depending on time        
    GLSL definition = 
       "vec4 AnimateTextures_"_glsl + functionId + "(in float time, in vec2 uv) {\n"
       "   if (time <= " + animationStart + ") {\n"
@@ -230,8 +225,8 @@ GLSL MaterialNodeTexture::GenerateDefinition(KeyframeMap* frameMap, const GLSL& 
       "      return " + GetKeyframe(frameMap, 0, "uv") + ";\n"
       "   }\n";
 
-   // Since samplers can't be saved to a variable, we have to explictly   
-   // generate an if statement for each inter-keyframe situation :(      
+   // Since samplers can't be saved to a variable, we have to explictly 
+   // generate an if statement for each inter-keyframe situation :(     
    for (pcptr i = 1; i < count; ++i) {
       const auto frameStart = frameMap->Keys()[i-1].SecondsReal();
       const auto frameEnd = frameMap->Keys()[i].SecondsReal();
@@ -240,7 +235,7 @@ GLSL MaterialNodeTexture::GenerateDefinition(KeyframeMap* frameMap, const GLSL& 
       const auto textureEnd = GetKeyframe(frameMap, i, "uv");
 
       if (textureStart == textureEnd) {
-         // No need to mix textures                                       
+         // No need to mix textures                                     
          definition += 
             "   else if (time < "_glsl + frameEnd + ") {\n"
             "      return " + textureStart + ";\n"
@@ -263,17 +258,17 @@ GLSL MaterialNodeTexture::GenerateDefinition(KeyframeMap* frameMap, const GLSL& 
       "   }\n"
       "}\n\n";
 
-   // Commit the animation function                                       
+   // Commit the animation function                                     
    Commit(ShaderToken::Functions, definition);
 
-   // And return its usage                                                
+   // And return its usage                                              
    return "AnimateTextures_"_glsl + functionId + "(time, " 
       + (uv.IsEmpty() ? GetTextureCoordinates() : uv) + ")";
 }
 
 /// Generate the shader stages                                                
-void MaterialNodeTexture::Generate() {
-   PC_VERBOSE_MATERIAL("Generating code...");
+void Texture::Generate() {
+   VERBOSE_NODE("Generating code...");
    Descend();
    Consume();
 
@@ -283,10 +278,10 @@ void MaterialNodeTexture::Generate() {
       totalKeyframeCount += channel.GetCount();
 
    if (totalKeyframeCount == 1) {
-      // If total count of keyframes is 1, just return the keyframe      
-      // There's no need of mixing functions                              
-      // Also, uv symbol is passed empty, because it will be requested   
-      // only on demand - we might not require it at all                  
+      // If total count of keyframes is 1, just return the keyframe     
+      // There's no need of mixing functions                            
+      // Also, uv symbol is passed empty, because it will be requested  
+      // only on demand - we might not require it at all                
       GLSL code;
       for (auto& channel : mKeyframes)
          code += GenerateDefinition(&channel, "");
@@ -299,15 +294,15 @@ void MaterialNodeTexture::Generate() {
    }
 
    // If this is reached, then we have a complex scenario of multiple   
-   // channels and/or keyframes                                          
-   // Combine all these in a single Texturize() function                  
+   // channels and/or keyframes                                         
+   // Combine all these in a single Texturize() function                
    const bool hasGlobalKeyframes = !mKeyframesGlobal.IsEmpty();
    GLSL texturize = "vec4 Texturize(int id, in vec2 uv) {\n";
    if (hasGlobalKeyframes)
       texturize += "   vec4 temporary = " + GenerateDefinition(&mKeyframesGlobal, "uv") + ";\n";
 
    for (pcptr i = 0; i < mKeyframes.GetCount(); ++i) {
-      // Generate a branch for each channel                              
+      // Generate a branch for each channel                             
       const auto& id = mKeyframes.GetKey(i);
       if (id != mKeyframes.Keys()[0])
          texturize += "   else \n";
@@ -340,14 +335,13 @@ void MaterialNodeTexture::Generate() {
       return;
    }
 
-   // Multiple texture channels                                          
+   // Multiple texture channels                                         
    auto channel = GetSymbol<Traits::Texture>(GetRate(), false);
    if (channel.IsEmpty())
       throw Except::Content(pcLogSelfError
          << "No texture channel available");
 
-   const GLSL define = "vec4 texturized = Texturize("
-      + channel + ", " + uv + ");\n\n";
+   const GLSL define = "vec4 texturized = Texturize(" + channel + ", " + uv + ");\n\n";
    Commit(ShaderToken::Texturize, define);
    Expose<Traits::Color, vec4>("texturized");
 }

@@ -5,33 +5,34 @@
 /// Distributed under GNU General Public License v3+                          
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
-#include "../MContent.hpp"
+#include "Transform.hpp"
+
+using namespace Nodes;
 
 
-/// Transformation node                                                         
-///   @param parent - the parent node                                          
-///   @param verb - the transformator creator verb                              
-MaterialNodeTransform::MaterialNodeTransform(MaterialNode* parent, const Verb& verb)
-   : MaterialNode{ MetaData::Of<MaterialNodeTransform>(), parent, verb } { }
+/// Transformation node descriptor-constructor                                
+///   @param desc - the node descriptor                                       
+Transform::Transform(const Descriptor& desc)
+   : Node {MetaOf<Transform>(), desc} { }
 
 /// For logging                                                               
-MaterialNodeTransform::operator Debug() const {
-   GASM result;
-   result += MaterialNode::DebugBegin();
+Transform::operator Debug() const {
+   Code result;
+   result += Node::DebugBegin();
       //result += mKeyframes;
-   result += MaterialNode::DebugEnd();
+   result += Node::DebugEnd();
    return result;
 }
 
 /// Move/rotate/scale instance                                                
 ///   @param verb - the move verb                                             
-void MaterialNodeTransform::Move(Verb& verb) {
+void Transform::Move(Verb& verb) {
    const auto time = PCTime::FromSeconds(verb.GetTime());
    const auto found = mKeyframes.FindKey(time);
-   if (uiNone == found) {
-      // Create new keyframe                                             
+   if (!found) {
+      // Create new keyframe                                            
       mKeyframes.Add(time, verb);
-      PC_VERBOSE_MATERIAL("Transformation keyframe added: " << verb);
+      VERBOSE_NODE("Transformation keyframe added: " << verb);
       verb << this;
       return;
    }
@@ -41,24 +42,24 @@ void MaterialNodeTransform::Move(Verb& verb) {
    verb << this;
 }
 
-/// Get a transformation matrix from a specific keyframe                        
-///   @param idx - the keyframe index                                          
-///   @return the instance                                                      
-InstanceReal<3> MaterialNodeTransform::GetInstance(pcptr idx) {
+/// Get a transformation matrix from a specific keyframe                      
+///   @param idx - the keyframe index                                         
+///   @return the instance                                                    
+TInstance<Vec3> Transform::GetInstance(Offset idx) {
    auto keyframe = mKeyframes.GetValue(idx);
    //bool relative = IsRelativeKeyframe(keyframe);
-   InstanceReal<3> instance;
+   TInstance<Vec3> instance;
    instance.Move(keyframe);
    return instance;
 }
 
-/// Turn a keyframe position to GLSL code                                       
-///   @param idx - the index of the keyframe                                    
-///   @return the generated GLSL code                                          
-GLSL MaterialNodeTransform::GetPosition(pcptr idx, bool& runtime) {
+/// Turn a keyframe position to GLSL code                                     
+///   @param idx - the index of the keyframe                                  
+///   @return the generated GLSL code                                         
+GLSL Transform::GetPosition(Offset idx, bool& runtime) {
    GLSL symbol;
    auto& keyframe = mKeyframes.GetValue(idx);
-   keyframe.GetArgument().ForEachDeep([&](const Block& group) {
+   keyframe.ForEachDeep([&](const Block& group) {
       group.ForEach([&](const MaterialNode& input) {
          symbol = input.GetOutputSymbol();
          runtime = true;
@@ -77,20 +78,20 @@ GLSL MaterialNodeTransform::GetPosition(pcptr idx, bool& runtime) {
    return symbol;
 }
 
-/// Turn a keyframe scale to GLSL code                                          
-///   @param idx - the index of the keyframe                                    
-///   @return the generated GLSL code                                          
-GLSL MaterialNodeTransform::GetScale(pcptr idx, bool&) {
+/// Turn a keyframe scale to GLSL code                                        
+///   @param idx - the index of the keyframe                                  
+///   @return the generated GLSL code                                         
+GLSL Transform::GetScale(Offset idx, bool&) {
    const auto instance = GetInstance(idx);
    GLSL result;
    result += instance.GetScale();
    return result;
 }
 
-/// Turn a keyframe orientation to GLSL code                                    
-///   @param idx - the index of the keyframe                                    
-///   @return the generated GLSL code                                          
-GLSL MaterialNodeTransform::GetAim(pcptr idx, bool&) {
+/// Turn a keyframe orientation to GLSL code                                  
+///   @param idx - the index of the keyframe                                  
+///   @return the generated GLSL code                                         
+GLSL Transform::GetAim(Offset idx, bool&) {
    const auto instance = GetInstance(idx);
    GLSL result;
    result += instance.GetAim();
@@ -98,14 +99,14 @@ GLSL MaterialNodeTransform::GetAim(pcptr idx, bool&) {
 }
 
 /// Turn a keyframe interpolator to GLSL code                                 
-///   @param idx - the index of the keyframe                                    
-///   @return the generated GLSL code                                          
-GLSL MaterialNodeTransform::GetInterpolator(pcptr idx) {
-   // Scan for interpolator traits up to the requested keyframe idx      
+///   @param idx - the index of the keyframe                                  
+///   @return the generated GLSL code                                         
+GLSL Transform::GetInterpolator(Offset idx) {
+   // Scan for interpolator traits up to the requested keyframe idx     
    auto interpolator = Verbs::Lerp::ID;
-   pcptr progress = 0;
+   Offset progress = 0;
    for (const auto& keyframe : mKeyframes.Values()) {
-      keyframe.GetArgument().ForEachDeep([&](const Block& group) {
+      keyframe.ForEachDeep([&](const Block& group) {
          group.ForEach([&](const Trait& trait) {
             if (trait.TraitIs<Traits::Interpolator>())
                interpolator = trait.AsCast<VerbID>();
@@ -117,21 +118,21 @@ GLSL MaterialNodeTransform::GetInterpolator(pcptr idx) {
       ++progress;
    }
 
-   // Generate the code                                                   
+   // Generate the code                                                 
    GLSL result;
    result += interpolator;
    return result;
 }
 
-/// Turn a keyframe time to GLSL code                                          
-///   @param idx - the index of the keyframe                                    
-///   @return the generated GLSL code                                          
-GLSL MaterialNodeTransform::GetTimer(pcptr idx) {
-   // Scan for interpolator traits up to the requested keyframe idx      
+/// Turn a keyframe time to GLSL code                                         
+///   @param idx - the index of the keyframe                                  
+///   @return the generated GLSL code                                         
+GLSL Transform::GetTimer(Offset idx) {
+   // Scan for interpolator traits up to the requested keyframe idx     
    Any timer;
    pcptr progress = 0;
    for (const auto& keyframe : mKeyframes.Values()) {
-      keyframe.GetArgument().ForEachDeep([&](const Block& group) {
+      keyframe.ForEachDeep([&](const Block& group) {
          group.ForEach([&](const Trait& trait) {
             if (trait.TraitIs<Traits::Time>())
                timer = static_cast<const Any&>(trait);
@@ -147,11 +148,11 @@ GLSL MaterialNodeTransform::GetTimer(pcptr idx) {
 }
 
 /// Generate vec4 Transform(vec3) function                                    
-void MaterialNodeTransform::GenerateDefinition() {
-   // Generate the function body                                          
+void Transform::GenerateDefinition() {
+   // Generate the function body                                        
    GLSL define;
    if (mKeyframes.IsEmpty()) {
-      // No transformations were applied to the instance                  
+      // No transformations were applied to the instance                
       define = 
          "vec4 Transform(in vec3 point) {\n"
          "   return vec4(point, 1.0);\n"
@@ -161,7 +162,7 @@ void MaterialNodeTransform::GenerateDefinition() {
       return;
    }
    else if (mKeyframes.GetCount() == 1){
-      // Single keyframe early return                                    
+      // Single keyframe early return                                   
       const auto model = GetInstance(0).GetModelTransform(Level::Default);
       define = 
          "vec4 Transform(in vec3 point) {\n"
@@ -174,7 +175,7 @@ void MaterialNodeTransform::GenerateDefinition() {
    }
 
    // Multiple transformations found - generate keyframes               
-   // 1. Collect time offsets                                             
+   // 1. Collect time offsets                                           
    const auto count = mKeyframes.GetCount();
    GLSL keyframeTime 
       = "const float cKeyframeTime["_glsl + count + "] = float["
@@ -210,10 +211,10 @@ void MaterialNodeTransform::GenerateDefinition() {
    }
    keyframeInterpolate += ");\n\n";
 
-   // 3. Collect timers                                                   
+   // 3. Collect timers                                                 
    auto timerCode = GetTimer(0);
 
-   // 4. Collect positions                                                
+   // 4. Collect positions                                              
    GLSL keyframePosition 
       = "vec3 cKeyframePosition["_glsl + count + "] = vec3["
       + count + "](\n";
@@ -236,7 +237,7 @@ void MaterialNodeTransform::GenerateDefinition() {
       keyframePosition = "const " + keyframePosition;
    }
 
-   // 5. Collect scale                                                   
+   // 5. Collect scale                                                  
    GLSL keyframeSize 
       = "vec3 cKeyframeScale["_glsl + count + "] = vec3["
       + count + "](\n";
@@ -259,7 +260,7 @@ void MaterialNodeTransform::GenerateDefinition() {
       keyframeSize = "const " + keyframeSize;
    }
 
-   // 6. Collect orientation                                             
+   // 6. Collect orientation                                            
    GLSL keyframeAim 
       = "vec4 cKeyframeAim["_glsl + count + "] = vec4["
       + count + "](\n";
@@ -278,14 +279,14 @@ void MaterialNodeTransform::GenerateDefinition() {
    keyframeAim += "\n);\n\n";
 
    if (!aimRuntime) {
-      // We can afford aim keyframes as constexpr                        
+      // We can afford aim keyframes as constexpr                       
       keyframeAim = "const " + keyframeAim;
    }
 
-   // 7. Check if no transformation is dynamic                           
+   // 7. Check if no transformation is dynamic                          
    if (!positionDynamic && !sizeDynamic && !aimDynamic) {
-      // All applied transformations are the same                        
-      // Single keyframe early return                                    
+      // All applied transformations are the same                       
+      // Single keyframe early return                                   
       const auto model = GetInstance(0).GetModelTransform(Level::Default);
       define += 
          "vec4 Transform(in vec3 point) {\n"
@@ -297,7 +298,7 @@ void MaterialNodeTransform::GenerateDefinition() {
    }
 
    // 8. Write constants                                                
-   // Animation limits                                                   
+   // Animation limits                                                  
    define += 
       "const int cKeyframeCount = "_glsl + count + ";\n"
       "const float cAnimationStart = " + animationStart + ";\n"
@@ -307,19 +308,19 @@ void MaterialNodeTransform::GenerateDefinition() {
    // Time offsets                                                      
    define += keyframeTime;
 
-   // Dynamic interpolators, if any                                       
+   // Dynamic interpolators, if any                                     
    if (interpolatorDynamic)
       define += keyframeInterpolate;
 
-   // Dynamic positions, if any                                          
+   // Dynamic positions, if any                                         
    if (positionDynamic)
       define += keyframePosition;
 
-   // Dynamic size, if any                                                
+   // Dynamic size, if any                                              
    if (sizeDynamic)
       define += keyframeSize;
 
-   // Dynamic aim, if any                                                
+   // Dynamic aim, if any                                               
    if (aimDynamic)
       define += keyframeAim;
 
@@ -373,7 +374,7 @@ void MaterialNodeTransform::GenerateDefinition() {
             "   return mat4(\n"
             "      // Column 0\n";
 
-         // We're animating via a matrix                                 
+         // We're animating via a matrix                                
          if (relevantAim && relevantSize) {
             define +=
                "      vec4(1.0 - (yy + zz), xy - wz, xz + wy, 0.0) * scaled, \n"
@@ -413,14 +414,14 @@ void MaterialNodeTransform::GenerateDefinition() {
          define += "   );\n";
       }
       else {
-         // We're animating via a simple position offset                  
+         // We're animating via a simple position offset                
          define += "   return mooved;\n";
       }
 
       define += "}\n\n";
    }
 
-   // Some general purpose cubic interpolators                           
+   // Some general purpose cubic interpolators                          
    if (cubicDependencies) {
       static const GLSL cerps =
          "float cerp(in float n0, in float n1, in float n2, in float n3, in float a) {\n"
@@ -496,7 +497,7 @@ void MaterialNodeTransform::GenerateDefinition() {
       define += ");\n}\n\n";
    }
 
-   // The animate function picks the keyframes depending on time         
+   // The animate function picks the keyframes depending on time        
    {
       define += aimDynamic || sizeDynamic ? "mat4 " : "vec4 ";
       define +=
@@ -557,7 +558,7 @@ void MaterialNodeTransform::GenerateDefinition() {
       define += "}\n\n";
    }
 
-   // The transform function applies the interpolated keyframe            
+   // The transform function applies the interpolated keyframe          
    {
       define += "vec4 Transform(in vec3 point) {\n   return ";
       if (timerCode.IsEmpty()) {
@@ -573,8 +574,8 @@ void MaterialNodeTransform::GenerateDefinition() {
 }
 
 /// Generate the shader stages                                                
-void MaterialNodeTransform::Generate() {
-   PC_VERBOSE_MATERIAL("Generating code...");
+void Transform::Generate() {
+   VERBOSE_NODE("Generating code...");
    Descend();
    Consume();
 

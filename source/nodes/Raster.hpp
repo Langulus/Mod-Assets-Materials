@@ -6,34 +6,36 @@
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
 #pragma once
-#include "MaterialNode.hpp"
+#include "../Node.hpp"
 
 
-///                                                                           
-///   RESTERIZER MATERIAL NODE                                                
-///                                                                           
-class MaterialNodeRasterize : public MaterialNode {
-   REFLECT(MaterialNodeRasterize);
-public:
-   MaterialNodeRasterize(MaterialNode*, const Verb&);
-   MaterialNodeRasterize(MaterialNodeRasterize&&) noexcept = default;
+namespace Nodes
+{
 
-public:
-   void Generate() final;
+   ///                                                                        
+   ///   Rasterizer material node                                             
+   ///                                                                        
+   struct Raster : Node {
+   private:
+      // Code for the rasterizer                                        
+      Code mCode;
+      // Whether or not to rasterize both sides of triangles            
+      bool mBilateral = false;
+      // Whether or not triangle faces are flipped                      
+      bool mSigned = false;
+      // Whether we're rasterizing triangles or lines                   
+      DMeta mTopology = nullptr;
+      // The depth range in which we're rasterizing                     
+      Range1 mDepth {0, 1000};
 
-private:
-   void GeneratePerPixel();
-   void GeneratePerVertex();
+   public:
+      Raster(const Descriptor&);
 
-private:
-   // Code for the rasterizer                                             
-   GASM mCode;
-   // Whether or not to rasterize both sides of triangles               
-   bool mBilateral = false;
-   // Whether or not triangle faces are flipped                           
-   bool mSigned = false;
-   // Whether we're rasterizing triangles or lines                        
-   DMeta mTopology = nullptr;
-   // The depth range in which we're rasterizing                        
-   range1 mDepth{ 0, 1000 };
-};
+      void Generate() final;
+
+   private:
+      void GeneratePerPixel();
+      void GeneratePerVertex();
+   };
+
+} // namespace Nodes

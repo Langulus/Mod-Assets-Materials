@@ -6,32 +6,34 @@
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
 #pragma once
-#include "MaterialNode.hpp"
+#include "../Node.hpp"
 
 
-///                                                                           
-///   FRACTAL BROWNIAN MOTION MATERIAL NODE                                    
-///                                                                           
-class MaterialNodeFBM : public MaterialNode {
-   REFLECT(MaterialNodeFBM);
-public:
-   MaterialNodeFBM(MaterialNode*);
-   MaterialNodeFBM(MaterialNodeFBM&&) noexcept = default;
+namespace Nodes
+{
 
-public:
-   void Generate() final;
+   ///                                                                        
+   ///   Fractal Brownian Motion node                                         
+   ///                                                                        
+   struct FBM : Node {
+   private:
+      // Code used to generate octaves                                  
+      Code mCode;
+      // Base weight value                                              
+      Real mBaseWeight {0.5};
+      // Number of octaves                                              
+      Count mOctaveCount {2};
 
-   PC_VERB(FBM);
+   public:
+      FBM(const Descriptor&);
 
-   NOD() operator Debug() const;
+      void Generate() final;
 
-private:
-   void GenerateDefinition();
-   void GenerateUsage();
+      NOD() operator Debug() const;
 
-private:
-   GASM mCodePerOctave;
-   GLSL mCodePerUse;
-   Trait mArgument;
-   pcptr mOctaveCount = 1;
-};
+   private:
+      void GenerateDefinition();
+      void GenerateUsage();
+   };
+
+} // namespace Nodes

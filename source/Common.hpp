@@ -16,3 +16,5 @@ using namespace Langulus::Math;
 
 struct MaterialLibrary;
 struct Material;
+
+LANGULUS_EXCEPTION(Material);

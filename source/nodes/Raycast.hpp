@@ -6,21 +6,22 @@
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
 #pragma once
-#include "MaterialNode.hpp"
+#include "../Node.hpp"
 
 
-///                                                                           
-///   RAYCASTER MATERIAL NODE                                                   
-///                                                                           
-class MaterialNodeRaycast : public MaterialNode {
-   REFLECT(MaterialNodeRaycast);
-public:
-   MaterialNodeRaycast(MaterialNode*, const Verb&);
-   MaterialNodeRaycast(MaterialNodeRaycast&&) noexcept = default;
+namespace Nodes
+{
 
-public:
-   void Generate() final;
+   ///                                                                        
+   ///   Raycast material node                                                
+   ///                                                                        
+   struct Raycast : Node {
+      Raycast(const Descriptor&);
 
-private:
-   void GenerateDefinition();
-};
+      void Generate() final;
+
+   private:
+      void GenerateDefinition();
+   };
+
+} // namespace Nodes

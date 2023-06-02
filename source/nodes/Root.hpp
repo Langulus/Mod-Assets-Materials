@@ -6,20 +6,19 @@
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
 #pragma once
-#include "MaterialNode.hpp"
+#include "../Node.hpp"
 
-///                                                                           
-///   ROOT MATERIAL NODE                                                      
-///                                                                           
-class MaterialNodeRoot : public MaterialNode {
-   REFLECT(MaterialNodeRoot);
-public:
-   MaterialNodeRoot(CGeneratorMaterial*);
-   MaterialNodeRoot(MaterialNodeRoot&&) noexcept = default;
-   MaterialNodeRoot& operator = (MaterialNodeRoot&&) noexcept = default;
 
-public:
-   void Generate() final;
+namespace Nodes
+{
 
-   NOD() operator Debug() const;
-};
+   ///                                                                        
+   ///   Root node                                                            
+   ///                                                                        
+   struct Root : Node {
+      Root(Material*, const Descriptor&);
+
+      void Generate() final;
+   };
+
+} // namespace Nodes
