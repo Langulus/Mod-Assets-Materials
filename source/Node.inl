@@ -16,7 +16,10 @@
 ///   @return the instantiated template                                       
 template<class... ARGS>
 Text TemplateFill(const Token& format, ARGS&&...args) {
-   const auto size = fmt::formatted_size(format, Forward<ARGS>(args)...);
+   const auto size = fmt::formatted_size(
+      fmt::format_string<ARGS...>(format), 
+      Forward<ARGS>(args)...
+   );
    Text result;
    result.Reserve(size);
    fmt::format_to_n(result.GetRaw(), size, format, Forward<ARGS>(args)...);

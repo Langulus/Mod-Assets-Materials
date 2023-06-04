@@ -6,6 +6,8 @@
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
 #include "Raster.hpp"
+#include "SceneTriangles.hpp"
+#include "SceneLines.hpp"
 
 using namespace Nodes;
 
@@ -14,53 +16,40 @@ using namespace Nodes;
 ///   @param desc - the rasterizer descriptor                                 
 Raster::Raster(const Descriptor& desc)
    : Node {MetaOf<Raster>(), desc} {
-   // Verb argument can provide additional traits for the rasterizer    
-   verb.ForEachDeep([&](const Block& group) {
-      group.ForEach(
-         [&](const Trait& trait) {
-            if (trait.TraitIs<Traits::Bilateral>()) {
-               // Are we rasterizing double-sided triangles?            
-               PC_VERBOSE_MATERIAL("Configuring rasterizer: " << trait);
-               mBilateral = trait.AsCast<bool>();
-            }
-            else if (trait.TraitIs<Traits::Signed>()) {
-               // Are we reverting face winding?                        
-               PC_VERBOSE_MATERIAL("Configuring rasterizer: " << trait);
-               mSigned = trait.AsCast<bool>();
-            }
-            else if (trait.TraitIs<Traits::Topology>()) {
-               // Are we rasterizing triangles, or lines                
-               PC_VERBOSE_MATERIAL("Configuring rasterizer: " << trait);
-               mTopology = trait.AsCast<DataID>().GetMeta();
-            }
-            else if (trait.TraitIs<Traits::Min>()) {
-               // Configures the rasterizer's min depth                 
-               PC_VERBOSE_MATERIAL("Configuring rasterizer: " << trait);
-               mDepth.mMin = trait.AsCast<real>();
-            }
-            else if (trait.TraitIs<Traits::Max>()) {
-               // Configures the rasterizer's max depth                 
-               PC_VERBOSE_MATERIAL("Configuring rasterizer: " << trait);
-               mDepth.mMax = trait.AsCast<real>();
-            }
-         },
-         [&](const GASM& code) {
-            // Rasterizer body                                          
-            mCode = code;
-         }
-      );
-   });
+   // Extract settings                                                  
+   mDescriptor.ExtractTrait<Traits::Bilateral>(mBilateral);
+   mDescriptor.ExtractTrait<Traits::Signed>(mSigned);
+   mDescriptor.ExtractTrait<Traits::Topology>(mTopology);
+   mDescriptor.ExtractTrait<Traits::Min>(mDepth.mMin);
+   mDescriptor.ExtractTrait<Traits::Max>(mDepth.mMax);
+
+   // Extract rasterizer body                                           
+   mDescriptor.ExtractData(mCode);
+   LANGULUS_ASSERT(!mCode.IsEmpty(), Material, "No rasterizer code");
 
    if (!mTopology) {
       // Rasterizing triangles by default                               
       mTopology = MetaOf<A::Triangle>();
    }
 
+   // Parse scene                                                       
+   if (mTopology->CastsTo<A::Triangle>())
+      mScene = new SceneTriangles {this, desc};
+   else if (mTopology->CastsTo<A::Lines>())
+      mScene = new SceneLines {this, desc};
+   else
+      LANGULUS_THROW(Material, "Bad topology for rasterizer");
+
    // Register the outputs                                              
    Expose<Traits::Color, Real>("rasResult.mDepth");
    Expose<Traits::Sampler, Vec2>("rasResult.mUV");
    Expose<Traits::Aim, Vec3>("rasResult.mNormal");
    Expose<Traits::Texture, int>("int(rasResult.mFront)");
+}
+
+void Raster::~Raster() {
+   if (mScene)
+      delete mScene;
 }
 
 /// Generate rasterizer definition code                                       
@@ -70,7 +59,7 @@ void Raster::GeneratePerPixel() {
    // In order to rasterize, we require either triangle or line data    
    // Scan all parent nodes for scenes in order to generate these       
    GLSL triangleDef, sceneTriangles, sceneLines;
-   pcptr triangleCount = 0, lineCount = 0;
+   Count triangleCount = 0, lineCount = 0;
    ForEachChild([&](MaterialNodeScene& scene) {
       scene.GenerateTriangleCode(triangleDef, sceneTriangles, triangleCount);
    });

@@ -116,12 +116,6 @@ constexpr Token RaymarchUsage = R"shader(
 ///   @param desc - raymarch descriptor                                       
 Raymarch::Raymarch(const Descriptor& desc)
    : Node {MetaOf<Raymarch>(), desc}
-   , mPrecision {0.008f}
-   , mFarMax {1000.0f}
-   , mFarStride {0.3f}
-   , mBaseStride {0.75f}
-   , mMinStep {0.1f}
-   , mDetail {60}
    , mScene {this, desc} {
    // Extract RaymarchConfig.mDetail                                    
    mDescriptor.ExtractTrait<Traits::Count>(mDetail);

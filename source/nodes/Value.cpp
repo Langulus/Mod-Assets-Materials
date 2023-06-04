@@ -6,6 +6,7 @@
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
 #include "Value.hpp"
+#include "../Material.hpp"
 
 using namespace Nodes;
 
@@ -16,7 +17,7 @@ Value::Value(const Descriptor& desc)
    : Node {MetaOf<Value>(), desc} {}
 
 ///                                                                           
-Value Value::Input(Material* producer, const Trait& trait, Rate rate, const GLSL& name) {
+/*Value Value::Input(Material* producer, const Trait& trait, Rate rate, const GLSL& name) {
    Value result(producer);
    result.mType = ValueType::Input;
    result.mTrait = trait;
@@ -29,26 +30,25 @@ Value Value::Input(Material* producer, const Trait& trait, Rate rate, const GLSL
       throw Except::Content(pcLogFuncError << "Bad name");
    result.mOutputs.Add(result.mTrait, result.mName);
    return result;
-}
+}*/
 
 ///                                                                           
 Value Value::Input(Node* parent, const Trait& trait, Rate rate, const GLSL& name) {
-   Value result(parent);
+   Value result {parent};
    result.mType = ValueType::Input;
    result.mTrait = trait;
    result.mRate = rate;
    result.mName = name;
    result.AutoCompleteTrait();
    if (result.mName.IsEmpty())
-      result.mName = result.GetProducer()->AddInput(RRate::PerAuto, result.mTrait, false);
-   if (result.mName.IsEmpty())
-      throw Except::Content(pcLogFuncError << "Bad name");
-   result.mOutputs.Add(result.mTrait, result.mName);
+      result.mName = result.GetMaterial()->AddInput(Rate::Auto, result.mTrait, false);
+   LANGULUS_ASSERT(!result.mName.IsEmpty(), Material, "Bad output symbol");
+   result.mOutputs.Insert(result.mTrait, result.mName);
    return result;
 }
 
 ///                                                                           
-Value Value::Output(Material* producer, const Trait& trait, Rate rate, const GLSL& name) {
+/*Value Value::Output(Material* producer, const Trait& trait, Rate rate, const GLSL& name) {
    Value result(producer);
    result.mType = ValueType::Output;
    result.mTrait = trait;
@@ -61,27 +61,26 @@ Value Value::Output(Material* producer, const Trait& trait, Rate rate, const GLS
       throw Except::Content(pcLogFuncError << "Bad name");
    result.mOutputs.Add(result.mTrait, result.mName);
    return result;
-}
+}*/
 
 ///                                                                           
 Value Value::Output(Node* parent, const Trait& trait, Rate rate, const GLSL& name) {
-   Value result(parent);
+   Value result {parent};
    result.mType = ValueType::Output;
    result.mTrait = trait;
    result.mRate = rate;
    result.mName = name;
    result.AutoCompleteTrait();
    if (result.mName.IsEmpty())
-      result.mName = result.GetProducer()->AddOutput(result.mRate, result.mTrait, false);
-   if (result.mName.IsEmpty())
-      throw Except::Content(pcLogFuncError << "Bad name");
-   result.mOutputs.Add(result.mTrait, result.mName);
+      result.mName = result.GetMaterial()->AddOutput(result.mRate, result.mTrait, false);
+   LANGULUS_ASSERT(!result.mName.IsEmpty(), Material, "Bad output symbol");
+   result.mOutputs.Insert(result.mTrait, result.mName);
    return result;
 }
 
 ///                                                                           
 Value Value::Local(Node* parent, const Trait& trait, Rate rate, const GLSL& name) {
-   Value result(parent);
+   Value result {parent};
    result.mType = ValueType::Input;
    result.mTrait = trait;
    result.mRate = rate;
@@ -89,7 +88,7 @@ Value Value::Local(Node* parent, const Trait& trait, Rate rate, const GLSL& name
    if (!result.mTrait.IsEmpty())
       result.AutoCompleteTrait();
    if (!result.mName.IsEmpty())
-      result.mOutputs.Add(result.mTrait, result.mName);
+      result.mOutputs.Insert(result.mTrait, result.mName);
    return result;
 }
 
@@ -108,12 +107,12 @@ void Value::BindTo(const Trait& trait, const Node* source) {
       mRate = source->GetRate();
    }
    else {
-      mName = GetProducer()->AddInput(RRate::PerAuto, mTrait, false);
-      mRate = MaterialNode::DefaultTraitRate(trait.GetTraitMeta());
+      mName = GetMaterial()->AddInput(Rate::Auto, mTrait, false);
+      mRate = DefaultTraitRate(trait.GetTrait());
    }
 
    mOutputs.Reset();
-   mOutputs.Add(mTrait, mName);
+   mOutputs.Insert(mTrait, mName);
 }
 
 /// Decide trait type and symbol if not decided yet                           
@@ -121,30 +120,30 @@ void Value::AutoCompleteTrait() {
    if (mTrait.IsUntyped()) {
       // An input must always be declared with a type                   
       // If no such type is provided, try adding a built-in one         
-      mTrait.SetDataID(DefaultTraitType(mTrait.GetTraitMeta()), false);
+      mTrait.SetType(DefaultTraitType(mTrait.GetTrait()));
    }
-   else if (mTrait.Is<DataID>() && !mTrait.IsEmpty()) {
+   else if (mTrait.Is<DMeta>() && !mTrait.IsEmpty()) {
       // Data ID provided, so make a new trait of this type             
-      mTrait = Trait::FromMeta(mTrait.GetTraitMeta(), mTrait.Get<DataID>().GetMeta());
+      mTrait = Trait::FromMeta(mTrait.GetTrait(), mTrait.Get<DMeta>());
    }
    else if (!mTrait.IsEmpty()) {
       // Constant provided, just set name to it                         
-      mName = pcSerialize<GLSL>(mTrait);
+      mName = Serialize<GLSL>(mTrait);
    }
 }
 
 /// For logging and serialization                                             
 Value::operator Debug() const {
-   GASM result;
-   result += MaterialNode::DebugBegin();
-      result += mTrait.GetTraitID();
-      result += GASM::AndSeparator;
-      result += mTrait.GetDataID();
+   Code result;
+   result += Node::DebugBegin();
+      result += mTrait.GetTrait();
+      result += ", ";
+      result += mTrait.GetType();
       if (!mOutputs.IsEmpty()) {
-         result += GASM::AndSeparator;
+         result += ", ";
          result += GetOutputSymbol();
       }
-   result += MaterialNode::DebugEnd();
+   result += Node::DebugEnd();
    return result;
 }
 
@@ -153,7 +152,7 @@ Value::operator Debug() const {
 ///   @param found - [out] the trait type is carried inside                   
 ///   @return the symbol of the found trait (empty if nothing was found)      
 GLSL Value::SelectMember(TraitID trait, Trait& found) {
-   PC_VERBOSE_MATERIAL("Searching for member " << trait << " inside " << *this);
+   VERBOSE_NODE("Searching for member ", trait, " inside ", *this);
    for (auto& member : mTrait.GetMeta()->GetMemberList()) {
       if (member.mStaticMember.mTrait == trait) {
          GLSL symbol = trait.GetMeta()->GetToken();
@@ -171,6 +170,14 @@ GLSL Value::SelectMember(TraitID trait, Trait& found) {
 ///   @return a variable declaration that is similar to the input             
 GLSL Value::GetDeclaration() const {
    return GLSL::Type(mTrait.GetMeta()) + " " + mName;
+}
+
+TMeta Value::GetTrait() const noexcept {
+   return mTrait.GetTrait();
+}
+
+bool Value::IsValid() const {
+   return !mName.IsEmpty();
 }
 
 /// Project the value by multiplying to a matrix                              
@@ -207,7 +214,7 @@ void Value::Project(Verb& verb) {
       << "Can't project with unsupported matrix type " << matrixType);
 
    mOutputs.GetValue(0) = mUse;
-   PC_VERBOSE_MATERIAL("Projected: " << ccCyan << mUse);
+   VERBOSE_NODE("Projected: ", Logger::Cyan, mUse);
    verb << this;
 }
 
@@ -234,7 +241,7 @@ void Value::Select(Verb& verb) {
       auto newValue = Ptr<MaterialNodeValue>::New(
          MaterialNodeValue::Local(this, found, mRate, symbol));
       verb << newValue.Get();
-      PC_VERBOSE_MATERIAL("Selected: " << ccCyan << symbol);
+      VERBOSE_NODE("Selected: ", Logger::Cyan, symbol);
    }
 }
 
@@ -245,7 +252,7 @@ void Value::Add(Verb& verb) {
       // Invert the input                                               
       mUse = "-(" + GetOutputSymbol() + ")";
       mOutputs.GetValue(0) = mUse;
-      PC_VERBOSE_MATERIAL("Inverted (-): " << ccCyan << mUse);
+      VERBOSE_NODE("Inverted (-): ", Logger::Cyan, mUse);
       verb << this;
       return;
    }
@@ -273,7 +280,7 @@ void Value::Add(Verb& verb) {
       mUse = "(" + GetOutputSymbol()
          + (verb.GetMass() > 0 ? " + " : " - ") + numbers + ")";
       mOutputs.GetValue(0) = mUse;
-      PC_VERBOSE_MATERIAL("Added/subtracted: " << ccCyan << mUse);
+      VERBOSE_NODE("Added/subtracted: ", Logger::Cyan, mUse);
    }
 
    if (!symbols.IsEmpty()) {
@@ -283,7 +290,7 @@ void Value::Add(Verb& verb) {
          mUse += GLSL(verb.GetMass() > 0 ? " + " : " - ") + s;
       mUse += ")";
       mOutputs.GetValue(0) = mUse;
-      PC_VERBOSE_MATERIAL("Added/subtracted: " << ccCyan << mUse);
+      VERBOSE_NODE("Added/subtracted: ", Logger::Cyan, mUse);
    }
 
    verb << this;
@@ -296,7 +303,7 @@ void Value::Multiply(Verb& verb) {
       // Invert the input                                               
       mUse = "1.0 / (" + GetOutputSymbol() + ")";
       mOutputs.GetValue(0) = mUse;
-      PC_VERBOSE_MATERIAL("Inverted (/): " << ccCyan << mUse);
+      VERBOSE_NODE("Inverted (/): " << ccCyan << mUse);
       verb << this;
       return;
    }
@@ -342,7 +349,7 @@ void Value::Multiply(Verb& verb) {
       mUse = "(" + GetOutputSymbol() 
          + (verb.GetMass() > 0 ? " * " : " / " ) + numbers + ")";
       mOutputs.GetValue(0) = mUse;
-      PC_VERBOSE_MATERIAL("Multiplied/divided: " << ccCyan << mUse);
+      VERBOSE_NODE("Multiplied/divided: " << ccCyan << mUse);
    }
 
    if (!symbols.IsEmpty()) {
@@ -352,7 +359,7 @@ void Value::Multiply(Verb& verb) {
          mUse += GLSL(verb.GetMass() > 0 ? " * " : " / ") + s;
       mUse += ")";
       mOutputs.GetValue(0) = mUse;
-      PC_VERBOSE_MATERIAL("Multiplied/divided: " << ccCyan << mUse);
+      VERBOSE_NODE("Multiplied/divided: ", Logger::Cyan, mUse);
    }
 
    verb << this;
@@ -373,7 +380,7 @@ void Value::Modulate(Verb& verb) {
    // Modify usage                                                      
    mUse = "mod(" + GetOutputSymbol() + ", " + accumulate + ")";
    mOutputs.GetValue(0) = mUse;
-   PC_VERBOSE_MATERIAL("Modulated: " << ccCyan << mUse);
+   VERBOSE_NODE("Modulated: ", Logger::Cyan, mUse);
    verb << this;
 }
 
@@ -393,7 +400,7 @@ void Value::Exponent(Verb& verb) {
    if (pcAbs(accumulate) != 1) {
       mUse = "pow(" + GetOutputSymbol() + ", " + accumulate + ")";
       mOutputs.GetValue(0) = mUse;
-      PC_VERBOSE_MATERIAL("Exponentiated: " << ccCyan << mUse);
+      VERBOSE_NODE("Exponentiated: ", Logger::Cyan, mUse);
    }
    verb << this;
 }
@@ -513,7 +520,7 @@ void Value::Randomize(Verb& verb) {
       mUse = otype + "(" + mUse + ")";
    }
 
-   PC_VERBOSE_MATERIAL("Randomized: " << ccCyan << mUse);
+   VERBOSE_NODE("Randomized: ", Logger::Cyan, mUse);
    mOutputs.GetValue(0) = mUse;
    verb << this;
 }

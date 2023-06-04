@@ -8,7 +8,8 @@
 /// Create GLSL from shader template                                          
 ///   @param stage - the shader stage to use as template                      
 ///   @return the GLSL code                                                   
-GLSL GLSL::From(ShaderStage::Enum stage) {
+GLSL GLSL::Template(Offset stage) {
+   LANGULUS_ASSUME(DevAssumes, stage < ShaderStages::Counter, "Bad index");
    return Templates[stage];
 }
 

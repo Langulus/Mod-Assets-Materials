@@ -34,18 +34,12 @@ namespace Nodes
 
       void Do(Verb&);
 
-      NOD() GLSL SelectMember(TraitID, Trait&);
+      NOD() GLSL SelectMember(TMeta, Trait&);
       NOD() GLSL GetDeclaration() const;
-
-      NOD() TMeta GetTrait() const noexcept {
-         return mTrait.GetTraitMeta();
-      }
+      NOD() TMeta GetTrait() const noexcept;
 
       void BindTo(const Trait&, const Node*);
-
-      bool IsValid() const {
-         return !mName.IsEmpty();
-      }
+      bool IsValid() const;
 
       NOD() operator Debug() const;
 

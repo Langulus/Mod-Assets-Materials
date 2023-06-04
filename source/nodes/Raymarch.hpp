@@ -17,12 +17,12 @@ namespace Nodes
    ///                                                                        
    struct Raymarch : Node {
    private:
-      float mPrecision;
-      float mFarMax;
-      float mFarStride;
-      float mBaseStride;
-      float mMinStep;
-      int mDetail;
+      float mPrecision {0.008f};
+      float mFarMax {1000.0f};
+      float mFarStride {0.3f};
+      float mBaseStride {0.75f};
+      float mMinStep {0.1f};
+      int mDetail {60};
       SceneSDF mScene;
 
    public:

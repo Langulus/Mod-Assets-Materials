@@ -19,6 +19,7 @@ namespace Nodes
    /// by adding signed distance field functions, or triangles/lines          
    ///                                                                        
    struct SceneTriangles : Node {
+      SceneTriangles(Node*, const Descriptor&);
       SceneTriangles(const Descriptor&);
 
       void Generate() final;

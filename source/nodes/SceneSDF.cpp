@@ -101,6 +101,12 @@ GLSL InterpretAsSDF(const Construct& what, GLSL& dep) {
    TODO();
 }
 
+/// Scene node as member constructor                                          
+///   @param parent - the owning node                                         
+///   @param desc - the node descriptor                                       
+SceneSDF::SceneSDF(Node* parent, const Descriptor& desc)
+   : Node {MetaOf<SceneSDF>(), parent, desc} {}
+
 /// Scene node descriptor-constructor                                         
 ///   @param desc - the node descriptor                                       
 SceneSDF::SceneSDF(const Descriptor& desc)

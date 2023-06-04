@@ -10,6 +10,12 @@
 using namespace Nodes;
 
 
+/// Scene node as member constructor                                          
+///   @param parent - the owning node                                         
+///   @param desc - the node descriptor                                       
+SceneLines::SceneLines(Node* parent, const Descriptor& desc)
+   : Node {MetaOf<SceneLines>(), parent, desc} {}
+
 /// Scene node descriptor-constructor                                         
 ///   @param desc - the node descriptor                                       
 SceneLines::SceneLines(const Descriptor& desc)

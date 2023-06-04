@@ -10,6 +10,12 @@
 using namespace Nodes;
 
 
+/// Scene node as member constructor                                          
+///   @param parent - the owning node                                         
+///   @param desc - the node descriptor                                       
+SceneTriangles::SceneTriangles(Node* parent, const Descriptor& desc)
+   : Node {MetaOf<SceneTriangles>(), parent, desc} {}
+
 /// Scene node descriptor-constructor                                         
 ///   @param desc - the node descriptor                                       
 SceneTriangles::SceneTriangles(const Descriptor& desc)

@@ -26,7 +26,7 @@ Transform::operator Debug() const {
 
 /// Move/rotate/scale instance                                                
 ///   @param verb - the move verb                                             
-void Transform::Move(Verb& verb) {
+/*void Transform::Move(Verb& verb) {
    const auto time = PCTime::FromSeconds(verb.GetTime());
    const auto found = mKeyframes.FindKey(time);
    if (!found) {
@@ -40,7 +40,7 @@ void Transform::Move(Verb& verb) {
    // Combine the keyframes                                             
    mKeyframes[time].GetArgument() << verb.GetArgument();
    verb << this;
-}
+}*/
 
 /// Get a transformation matrix from a specific keyframe                      
 ///   @param idx - the keyframe index                                         

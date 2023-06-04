@@ -45,6 +45,7 @@ LANGULUS_DECLARE_CONSTANT(BackFace, Trait::From<Traits::Texture>(1),
 struct Node : Unit {
 protected:
    friend struct Material;
+   friend struct FBM;
 
    enum ValueType {Input, Output};
 
@@ -70,10 +71,16 @@ protected:
    // Protects against infinite dependency loops                        
    bool mGenerated = false;
 
+   struct DefaultTrait {
+      DMeta mType;
+      Rate  mRate;
+   };
+
 public:
    LANGULUS_VERBS(Verbs::Create, Verbs::Select);
 
    Node(DMeta, Material*, const Descriptor&);
+   Node(DMeta, Node*, const Descriptor&);
    Node(DMeta, const Descriptor&);
 
    void Create(Verb&);
@@ -87,7 +94,6 @@ public:
    NOD() Material* GetMaterial() const noexcept;
    NOD() MaterialLibrary* GetLibrary() const noexcept;
    NOD() const Hierarchy& GetOwners() const noexcept;
-   NOD() static Rate DetermineRate(const Verb&, Rate);
 
    NOD() const Trait& GetOutputTrait() const;
    NOD() Trait GetOutputTrait(const Trait&) const;
@@ -100,8 +106,7 @@ public:
 
    NOD() GLSL GetSymbol(TMeta, DMeta, Rate, bool = true);
 
-   NOD() static DMeta DefaultTraitType(TMeta);
-   NOD() static Rate DefaultTraitRate(TMeta);
+   NOD() static const DefaultTrait& GetDefaultTrait(TMeta);
    NOD() static DMeta DecayToGLSLType(DMeta);
 
    template<CT::Trait, class = void>
@@ -130,7 +135,7 @@ public:
    NOD() Rate GetRate() const noexcept;
    NOD() bool IsConsumed() const noexcept;
    NOD() auto& GetOutputs() const noexcept;
-   NOD() ShaderStage::Enum GetStage() const;
+   NOD() Offset GetStage() const;
 
    void Consume() noexcept;
    void Descend();
@@ -143,7 +148,7 @@ public:
 
 protected:
    void InnerCreate();
-   void NodeFromConstruct(const Construct&);
+   Node* NodeFromConstruct(const Construct&);
 
    NOD() bool InnerGetValue(const Trait&, Rate, bool, Nodes::Value&) const;
    bool IsInHierarchy(Node*) const;

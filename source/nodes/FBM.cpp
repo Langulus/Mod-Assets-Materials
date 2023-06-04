@@ -6,6 +6,7 @@
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
 #include "FBM.hpp"
+#include "Value.hpp"
 
 using namespace Nodes;
 
@@ -83,7 +84,7 @@ void FBM::GenerateDefinition() {
    for (Offset i = 0; i < mOctaveCount && mBaseWeight != 0; ++i) {
       // Make a temporary node for each octave, we don't want any       
       // persistent side effects from executing the code here           
-      auto temporary = Node::Value::Local(*this);
+      auto temporary = Nodes::Value::Local(this);
 
       // Update inputs for each octave, octave code might use them      
       temporary.mInputs[Trait::From<Traits::Index>()] = i;

@@ -15,15 +15,15 @@ using namespace Nodes;
 Texture::Texture(const Descriptor& desc)
    : Node {MetaOf<Texture>(), desc} {
    // Parse texture-related descriptor                                  
-   Offset textureId = 0;
-   bool usingTextureId = false;
-   bool relative = false;
+   Offset textureId {};
+   bool usingTextureId {};
+   bool relative {};
 
    for (auto pair : mDescriptor.mTraits) {
       if (pair.mKey->template Is<Traits::Texture>()) {
          // Texture id                                                  
          VERBOSE_NODE("Configuring texturizer: ", pair.mValue);
-         textureId = pair.mValue.AsCast<pcptr>();
+         textureId = pair.mValue.AsCast<Offset>();
          usingTextureId = true;
       }
       else if (pair.mKey->template Is<Traits::Relative>()) {
@@ -42,7 +42,7 @@ Texture::Texture(const Descriptor& desc)
       }
    }
 
-   const auto time = PCTime::FromSeconds(verb.GetTime());
+   const Time time {std::chrono::duration<Real> {verb.GetTime()}};
    KeyframeMap* frameMap = nullptr;
    if (usingTextureId) {
       // Check if keyframe channel exists                               
@@ -84,11 +84,9 @@ Texture::operator Debug() const {
 /// May either return a local 'uv' symbol, or a uniform/varying               
 ///   @return the texture coordinate symbol                                   
 GLSL Texture::GetTextureCoordinates() {
-   auto sampler = GetValue(Traits::Sampler::Reflect(), nullptr, GetRate(), false);
-   if (!sampler.IsValid())
-      throw Except::Content(pcLogSelfError
-         << "No texture coordinates available");
-   return sampler.GetOutputSymbolAs(MetaData::Of<vec2f>(), 0);
+   auto sampler = GetValue(MetaTrait::Of<Traits::Sampler>(), nullptr, GetRate(), false);
+   LANGULUS_ASSERT(sampler.IsValid(), Material, "No texture coordinates available");
+   return sampler.GetOutputSymbolAs(MetaData::Of<Vec2f>(), 0);
 }
 
 /// Assembles a GLSL texture(...) function                                    
@@ -96,9 +94,7 @@ GLSL Texture::GetTextureCoordinates() {
 ///   @param meta - the format of the texture                                 
 ///   @return the resulting texture(...) code                                 
 GLSL GetPixel(const GLSL& textureSymbol, const GLSL& uvSymbol, DMeta meta) {
-   if (!meta)
-      throw Except::Content(pcLogError << "Unknown texture format");
-
+   LANGULUS_ASSERT(meta, Material, "Unknown texture format");
    GLSL symbol;
    const auto channels = meta->GetMemberCount();
    switch (channels) {
@@ -109,8 +105,7 @@ GLSL GetPixel(const GLSL& textureSymbol, const GLSL& uvSymbol, DMeta meta) {
    case 3: case 4:
       return "texture(" + textureSymbol + ", " + uvSymbol + ")";
    default:
-      throw Except::Content(pcLogError
-         << "Unsupported texture format: " << meta);
+      LANGULUS_THROW(Material, "Unsupported texture format");
    }
 }
 
@@ -126,61 +121,55 @@ GLSL Texture::GetKeyframe(KeyframeMap* frameMap, pcptr keyIdx, const GLSL& uv) {
    VERBOSE_NODE("Analyzing keyframe #", keyIdx, ": ", keyframe);
 
    // Scan the keyframe verb                                            
-   bool usingChannelId = false;
-   pcptr channelId = 0;
-   keyframe.GetArgument().ForEachDeep([&](const Block& group) {
-      EitherDoThis
-      group.ForEach([&](const real& id) {
-         // Get a channel ID                                            
-         usingChannelId = true;
-         channelId = static_cast<pcptr>(id);
-      })
-      OrThis
-      group.ForEach([&](const GASM& code) {
-         // Generate keyframe from GASM code                            
-         auto uvNode = MaterialNodeValue::Local(
-            this, Trait::From<Traits::Sampler, vec2>(), mRate, 
-            uv.IsEmpty() ? GetTextureCoordinates() : uv
-         );
-         uvNode.DoGASM(code);
-         symbol = uvNode.GetOutputSymbolAs(MetaData::Of<vec4f>(), 0);
-      })
-      OrThis
-      group.ForEach([&](const rgba& color) {
-         // Generate keyframe from a static color                       
-         symbol += color;
-      })
-      OrThis
-      group.ForEach([&](const Construct& construct) {
-         bool relevantConstruct = false;
-         if (construct.InterpretsAs<AFile>()) {
-            // Generate keyframe from a texture file                    
-            auto creator = Verb::From<Verbs::Create>({}, &construct);
-            Any environment = mProducer->GetOwners();
-            Verb::ExecuteVerb(environment, creator);
-            creator.GetOutput().ForEachDeep([&](CGeneratorTexture* t) {
-               t->Generate();
-               auto uniform = GetProducer()->AddInput(
-                  RRate::PerAuto, Trait::From<Traits::Texture>(t), true);
-               symbol = GetPixel(
-                  uniform,
-                  uv.IsEmpty() ? GetTextureCoordinates() : uv,
-                  t->GetFormat()
-               );
-               relevantConstruct = true;
-            });
-         }
-         else {
-            //TODO support other kinds of constructs?
-            TODO();
-         }
-
-         if (!relevantConstruct) {
-            throw Except::Content(pcLogSelfError 
-               << "Irrelevant keyframe construct: " << construct
+   bool usingChannelId {};
+   Offset channelId {};
+   keyframe.ForEachDeep([&](const Block& group) {
+      group.ForEach(
+         [&](const Real& id) {
+            // Get a channel ID                                         
+            usingChannelId = true;
+            channelId = static_cast<Offset>(id);
+         },
+         [&](const Code& code) {
+            // Generate keyframe from GASM code                         
+            auto uvNode = MaterialNodeValue::Local(
+               this, Trait::From<Traits::Sampler, vec2>(), mRate, 
+               uv.IsEmpty() ? GetTextureCoordinates() : uv
             );
+            uvNode.DoGASM(code);
+            symbol = uvNode.GetOutputSymbolAs(MetaData::Of<vec4f>(), 0);
+         },
+         [&](const rgba& color) {
+            // Generate keyframe from a static color                    
+            symbol += color;
+         },
+         [&](const Construct& construct) {
+            bool relevantConstruct = false;
+            if (construct.InterpretsAs<AFile>()) {
+               // Generate keyframe from a texture file                 
+               auto creator = Verb::From<Verbs::Create>({}, &construct);
+               Any environment = mProducer->GetOwners();
+               Verb::ExecuteVerb(environment, creator);
+               creator.GetOutput().ForEachDeep([&](CGeneratorTexture* t) {
+                  t->Generate();
+                  auto uniform = GetProducer()->AddInput(
+                     RRate::PerAuto, Trait::From<Traits::Texture>(t), true);
+                  symbol = GetPixel(
+                     uniform,
+                     uv.IsEmpty() ? GetTextureCoordinates() : uv,
+                     t->GetFormat()
+                  );
+                  relevantConstruct = true;
+               });
+            }
+            else {
+               //TODO support other kinds of constructs?
+               TODO();
+            }
+
+            LANGULUS_ASSERT(relevantConstruct, Material, "Irrelevant keyframe construct");
          }
-      });
+      );
    });
 
    // Fallback for when only channel ID is available                    
@@ -194,8 +183,7 @@ GLSL Texture::GetKeyframe(KeyframeMap* frameMap, pcptr keyIdx, const GLSL& uv) {
       );
    }
 
-   if (symbol.IsEmpty())
-      throw Except::Content(pcLogSelfError << "Bad keyframe symbol");
+   LANGULUS_ASSERT(!symbol.IsEmpty(), Material, "Bad keyframe symbol");
    return symbol;
 }
 
@@ -227,7 +215,7 @@ GLSL Texture::GenerateDefinition(KeyframeMap* frameMap, const GLSL& uv) {
 
    // Since samplers can't be saved to a variable, we have to explictly 
    // generate an if statement for each inter-keyframe situation :(     
-   for (pcptr i = 1; i < count; ++i) {
+   for (Offset i = 1; i < count; ++i) {
       const auto frameStart = frameMap->Keys()[i-1].SecondsReal();
       const auto frameEnd = frameMap->Keys()[i].SecondsReal();
       const auto frameLength = frameEnd - frameStart;
@@ -301,7 +289,7 @@ void Texture::Generate() {
    if (hasGlobalKeyframes)
       texturize += "   vec4 temporary = " + GenerateDefinition(&mKeyframesGlobal, "uv") + ";\n";
 
-   for (pcptr i = 0; i < mKeyframes.GetCount(); ++i) {
+   for (Offset i = 0; i < mKeyframes.GetCount(); ++i) {
       // Generate a branch for each channel                             
       const auto& id = mKeyframes.GetKey(i);
       if (id != mKeyframes.Keys()[0])

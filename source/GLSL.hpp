@@ -80,7 +80,7 @@ public:
    template<CT::DenseNumber T>
    explicit GLSL(const TQuaternion<T>&);
 
-   NOD() static GLSL From(ShaderStage::Enum);
+   NOD() static GLSL Template(Offset);
    NOD() bool IsDefined(const Text&);
    NOD() Text Pretty() const;
    NOD() static GLSL Type(DMeta);

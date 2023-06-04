@@ -19,6 +19,7 @@ namespace Nodes
    /// by adding signed distance field functions, or triangles/lines          
    ///                                                                        
    struct SceneSDF : Node {
+      SceneSDF(Node*, const Descriptor&);
       SceneSDF(const Descriptor&);
 
       void Generate() final;
