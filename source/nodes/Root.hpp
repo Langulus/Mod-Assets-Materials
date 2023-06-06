@@ -18,7 +18,7 @@ namespace Nodes
    struct Root : Node {
       Root(Material*, const Descriptor&);
 
-      void Generate() final;
+      Symbol Generate() final;
    };
 
 } // namespace Nodes

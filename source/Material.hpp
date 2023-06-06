@@ -30,6 +30,9 @@ private:
    // Compiled flow                                                     
    Temporal mCompiled;
 
+   // Required definitions for each shader stage                        
+   TAny<GLSL> mDefinitions[ShaderStage::Counter];
+
 public:
    LANGULUS(ABSTRACT) false;
    LANGULUS_BASES(A::Material);
@@ -51,5 +54,5 @@ public:
 
    GLSL AddInput (Rate, const Trait&, bool allowDuplicates);
    GLSL AddOutput(Rate, const Trait&, bool allowDuplicates);
-
+   GLSL AddDefine(Rate, const Token&, const GLSL&);
 };

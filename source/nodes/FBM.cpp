@@ -72,8 +72,12 @@ FBM::operator Debug() const {
    return result;
 }
 
-/// Generate FBM definition code                                              
-void FBM::GenerateDefinition() {
+/// Generate the FBM function                                                 
+///   @return the FBM function template                                       
+Symbol FBM::Generate() {
+   // Generate children first                                           
+   Descend();
+
    // FBM takes place as input                                          
    auto symPos = GetSymbol<Traits::Place, Vec2>(mRate);
    LANGULUS_ASSERT(!symPos.IsEmpty(), Material, "No position for FBM");
@@ -103,19 +107,8 @@ void FBM::GenerateDefinition() {
    // Commit                                                            
    GLSL definition = TemplateFill(FBMTemplate, "", "", octaves);
    Commit(ShaderToken::Functions, definition);
-}
 
-/// Generate FBM definition code                                              
-void FBM::GenerateUsage() {
+   // Generate the function template as output symbol                   
    const GLSL use = "FBM_" + GetNodeID() + "(" + mCodePerUse + ")";
    mOutputs.Insert(Trait::From<Traits::Color, Real>(), use);
-}
-
-/// Generate the shader stages                                                
-void FBM::Generate() {
-   VERBOSE_NODE("Generating code...");
-   Descend();
-   Consume();
-   GenerateDefinition();
-   GenerateUsage();
 }

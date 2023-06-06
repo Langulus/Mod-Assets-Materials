@@ -169,7 +169,7 @@ GLSL Value::SelectMember(TraitID trait, Trait& found) {
 /// Get declaration for the input variable                                    
 ///   @return a variable declaration that is similar to the input             
 GLSL Value::GetDeclaration() const {
-   return GLSL::Type(mTrait.GetMeta()) + " " + mName;
+   return GLSL::Type(mTrait.GetType()) + " " + mName;
 }
 
 TMeta Value::GetTrait() const noexcept {

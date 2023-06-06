@@ -37,14 +37,6 @@ constexpr Token RaymarchConfig = R"shader(
    );
 )shader";
 
-/// SDF scene function                                                        
-///   @param {0} - scene code                                                 
-constexpr Token SceneFunction = R"shader(
-   float Scene(in vec3 point) {{
-      return {0};
-   }}
-)shader";
-
 /// Raymarch function                                                         
 constexpr Token RaymarchFunction = R"shader(
    struct RaymarchResult {{
@@ -145,8 +137,12 @@ Raymarch::Raymarch(const Descriptor& desc)
    Expose<Traits::Color, Real>("rmrResult.mDepth");
 }
 
-/// Generate raymarcher definition code                                       
-void Raymarch::GenerateDefinition() {
+/// Generate raymarcher code                                                  
+///   @return the output symbol                                               
+Symbol Raymarch::Generate() {
+   // Generate children first                                           
+   Descend();
+
    // In order to raymarch, we require an SDF scene                     
    GLSL functions, scene;
    mScene.GenerateCode(functions, scene);
@@ -155,19 +151,11 @@ void Raymarch::GenerateDefinition() {
 
    // Add raymarching functions and dependencies                        
    functions += TemplateFill(SceneFunction, scene);
-   functions += TemplateFill(RaymarchConfig, 
+   functions += TemplateFill(RaymarchConfig,
       mPrecision, mFarMax, mFarStride, mBaseStride, mMinStep, mDetail);
    functions += RaymarchFunction;
 
    // Commit                                                            
    Commit(ShaderToken::Functions, functions);
    Commit(ShaderToken::Transform, RaymarchUsage);
-}
-
-/// Generate the shader stages                                                
-void Raymarch::Generate() {
-   VERBOSE_NODE("Generating code...");
-   Descend();
-   Consume();
-   GenerateDefinition();
 }

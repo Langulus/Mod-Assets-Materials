@@ -15,22 +15,9 @@ using namespace Nodes;
 Light::Light(const Descriptor& desc)
    : Node {MetaOf<Light>(), desc} { }
 
-/// Generate light definition code                                            
-void Light::GenerateDefinition() {
-   //TODO();
-}
-
-/// Generate light usage code with all modifiers                              
-void Light::GenerateUsage() {
-   //TODO();
-}
-
-/// Generate the shader stages                                                
-void Light::Generate() {
-   VERBOSE_NODE("Generating code...");
+/// Generate the light functionality                                          
+///   @return the light function template                                     
+Symbol Light::Generate() {
+   // Generate children first, if any                                   
    Descend();
-   Consume();
-
-   GenerateDefinition();
-   GenerateUsage();
 }

@@ -27,13 +27,14 @@ Node::Node(DMeta classid, Material* material, const Descriptor& descriptor)
 
 /// Material node construction for members                                    
 ///   @param classid - the node type                                          
-///   @param material - the parent material                                   
+///   @param parent - the parent node                                         
 ///   @param descriptor - the node descriptor                                 
 Node::Node(DMeta classid, Node* parent, const Descriptor& descriptor)
    : Unit {classid, descriptor}
    , mDescriptor {descriptor}
    , mParent {parent}
    , mMaterial {parent->GetMaterial()} {
+   parent->mChildren << this;
    // Satisfy the rest of the descriptor                                
    InnerCreate();
 }
@@ -48,11 +49,14 @@ Node::Node(DMeta classid, const Descriptor& descriptor)
    descriptor.ForEachDeep(
       [this](const Trait& trait) {
          if (trait.TraitIs<Traits::Parent>()) {
-            trait.ForEach([this](const Node* owner) {
+            return !trait.ForEach([this](const Node* owner) {
                mParent = owner;
+               owner->mChildren << this;
                mMaterial = owner->GetMaterial();
+               return Flow::Break;
             });
          }
+         return Flow::Continue;
       }
    );
 
@@ -61,6 +65,7 @@ Node::Node(DMeta classid, const Descriptor& descriptor)
 }
 
 /// Parse the normalized descriptor and create subnodes, apply traits         
+/// This is a common parser used in all nodes' constructors                   
 void Node::InnerCreate() {
    // Save the rate                                                     
    auto rates = mDescriptor.GetTraits<Traits::Rate>();
@@ -183,7 +188,10 @@ Offset Node::GetStage() const {
 }
 
 /// Generate all children's code                                              
+/// Also mark this node as generated                                          
 void Node::Descend() {
+   mGenerated = true;
+   VERBOSE_NODE("Generating code...");
    for (auto child : mChildren)
       child->Generate();
 }
@@ -563,7 +571,7 @@ Nodes::Value Node::GetValue(TMeta tmeta, DMeta dmeta, Rate rate, bool addIfMissi
 
    // Undefined symbol                                                  
    if (addIfMissing) {
-      Langulus::Warning(
+      Logger::Warning(
          "No input available, so adding default one: ", 
          GetMaterial()->GenerateInputName(rate, trait)
       );
@@ -586,7 +594,7 @@ GLSL Node::GetSymbol(TMeta tmeta, DMeta dmeta, Rate rate, bool addIfMissing) {
    if (symbol.IsEmpty()) {
       VERBOSE_NODE(Logger::Red, 
          "Undefined input ", tmeta, 
-         " (of type ", (dmeta ? dmeta->GetToken() : "any"), 
+         " (of type ", (dmeta ? dmeta->mToken : "any"), 
          ") @ ", rate
       );
       return {};

@@ -10,6 +10,14 @@
 using namespace Nodes;
 
 
+/// SDF scene function                                                        
+///   @param {0} - scene code                                                 
+constexpr Token SceneFunction = R"shader(
+   float Scene(in vec3 point) {{
+      return {0};
+   }}
+)shader";
+
 /// Signed distance union function                                            
 constexpr Token SDFUnion = R"shader(
    float SDFUnion(float d1, float d2) {
@@ -121,10 +129,12 @@ SceneSDF::operator Debug() const {
    return result;
 }
 
-/// Generate code for signed distance field from geometry                     
-///   @param define - [in/out] code definitions                               
-///   @param scene - [out] SDF code goes here                                 
-void SceneSDF::GenerateCode(GLSL& define, GLSL& scene) {
+/// Generate scene code                                                       
+///   @return the SDF scene function template symbol                          
+Symbol SceneSDF::Generate() {
+   // Generate children first                                           
+   Descend();
+
    // Scene nodes are usually inside Raster/Raycast/Raymarch/Raytrace   
    // nodes, and the place trait should come from there                 
    auto symPos = GetSymbol<Traits::Place, Vec3>(PerPixel);
@@ -153,11 +163,4 @@ void SceneSDF::GenerateCode(GLSL& define, GLSL& scene) {
          }
       }
    }
-}
-
-/// Generate the shader stages                                                
-void SceneSDF::Generate() {
-   VERBOSE_NODE("Generating code...");
-   Descend();
-   Consume();
 }

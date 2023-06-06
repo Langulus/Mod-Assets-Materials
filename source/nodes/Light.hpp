@@ -18,11 +18,7 @@ namespace Nodes
    struct Light : Node {
       Light(const Descriptor&);
 
-      void Generate() final;
-
-   private:
-      void GenerateDefinition();
-      void GenerateUsage();
+      Symbol Generate() final;
    };
 
 } // namespace Nodes

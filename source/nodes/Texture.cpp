@@ -59,7 +59,7 @@ Texture::Texture(const Descriptor& desc)
    if (frameMap->FindKey(time) == uiNone) {
       // No such keyframe exists, so create it                          
       VERBOSE_NODE("Texture #", textureId, " keyframe added at ", time, ": ", verb);
-      frameMap->Add(time, verb);
+      frameMap->Insert(time, verb);
       verb << this;
       return;
    }
@@ -132,20 +132,20 @@ GLSL Texture::GetKeyframe(KeyframeMap* frameMap, pcptr keyIdx, const GLSL& uv) {
          },
          [&](const Code& code) {
             // Generate keyframe from GASM code                         
-            auto uvNode = MaterialNodeValue::Local(
-               this, Trait::From<Traits::Sampler, vec2>(), mRate, 
+            auto uvNode = Nodes::Value::Local(
+               this, Trait::From<Traits::Sampler, Vec2>(), mRate, 
                uv.IsEmpty() ? GetTextureCoordinates() : uv
             );
             uvNode.DoGASM(code);
-            symbol = uvNode.GetOutputSymbolAs(MetaData::Of<vec4f>(), 0);
+            symbol = uvNode.GetOutputSymbolAs(MetaData::Of<Vec4f>(), 0);
          },
-         [&](const rgba& color) {
+         [&](const RGBA& color) {
             // Generate keyframe from a static color                    
             symbol += color;
          },
          [&](const Construct& construct) {
             bool relevantConstruct = false;
-            if (construct.InterpretsAs<AFile>()) {
+            if (construct.CastsTo<A::File>()) {
                // Generate keyframe from a texture file                 
                auto creator = Verb::From<Verbs::Create>({}, &construct);
                Any environment = mProducer->GetOwners();
@@ -255,12 +255,10 @@ GLSL Texture::GenerateDefinition(KeyframeMap* frameMap, const GLSL& uv) {
 }
 
 /// Generate the shader stages                                                
-void Texture::Generate() {
-   VERBOSE_NODE("Generating code...");
+Symbol Texture::Generate() {
    Descend();
-   Consume();
 
-   pcptr totalKeyframeCount = 0;
+   Count totalKeyframeCount {};
    totalKeyframeCount += mKeyframesGlobal.GetCount();
    for (auto& channel : mKeyframes)
       totalKeyframeCount += channel.GetCount();
@@ -275,9 +273,8 @@ void Texture::Generate() {
          code += GenerateDefinition(&channel, "");
       code += GenerateDefinition(&mKeyframesGlobal, "");
 
-      Commit(ShaderToken::Texturize, 
-         "vec4 texturized = " + code + ";\n");
-      Expose<Traits::Color, vec4>("texturized");
+      Commit(ShaderToken::Texturize, "vec4 texturized = " + code + ";\n");
+      Expose<Traits::Color, Vec4>("texturized");
       return;
    }
 
@@ -325,11 +322,8 @@ void Texture::Generate() {
 
    // Multiple texture channels                                         
    auto channel = GetSymbol<Traits::Texture>(GetRate(), false);
-   if (channel.IsEmpty())
-      throw Except::Content(pcLogSelfError
-         << "No texture channel available");
-
+   LANGULUS_ASSERT(!channel.IsEmpty(), Material, "No texture channel available")
    const GLSL define = "vec4 texturized = Texturize(" + channel + ", " + uv + ");\n\n";
    Commit(ShaderToken::Texturize, define);
-   Expose<Traits::Color, vec4>("texturized");
+   Expose<Traits::Color, Vec4>("texturized");
 }

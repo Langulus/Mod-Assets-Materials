@@ -25,7 +25,7 @@ namespace Nodes
    public:
       Transform(const Descriptor&);
 
-      void Generate() final;
+      Symbol Generate() final;
 
       NOD() operator Debug() const;
 

@@ -6,37 +6,7 @@
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
 #pragma once
-#include "GLSL.hpp"
-#include <Flow/Rate.hpp>
-
-#define VERBOSE_NODE(...) Logger::Verbose(Self(), __VA_ARGS__)
-
-template<class... ARGUMENTS>
-Text TemplateFill(const Token&, ARGUMENTS&&...);
-
-namespace Nodes
-{
-   struct Root;
-   struct Camera;
-   struct FBM;
-   struct Light;
-   struct Raster;
-   struct Raycast;
-   struct Raymarch;
-   struct Raytrace;
-   struct SceneSDF;
-   struct SceneTriangles;
-   struct SceneLines;
-   struct Texture;
-   struct Transform;
-   struct Value;
-}
-
-/// Useful constants                                                          
-/*LANGULUS_DECLARE_CONSTANT(FrontFace, Trait::From<Traits::Texture>(0),
-   "Used as texture ID, dedicated to front polygonal faces");
-LANGULUS_DECLARE_CONSTANT(BackFace, Trait::From<Traits::Texture>(1),
-   "Used as texture ID, dedicated to back polygonal faces");*/
+#include "Symbol.hpp"
 
 
 ///                                                                           
@@ -45,7 +15,7 @@ LANGULUS_DECLARE_CONSTANT(BackFace, Trait::From<Traits::Texture>(1),
 struct Node : Unit {
 protected:
    friend struct Material;
-   friend struct FBM;
+   friend struct Nodes::FBM;
 
    enum ValueType {Input, Output};
 
@@ -62,6 +32,7 @@ protected:
    Ref<Node> mParent;
    // The children that this node leads to                              
    TAny<Ref<Node>> mChildren;
+
    // The input traits that this node consumes                          
    TUnorderedMap<Trait, GLSL> mInputs;
    // The output traits that this node produces                         
@@ -70,6 +41,7 @@ protected:
    // Whether or not this node's code has already been generated        
    // Protects against infinite dependency loops                        
    bool mGenerated = false;
+
 
    struct DefaultTrait {
       DMeta mType;
@@ -89,7 +61,7 @@ public:
    NOD() operator Debug() const;
    NOD() operator GLSL() const;
 
-   virtual void Generate() = 0;
+   virtual Symbol Generate() = 0;
 
    NOD() Material* GetMaterial() const noexcept;
    NOD() MaterialLibrary* GetLibrary() const noexcept;

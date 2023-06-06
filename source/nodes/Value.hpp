@@ -19,18 +19,17 @@ namespace Nodes
    private:
       Trait mTrait;
       GLSL mUniform, mName, mUse;
-      GLSL mDependencies;
 
    public:
       LANGULUS_VERBS(Verbs::Do);
 
       Value(const Descriptor&);
 
-      NOD() static Value Input(Node*,  const Trait& = {}, Rate = Rate::Auto, const GLSL& name = {});
+      NOD() static Value Input (Node*, const Trait& = {}, Rate = Rate::Auto, const GLSL& name = {});
       NOD() static Value Output(Node*, const Trait& = {}, Rate = Rate::Auto, const GLSL& name = {});
-      NOD() static Value Local(Node*,  const Trait& = {}, Rate = Rate::Auto, const GLSL& name = {});
+      NOD() static Value Local (Node*, const Trait& = {}, Rate = Rate::Auto, const GLSL& name = {});
 
-      void Generate() override;
+      Symbol Generate() final;
 
       void Do(Verb&);
 

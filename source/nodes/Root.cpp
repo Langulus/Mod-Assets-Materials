@@ -17,8 +17,8 @@ Root::Root(Material* producer, const Descriptor& desc)
    : Node {MetaOf<Root>(), producer, desc} { }
 
 /// Generate the shader stages                                                
-void Root::Generate() {
-   VERBOSE_NODE("Generating code...");
+Symbol Root::Generate() {
+   // Just generate children                                            
    Descend();
-   Consume();
+   return {};
 }

@@ -22,8 +22,6 @@ namespace Nodes
    ///                                                                        
    struct Texture : Node {
    private:
-      // Supports animating multiple texture channels                   
-      // Index zero and one are reserved for front/back of polygons     
       using KeyframeMap = TMap<Time, Verb>;
       TMap<Offset, KeyframeMap> mKeyframes;
       KeyframeMap mKeyframesGlobal;
@@ -31,7 +29,7 @@ namespace Nodes
    public:
       Texture(const Descriptor&);
 
-      void Generate() final;
+      Symbol Generate() final;
 
       NOD() operator Debug() const;
 

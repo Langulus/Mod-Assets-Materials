@@ -22,9 +22,7 @@ namespace Nodes
       SceneTriangles(Node*, const Descriptor&);
       SceneTriangles(const Descriptor&);
 
-      void Generate() final;
-
-      void GenerateCode(GLSL& define, GLSL& scene, Count&);
+      Symbol Generate() final;
 
       NOD() operator Debug() const;
    };

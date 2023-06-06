@@ -12,6 +12,17 @@
 using namespace Nodes;
 
 
+/// Rasterizer result                                                         
+constexpr Token RasterResult = R"shader(
+   struct RasterizeResult {
+      vec3 mNormal;
+      vec2 mUV;
+      float mDepth;
+      int mTextureId;
+   };
+)shader";
+
+
 /// Rasterizer node creation                                                  
 ///   @param desc - the rasterizer descriptor                                 
 Raster::Raster(const Descriptor& desc)
@@ -35,7 +46,7 @@ Raster::Raster(const Descriptor& desc)
    // Parse scene                                                       
    if (mTopology->CastsTo<A::Triangle>())
       mScene = new SceneTriangles {this, desc};
-   else if (mTopology->CastsTo<A::Lines>())
+   else if (mTopology->CastsTo<A::Line>())
       mScene = new SceneLines {this, desc};
    else
       LANGULUS_THROW(Material, "Bad topology for rasterizer");
@@ -47,7 +58,7 @@ Raster::Raster(const Descriptor& desc)
    Expose<Traits::Texture, int>("int(rasResult.mFront)");
 }
 
-void Raster::~Raster() {
+Raster::~Raster() {
    if (mScene)
       delete mScene;
 }
@@ -56,6 +67,11 @@ void Raster::~Raster() {
 /// This is a 'fake' per-pixel rasterizer - very suboptimal, but useful in    
 /// various scenarios                                                         
 void Raster::GeneratePerPixel() {
+   // In order to rasterize, we require a scene                         
+   auto scene = mScene.Generate();
+   LANGULUS_ASSERT(!scene.IsEmpty(), Material,
+      "No scene available for rasterizer");
+
    // In order to rasterize, we require either triangle or line data    
    // Scan all parent nodes for scenes in order to generate these       
    GLSL triangleDef, sceneTriangles, sceneLines;
@@ -67,13 +83,7 @@ void Raster::GeneratePerPixel() {
    if (!lineCount && !triangleCount)
       throw Except::Content(pcLogSelfError << "No geometry available for rasterizer");
 
-   GLSL define =
-      "struct RasterizeResult {\n"
-      "   vec3 mNormal;\n"
-      "   vec2 mUV;\n"
-      "   float mDepth;\n"_glsl +
-      (mBilateral ? "   bool mFront;\n" : "") +
-      "};\n\n";
+   GLSL define = RasterResult;
 
    // Define the triangle rasterizing function                           
    GLSL rasterizeTriangle =
@@ -240,24 +250,15 @@ void Raster::GeneratePerVertex() {
    //float gl_ClipDistance[];
 }
 
-/// Generate the shader stages                                                
-void Raster::Generate() {
-   VERBOSE_NODE("Generating code...");
-
-   if (!mCode.IsEmpty()) {
-      auto parsed = mCode.Parse();
-      Any context {GetBlock()};
-      if (!Verb::ExecuteScope(context, parsed))
-         LANGULUS_THROW(Content, "Can't execute code");
-   }
-
+/// Generate the rasterizer code                                              
+///   @return the rasterizer function template                                
+Symbol Raster::Generate() {
    Descend();
-   Consume();
 
    if (mRate == PerVertex)
       GeneratePerVertex();
    else if (mRate == PerPixel)
       GeneratePerPixel();
    else
-      LANGULUS_THROW(Content, "Bad rate for rasterizer");
+      LANGULUS_THROW(Material, "Bad rate for rasterizer");
 }

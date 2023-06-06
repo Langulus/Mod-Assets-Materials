@@ -22,9 +22,7 @@ namespace Nodes
       SceneSDF(Node*, const Descriptor&);
       SceneSDF(const Descriptor&);
 
-      void Generate() final;
-
-      void GenerateCode(GLSL& define, GLSL& scene);
+      Symbol Generate() final;
 
       NOD() operator Debug() const;
    };

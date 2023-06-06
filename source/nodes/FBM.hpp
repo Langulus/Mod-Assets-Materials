@@ -27,13 +27,9 @@ namespace Nodes
    public:
       FBM(const Descriptor&);
 
-      void Generate() final;
+      Symbol Generate() final;
 
       NOD() operator Debug() const;
-
-   private:
-      void GenerateDefinition();
-      void GenerateUsage();
    };
 
 } // namespace Nodes

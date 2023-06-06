@@ -18,10 +18,7 @@ namespace Nodes
    struct Raytrace : Node {
       Raytrace(const Descriptor&);
 
-      void Generate() final;
-
-   private:
-      void GenerateDefinition();
+      Symbol Generate() final;
    };
 
 } // namespace Nodes

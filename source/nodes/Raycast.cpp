@@ -15,15 +15,8 @@ using namespace Nodes;
 Raycast::Raycast(const Descriptor& desc)
    : Node {MetaOf<Raycast>(), desc} { }
 
-/// Generate raycaster definition code                                        
-void Raycast::GenerateDefinition() {
-   TODO();
-}
-
-/// Generate the shader stages                                                
-void Raycast::Generate() {
-   VERBOSE_NODE("Generating...");
+/// Generate the raycaster code                                               
+///   @return the raycaster function template                                 
+Symbol Raycast::Generate() {
    Descend();
-   Consume();
-   GenerateDefinition();
 }

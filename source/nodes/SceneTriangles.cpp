@@ -30,11 +30,11 @@ SceneTriangles::operator Debug() const {
    return result;
 }
 
-/// Generate code for triangles from geometry                                 
-///   @param define - [in/out] code definitions                               
-///   @param sceneTriangles - [out] triangle code goes here                   
-///   @param triangleCount - [in/out] keeps track of generated triangles      
-void SceneTriangles::GenerateCode(GLSL& define, GLSL& sceneTriangles, pcptr& triangleCount) {
+/// Generate scene code                                                       
+///   @return the array of triangles symbol                                   
+Symbol SceneTriangles::Generate() {
+   Descend();
+
    if (!mGeometry->IsGenerated()) {
       // By default, geometry doesn't generate vertex positions         
       // and rasterizer requires it, so we create them                  
@@ -47,7 +47,7 @@ void SceneTriangles::GenerateCode(GLSL& define, GLSL& sceneTriangles, pcptr& tri
       );
 
       Any unusedSideproducts;
-      Any geometryBlock { mGeometry->GetBlock() };
+      Any geometryBlock {mGeometry->GetBlock()};
       Verb::DefaultCreateInner(geometryBlock, additional, unusedSideproducts);
       mGeometry->Generate();
    }
@@ -122,11 +122,4 @@ void SceneTriangles::GenerateCode(GLSL& define, GLSL& sceneTriangles, pcptr& tri
       sceneTriangles += ")";
       ++triangleCount;
    }
-}
-
-/// Generate the shader stages                                                
-void SceneTriangles::Generate() {
-   VERBOSE_NODE("Generating code...");
-   Descend();
-   Consume();
 }

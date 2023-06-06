@@ -78,8 +78,11 @@ constexpr Token CameraFuncDefault = R"shader(
 Camera::Camera(const Descriptor& desc)
    : Node {MetaOf<Camera>(), desc} { }
 
-/// Generate camera definition code, based on usage                           
-void Camera::GenerateDefinition() {
+/// Generate the camera code                                                  
+Symbol Camera::Generate() {
+   // Generate children first                                           
+   Descend();
+
    GLSL types;
    types += CameraResult;
 
@@ -94,10 +97,10 @@ void Camera::GenerateDefinition() {
 
       // Projection based on camera view transformation                 
       if (mRate == PerPixel) {
-         auto symView   = GetSymbol<Traits::View, Mat4>(PerLevel);
-         auto symFov    = GetSymbol<Traits::FOV, Real>(PerCamera);
-         auto symProj   = GetSymbol<Traits::Projection, Mat4>(PerLevel);
-         auto symRes    = GetSymbol<Traits::Size, Vec2>(PerTick);
+         auto symView = GetSymbol<Traits::View, Mat4>(PerLevel);
+         auto symFov = GetSymbol<Traits::FOV, Real>(PerCamera);
+         auto symProj = GetSymbol<Traits::Projection, Mat4>(PerLevel);
+         auto symRes = GetSymbol<Traits::Size, Vec2>(PerTick);
 
          // Combine pixel position with the view matrix to from         
          // the projection per pixel. This allows for optically         
@@ -106,8 +109,8 @@ void Camera::GenerateDefinition() {
          explicitCamera = true;
       }
       else if (mRate == PerVertex) {
-         auto symView   = GetSymbol<Traits::View, Mat4>(PerLevel);
-         auto symPos    = GetSymbol<Traits::Place, Vec4>(PerVertex);
+         auto symView = GetSymbol<Traits::View, Mat4>(PerLevel);
+         auto symPos = GetSymbol<Traits::Place, Vec4>(PerVertex);
 
          // Combine vertex position with the view matrix to from        
          // the projection per vertex                                   
@@ -135,12 +138,4 @@ void Camera::GenerateDefinition() {
    Expose<Traits::Place, Vec3>("camResult.mOrigin");
    Expose<Traits::Projection, Mat4>("camResult.mProjectedView");
    Expose<Traits::Aim, Vec3>("camResult.mDirection");
-}
-
-/// Generate the shader stages                                                
-void Camera::Generate() {
-   VERBOSE_NODE("Generating code...");
-   Descend();
-   Consume();
-   GenerateDefinition();
 }

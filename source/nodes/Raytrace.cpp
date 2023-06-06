@@ -15,15 +15,8 @@ using namespace Nodes;
 Raytrace::Raytrace(const Descriptor& desc)
    : Node {MetaOf<Raytrace>(), desc} { }
 
-/// Generate raytracer definition code                                        
-void Raytrace::GenerateDefinition() {
-   TODO();
-}
-
-/// Generate the shader stages                                                
-void Raytrace::Generate() {
-   VERBOSE_NODE("Generating code...");
+/// Generate raytracer code                                                   
+///   @return the output symbol                                               
+Symbol Raytrace::Generate() {
    Descend();
-   Consume();
-   GenerateDefinition();
 }

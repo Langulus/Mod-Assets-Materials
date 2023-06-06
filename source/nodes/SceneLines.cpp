@@ -30,11 +30,11 @@ SceneLines::operator Debug() const {
    return result;
 }
 
-/// Generate code for lines from geometry                                     
-///   @param define - [in/out] code definitions                               
-///   @param sceneLines - [out] line code goes here                           
-///   @param lineCount - [in/out] keeps track of generated lines              
-void SceneLines::GenerateCode(GLSL& define, GLSL& sceneLines, pcptr& lineCount) {
+/// Generate scene code                                                       
+///   @return the array of lines symbol                                       
+Symbol SceneLines::Generate() {
+   Descend();
+
    if (!mGeometry->IsGenerated()) {
       // By default, geometry doesn't generate vertex positions         
       // and rasterizer requires it, so we create them                  
@@ -98,11 +98,4 @@ void SceneLines::GenerateCode(GLSL& define, GLSL& sceneLines, pcptr& lineCount) 
 
       ++lineCount;
    }
-}
-
-/// Generate the shader stages                                                
-void SceneLines::Generate() {
-   VERBOSE_NODE("Generating code...");
-   Descend();
-   Consume();
 }

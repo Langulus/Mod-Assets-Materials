@@ -20,11 +20,11 @@ namespace Nodes
       // Code for the rasterizer                                        
       Code mCode;
       // Whether or not to rasterize both sides of triangles            
-      bool mBilateral = false;
+      bool mBilateral {};
       // Whether or not triangle faces are flipped                      
-      bool mSigned = false;
+      bool mSigned {};
       // Whether we're rasterizing triangles or lines                   
-      DMeta mTopology = nullptr;
+      DMeta mTopology {};
       // The depth range in which we're rasterizing                     
       Range1 mDepth {0, 1000};
       // Scene, depending on topology, it is either SceneLines or       
@@ -35,7 +35,7 @@ namespace Nodes
       Raster(const Descriptor&);
       ~Raster();
 
-      void Generate() final;
+      Symbol Generate() final;
 
    private:
       void GeneratePerPixel();

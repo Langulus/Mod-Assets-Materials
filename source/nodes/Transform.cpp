@@ -245,7 +245,7 @@ void Transform::GenerateDefinition() {
    SuccessTrap sizeDynamic;
    bool sizeRuntime = false;
    const auto sizeReference = GetScale(0, sizeRuntime);
-   for (pcptr i = 0; i < mKeyframes.GetCount(); ++i) {
+   for (Offset i = 0; i < mKeyframes.GetCount(); ++i) {
       const auto size = GetScale(i, sizeRuntime);
       sizeDynamic = sizeReference != size;
       keyframeSize += "   ";
@@ -268,7 +268,7 @@ void Transform::GenerateDefinition() {
    SuccessTrap aimDynamic;
    bool aimRuntime = false;
    const auto aimReference = GetAim(0, aimRuntime);
-   for (pcptr i = 0; i < mKeyframes.GetCount(); ++i) {
+   for (Offset i = 0; i < mKeyframes.GetCount(); ++i) {
       const auto aim = GetAim(i, aimRuntime);
       aimDynamic = aimReference != aim;
       keyframeAim += "   ";
@@ -574,10 +574,6 @@ void Transform::GenerateDefinition() {
 }
 
 /// Generate the shader stages                                                
-void Transform::Generate() {
-   VERBOSE_NODE("Generating code...");
+Symbol Transform::Generate() {
    Descend();
-   Consume();
-
-   GenerateDefinition();
 }
