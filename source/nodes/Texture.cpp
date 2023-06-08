@@ -14,61 +14,40 @@ using namespace Nodes;
 ///   @param desc - the node descriptor                                       
 Texture::Texture(const Descriptor& desc)
    : Node {MetaOf<Texture>(), desc} {
-   // Parse texture-related descriptor                                  
-   Offset textureId {};
-   bool usingTextureId {};
-   bool relative {};
+   // Extract texture id                                                
+   mDescriptor.ExtractTrait<Traits::Texture>(mTextureId);
+   mDescriptor.ExtractDataAs(mTextureId);
 
-   for (auto pair : mDescriptor.mTraits) {
-      if (pair.mKey->template Is<Traits::Texture>()) {
-         // Texture id                                                  
-         VERBOSE_NODE("Configuring texturizer: ", pair.mValue);
-         textureId = pair.mValue.AsCast<Offset>();
-         usingTextureId = true;
+   // Extract animation keyframes                                       
+   for (auto& verb : mDescriptor.mVerbs) {
+      const Time time {std::chrono::duration<Real> {verb.GetTime()}};
+      KeyframeMap* frameMap = nullptr;
+      if (usingTextureId) {
+         // Check if keyframe channel exists                            
+         if (mKeyframes.FindKey(textureId) == uiNone)
+            mKeyframes.Add(textureId, {});
+
+         frameMap = &mKeyframes[textureId];
       }
-      else if (pair.mKey->template Is<Traits::Relative>()) {
-         // Relativity                                                  
-         VERBOSE_NODE("Configuring texturizer: ", pair.mValue);
-         relative = pair.mValue.AsCast<bool>();
+      else {
+         // Or use the global keyframes if no channel specified         
+         frameMap = &mKeyframesGlobal;
       }
-   }
 
-   for (auto pair : mDescriptor.mAnythingElse) {
-      if (pair.mKey->template CastsTo<A::Number>()) {
-         // Texture id                                                  
-         VERBOSE_NODE("Configuring texturizer: ", pair.mValue);
-         textureId = pair.mValue.AsCast<Offset>();
-         usingTextureId = true;
+      if (frameMap->FindKey(time) == uiNone) {
+         // No such keyframe exists, so create it                       
+         VERBOSE_NODE("Texture #", textureId, " keyframe added at ", time, ": ", verb);
+         frameMap->Insert(time, verb);
+         verb << this;
+         return;
       }
-   }
 
-   const Time time {std::chrono::duration<Real> {verb.GetTime()}};
-   KeyframeMap* frameMap = nullptr;
-   if (usingTextureId) {
-      // Check if keyframe channel exists                               
-      if (mKeyframes.FindKey(textureId) == uiNone)
-         mKeyframes.Add(textureId, {});
-
-      frameMap = &mKeyframes[textureId];
+      // Combine the keyframes' verbs                                   
+      if (relative)
+         (*frameMap)[time].GetArgument() << verb.GetArgument();
+      else
+         (*frameMap)[time] = verb;
    }
-   else {
-      // Or use the global keyframes if no channel specified            
-      frameMap = &mKeyframesGlobal;
-   }
-
-   if (frameMap->FindKey(time) == uiNone) {
-      // No such keyframe exists, so create it                          
-      VERBOSE_NODE("Texture #", textureId, " keyframe added at ", time, ": ", verb);
-      frameMap->Insert(time, verb);
-      verb << this;
-      return;
-   }
-
-   // Combine the keyframes' verbs                                      
-   if (relative)
-      (*frameMap)[time].GetArgument() << verb.GetArgument();
-   else
-      (*frameMap)[time] = verb;
 }
 
 /// For logging                                                               

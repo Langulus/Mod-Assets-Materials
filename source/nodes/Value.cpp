@@ -151,7 +151,7 @@ Value::operator Debug() const {
 ///   @param trait - the trait to select                                      
 ///   @param found - [out] the trait type is carried inside                   
 ///   @return the symbol of the found trait (empty if nothing was found)      
-GLSL Value::SelectMember(TraitID trait, Trait& found) {
+GLSL Value::SelectMember(TMeta trait, Trait& found) {
    VERBOSE_NODE("Searching for member ", trait, " inside ", *this);
    for (auto& member : mTrait.GetMeta()->GetMemberList()) {
       if (member.mStaticMember.mTrait == trait) {
@@ -405,15 +405,6 @@ void Value::Exponent(Verb& verb) {
    verb << this;
 }
 
-/// Apply fractal brawnian motion to the input                                
-///   @param verb - the randomization verb                                    
-void Value::FBM(Verb& verb) {
-   MaterialNodeFBM fbm(this);
-   fbm.FBM(verb);
-   fbm.Generate();
-   mOutputs = fbm.GetOutputs();
-}
-
 /// Randomize inputs                                                          
 ///   @param verb - the randomization verb                                    
 void Value::Randomize(Verb& verb) {
@@ -539,8 +530,5 @@ void Value::Randomize(Verb& verb) {
 
 /// Generate the shader stages                                                
 void Value::Generate() {
-   VERBOSE_NODE("Generating code...");
    Descend();
-   Consume();
-   Commit(ShaderToken::Functions, mDependencies);
 }

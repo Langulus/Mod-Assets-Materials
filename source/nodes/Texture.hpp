@@ -22,9 +22,8 @@ namespace Nodes
    ///                                                                        
    struct Texture : Node {
    private:
-      using KeyframeMap = TMap<Time, Verb>;
-      TMap<Offset, KeyframeMap> mKeyframes;
-      KeyframeMap mKeyframesGlobal;
+      Temporal mKeyframes;
+      Offset mTextureId {};
 
    public:
       Texture(const Descriptor&);
