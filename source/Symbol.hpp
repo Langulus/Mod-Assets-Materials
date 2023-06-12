@@ -35,3 +35,5 @@ struct Symbol {
    // variable, that will be used instead                               
    Count mUses {1};
 };
+
+using Symbols = TAny<Symbol>;

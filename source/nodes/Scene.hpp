@@ -26,7 +26,6 @@ namespace Nodes
 
       NOD() operator Debug() const;
 
-   private:
       Symbol GenerateSDF();
       Symbol GenerateLines();
       Symbol GenerateTriangles();

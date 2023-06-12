@@ -25,6 +25,16 @@ constexpr Token SDFUnion = R"shader(
    }
 )shader";
 
+/// Signed distance union function usage                                      
+///   @param {0} - first scene element                                        
+///   @param {1} - second scene element                                       
+constexpr Token SDFUnionUsage = R"shader(
+   SDFUnion(
+      {0},
+      {1}
+   )
+)shader";
+
 /// 3D box signed distance function                                           
 constexpr Token SDFBox3 = R"shader(
    float SDF(in vec3 point, in Box3 box) {
@@ -105,16 +115,18 @@ constexpr Token SDFCylinderZ = R"shader(
    };
 )shader";
 
-GLSL InterpretAsSDF(const Construct& what, GLSL& dep) {
+/// Interpret a construct as an SDF function                                  
+///   @param what - the construct to reinterpret                              
+///   @param global - place where global definitions go                       
+///   @return the generated scene function call                               
+GLSL InterpretAsSDF(const Construct& what, Material& global) {
    TODO();
 }
 
 /// Generate scene code                                                       
 ///   @return the SDF scene function template symbol                          
 Symbol Scene::GenerateSDF() {
-   // Scene nodes are usually inside Raster/Raycast/Raymarch/Raytrace   
-   // nodes, and the place trait should come from there                 
-   auto symPos = GetSymbol<Traits::Place, Vec3>(PerPixel);
+   GLSL scene;
 
    // Get the SDF code for each geometry construct                      
    for (auto pair : mDescriptor.mConstructs) {
@@ -122,22 +134,24 @@ Symbol Scene::GenerateSDF() {
          continue;
 
       for (auto& construct : pair.mValue) {
-         GLSL element = InterpretAsSDF(construct, define);
+         auto element = InterpretAsSDF(construct, *mMaterial);
          if (scene.IsEmpty()) {
             // This was the first element                               
-            scene += element;
+            scene = element;
+            continue;
          }
-         else {
-            // Define the union operation if not yet defined            
-            if (!define.Find(SDFUnion))
-               define += SDFUnion;
 
-            // Nest the union function for each new element             
-            scene = "SDFUnion(" + scene;
-            scene += ", ";
-            scene += element;
-            scene += ')';
-         }
+         // Each consecutive element is SDFUnion'ed                     
+         // Define the union operation if not yet defined               
+         mMaterial->AddDefine("SDFUnion", SDFUnion);
+
+         // Nest the union function for each new element                
+         scene = TemplateFill(SDFUnionUsage, scene, element);
       }
    }
+
+   LANGULUS_ASSERT(!scene.IsEmpty(), Material, "SDF scene is empty");
+
+   // Define the scene function                                         
+   mMaterial->AddDefine("Scene", TemplateFill(SceneFunction, scene));
 }

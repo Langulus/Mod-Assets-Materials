@@ -38,7 +38,7 @@ public:
    LANGULUS_BASES(A::Material);
    LANGULUS_VERBS(Verbs::Create);
 
-   Material(MaterialLibrary*, const Descriptor&);
+   Material(A::AssetModule*, const Descriptor&);
 
    void Create(Verb&);
    void Refresh();

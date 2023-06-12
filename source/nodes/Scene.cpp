@@ -34,4 +34,7 @@ Scene::operator Debug() const {
 ///   @return the SDF scene function template symbol                          
 Symbol Scene::Generate() {
    Descend();
+
+   // Intentionally does nothing. It is generated on demand by a        
+   // raycaster/raymarcher/raytracer/rasterizer                         
 }

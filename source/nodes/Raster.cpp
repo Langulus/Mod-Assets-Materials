@@ -21,6 +21,105 @@ constexpr Token RasterResult = R"shader(
    };
 )shader";
 
+/// Rasterize single triangle                                                 
+///   @param {0} - culling and sidedness code                                 
+constexpr Token RasterTriangle = R"shader(
+   void RasterizeTriangle(in CameraResult camera, in Triangle triangle, inout RasterizeResult result) {{
+      // Transform to eye space
+      vec4 pt0 = camera.mProjectedView * Transform(triangle.a);
+      vec4 pt1 = camera.mProjectedView * Transform(triangle.b);
+      vec4 pt2 = camera.mProjectedView * Transform(triangle.c);
+
+      vec2 p0 = pt0.xy / pt0.w;
+      vec2 p1 = pt1.xy / pt1.w;
+      vec2 p2 = pt2.xy / pt2.w;
+
+      float a = 0.5 * (-p1.y * p2.x + p0.y * (-p1.x + p2.x) + p0.x * (p1.y - p2.y) + p1.x * p2.y);
+
+      {0}
+
+      float s = 1.0 / (2.0 * a) * (p0.y * p2.x - p0.x * p2.y
+         + (p2.y - p0.y) *  camera.mScreenUV.x
+         + (p0.x - p2.x) * -camera.mScreenUV.y
+      );
+      float t = 1.0 / (2.0 * a) * (p0.x * p1.y - p0.y * p1.x
+         + (p0.y - p1.y) *  camera.mScreenUV.x
+         + (p1.x - p0.x) * -camera.mScreenUV.y
+      );
+
+      if (s <= 0.0 || t <= 0.0 || 1.0 - s - t <= 0.0)
+         return;
+
+      vec4 test = vec4(1.0, s, t, 1.0 - s - t);
+      float denominator = 1.0 / (test.y / pt1.w + test.z / pt2.w + test.w / pt0.w);
+      float z = (
+         (pt1.z * test.y) / pt1.w +
+         (pt2.z * test.z) / pt2.w +
+         (pt0.z * test.w) / pt0.w
+      ) * denominator;
+
+      if (z < result.mDepth && z > 0.0) {{
+         result.mUV.x = (
+            (triangle.bUV.x * test.y) / pt1.w +
+            (triangle.cUV.x * test.z) / pt2.w +
+            (triangle.aUV.x * test.w) / pt0.w
+         ) * denominator;
+
+         result.mUV.y = (
+            (triangle.bUV.y * test.y) / pt1.w +
+            (triangle.cUV.y * test.z) / pt2.w +
+            (triangle.aUV.y * test.w) / pt0.w
+         ) * denominator;
+
+         result.mDepth = z;
+         result.mNormal = triangle.n;
+      }}
+   }}
+)shader";
+
+
+/// Rasterize single line                                                     
+///   @param {0} - culling and sidedness code                                 
+constexpr Token RasterLine = R"shader(
+   void RasterizeLine(in CameraResult camera, in Line line, inout RasterizeResult result) {{
+      TODO
+   }}
+)shader";
+
+
+/// Rasterize a list of triangles                                             
+///   @param {0} - number of triangles                                        
+///   @param {1} - triangle array name                                        
+constexpr Token RasterTriangleList = R"shader(
+   void RasterizeTriangleList(in CameraResult camera, inout RasterizeResult result) {
+      for (int i = 0; i < {0}; i += 1) {{
+         RasterizeTriangle(camera, {1}[i], result);
+      }}
+   }}
+)shader";
+
+/// Rasterize a list of lines                                                 
+///   @param {0} - number of lines                                            
+///   @param {1} - line array name                                            
+constexpr Token RasterLineList = R"shader(
+   void RasterizeLineList(in CameraResult camera, inout RasterizeResult result) {
+      for (int i = 0; i < {0}; i += 1) {{
+         RasterizeLine(camera, {1}[i], result);
+      }}
+   }}
+)shader";
+
+/// Rasterizer usage snippet                                                  
+///   @param {0} - max depth                                                  
+constexpr Token RasterUsage = R"shader(
+   RasterizeResult rasResult;
+   rasResult.mDepth = {0};
+   SceneRAS(camResult, rasResult);
+   if (rasResult.mDepth >= {0})
+      discard;
+   rasResult.mDepth = 1.0 - rasResult.mDepth / {0};
+)shader";
+
 
 /// Rasterizer node creation                                                  
 ///   @param desc - the rasterizer descriptor                                 
@@ -71,70 +170,17 @@ void Raster::GeneratePerPixel() {
 
    GLSL define = RasterResult;
 
-   // Define the triangle rasterizing function                           
-   GLSL rasterizeTriangle =
-      "void RasterizeTriangle(in CameraResult camera, in Triangle triangle, inout RasterizeResult result) {\n"
-      "   // Transform to eye space\n"
-      "   vec4 pt0 = camera.mProjectedView * Transform(triangle.a);\n"
-      "   vec4 pt1 = camera.mProjectedView * Transform(triangle.b);\n"
-      "   vec4 pt2 = camera.mProjectedView * Transform(triangle.c);\n\n"
-
-      "   vec2 p0 = pt0.xy / pt0.w;\n"
-      "   vec2 p1 = pt1.xy / pt1.w;\n"
-      "   vec2 p2 = pt2.xy / pt2.w;\n\n"
-
-      "   float a = 0.5 * (-p1.y * p2.x + p0.y * (-p1.x + p2.x) + p0.x * (p1.y - p2.y) + p1.x * p2.y);\n";
-
    // Do face culling if required                                       
+   GLSL culling;
    if (mBilateral)
-      rasterizeTriangle += "   result.mFront = a <= 0.0;\n";
+      culling += "result.mFront = a <= 0.0;\n";
    else if (mSigned)
-      rasterizeTriangle += "   if (a >= 0.0) return;\n";
+      culling += "if (a >= 0.0) return;";
    else
-      rasterizeTriangle += "   if (a <= 0.0) return;\n";
+      culling += "if (a <= 0.0) return;";
 
-   rasterizeTriangle +=
-      "   float s = 1.0 / (2.0 * a) * (p0.y * p2.x - p0.x * p2.y \n"
-      "      + (p2.y - p0.y) * camera.mScreenUV.x \n"
-      "      + (p0.x - p2.x) * -camera.mScreenUV.y);\n"
-      "   float t = 1.0 / (2.0 * a) * (p0.x * p1.y - p0.y * p1.x \n"
-      "      + (p0.y - p1.y) * camera.mScreenUV.x \n"
-      "      + (p1.x - p0.x) * -camera.mScreenUV.y);\n\n"
-
-      "   if (s <= 0.0 || t <= 0.0 || 1.0 - s - t <= 0.0) \n"
-      "      return;\n\n"
-
-      "   vec4 test = vec4(1.0, s, t, 1.0 - s - t); \n"
-      "   float denominator = 1.0 / (test.y / pt1.w + test.z / pt2.w + test.w / pt0.w);\n"
-      "   float z = (\n"
-      "      (pt1.z * test.y) / pt1.w + \n"
-      "      (pt2.z * test.z) / pt2.w + \n"
-      "      (pt0.z * test.w) / pt0.w \n"
-      "   ) * denominator; \n\n"
-
-      "   if (z < result.mDepth && z > 0.0) {\n"
-      "      result.mUV.x = (\n"
-      "         (triangle.bUV.x * test.y) / pt1.w + \n"
-      "         (triangle.cUV.x * test.z) / pt2.w + \n"
-      "         (triangle.aUV.x * test.w) / pt0.w \n"
-      "      ) * denominator; \n\n"
-
-      "      result.mUV.y = (\n"
-      "         (triangle.bUV.y * test.y) / pt1.w + \n"
-      "         (triangle.cUV.y * test.z) / pt2.w + \n"
-      "         (triangle.aUV.y * test.w) / pt0.w \n"
-      "      ) * denominator; \n\n"
-
-      "      result.mDepth = z;\n"
-      "      result.mNormal = triangle.n;\n"
-      "   }\n"
-      "}\n\n";
-
-   // Define the line rasterizing function                              
-   static const GLSL rasterizeLine =
-      "void RasterizeLine(in CameraResult camera, in Line t, inout RasterizeResult result) {\n"
-      "   TODO();\n"
-      "}\n\n";
+   // Define the triangle rasterizing function                          
+   GLSL rasterizeTriangle = TemplateFill(RasterTriangles, culling);
 
    // Finish up the SceneRAS() if anything was defined in it            
    GLSL sceneFunction = "void SceneRAS(in CameraResult camera, inout RasterizeResult result) {\n";
@@ -143,13 +189,6 @@ void Raster::GeneratePerPixel() {
       sceneTriangles = triangleDef 
          + "const Triangle cTriangles[" + triangleCount + "] = Triangle["
          + triangleCount + "](\n" + sceneTriangles + "\n);\n\n";
-
-      // And iterate the triangles inside the SceneRAS()                
-      sceneFunction += "   for(int triangleIndex = 0; triangleIndex < ";
-      sceneFunction += triangleCount;
-      sceneFunction += "; triangleIndex += 1) {\n";
-      sceneFunction += "      RasterizeTriangle(camera, cTriangles[triangleIndex], result);\n";
-      sceneFunction += "   }\n";
 
       // Add the required rasterizer to the definitions                 
       define += sceneTriangles;
@@ -163,31 +202,16 @@ void Raster::GeneratePerPixel() {
          + "const Lines cLines[" + lineCount + "] = Line["
          + lineCount + "](\n" + sceneLines + "\n);\n\n";*/
 
-      // And iterate the lines inside the SceneRAS()
-      sceneFunction += "   for(int lineIndex = 0; lineIndex < ";
-      sceneFunction += lineCount;
-      sceneFunction += "; lineIndex += 1) {\n";
-      sceneFunction += "      RasterizeLine(camera, cLines[lineIndex], result);\n";
-      sceneFunction += "   }\n";
-
       // Add the required rasterizer to the definitions
       define += sceneLines;
       if (!define.Find(rasterizeLine))
          define += rasterizeLine;
    }
 
-   sceneFunction += "}\n\n";
    define += sceneFunction;
 
    // Rasterize usage                                                   
-   GLSL usage = 
-      "RasterizeResult rasResult;\n"
-      "rasResult.mDepth = "_glsl + mDepth.mMax + ";\n"
-      "SceneRAS(camResult, rasResult);\n"
-      "if (rasResult.mDepth >= " + mDepth.mMax + ")\n"
-      "   discard;\n"
-      "rasResult.mDepth = 1.0 - rasResult.mDepth / " + mDepth.mMax + ";\n\n";
-
+   GLSL usage = TemplateFill(RasterLineList, mDepth.mMax);
    Commit(ShaderToken::Functions, define);
    Commit(ShaderToken::Transform, usage);
 }

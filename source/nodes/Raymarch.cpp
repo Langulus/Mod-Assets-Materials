@@ -10,34 +10,20 @@
 using namespace Nodes;
 
 
-/// Raymarcher settings structure                                             
-///   @param {0} - precision                                                  
-///   @param {1} - max raymarching distance                                   
-///   @param {2} - far stride, used by the hybrid marcher                     
+/// Raymarch function                                                         
+///   @param {0} - scene function symbol                                      
+///   @param {1} - precision                                                  
+///   @param {2} - max raymarching distance                                   
+///   @param {3} - far stride, used by the hybrid marcher                     
 ///                if the distance from the root is high enough we use d      
 ///                instead of log(d)                                          
-///   @param {3} - base stride, used by the hybrid marcher                    
+///   @param {4} - base stride, used by the hybrid marcher                    
 ///                determines how fast the root finder moves in, needs to be  
 ///                lowered when dealing with thin "slices". the potential     
 ///                problem is the intersector crossing the function twice in  
 ///                one step                                                   
-///   @param {4} - a minimum step size                                        
-///   @param {5} - max number of raymarching steps                            
-constexpr Token RaymarchConfig = R"shader(
-   struct Raymarcher {{
-      float mPrecision;
-      float mFarMax;
-      float mFarStride;
-      float mBaseStride;
-      float mMinStep;
-      int mDetail;
-   }};
-   const Raymarcher raymarchConfig = Raymarcher(
-      {0}, {1}, {2}, {3}, {4}, {5}
-   );
-)shader";
-
-/// Raymarch function                                                         
+///   @param {5} - a minimum step size                                        
+///   @param {6} - max number of raymarching steps                            
 constexpr Token RaymarchFunction = R"shader(
    struct RaymarchResult {{
       float mDepth;
@@ -47,13 +33,13 @@ constexpr Token RaymarchFunction = R"shader(
    // based on nimitz's original code, without his permission or endorsement:
    // https://www.shadertoy.com/view/4sSXzD
    // License: https://creativecommons.org/licenses/by-nc-sa/3.0/
-   float Bisect(in RaymarchConfig config, in CameraResult camera, in float near, in float far) {{
+   float Bisect(in CameraResult camera, in float near, in float far) {{
       float mid = 0.0;
-      float sgn = sign(Scene(camera.mDirection * near + camera.mOrigin));
+      float sgn = sign({0}(camera.mDirection * near + camera.mOrigin));
       for (int i = 0; i < 6; i++) {{
          mid = (near + far) * 0.5;
-         float d = SceneSDF(camera.mDirection * mid + camera.mOrigin);
-         if (abs(d) < config.mPrecision)
+         float d = {0}(camera.mDirection * mid + camera.mOrigin);
+         if (abs(d) < {1})
             break;
 
          d * sgn < 0.0 ? far = mid : near = mid;
@@ -62,45 +48,34 @@ constexpr Token RaymarchFunction = R"shader(
       return (near + far) * 0.5;
    }}
 
-   RaymarchResult Raymarch(in RaymarchConfig config, in CameraResult camera) {{
+   RaymarchResult Raymarch(in CameraResult camera) {{
       float t = 0.0;
-      float d = Scene(camera.mDirection * t + camera.mOrigin);
+      float d = {0}(camera.mDirection * t + camera.mOrigin);
       float sgn = sign(d);
       float told = t;
-      bool doBisect = false;
-      for (int i = 0; i <= config.mDetail; i++) {{
-         if (abs(d) < config.mPrecision || t >= config.mFarMax)
+
+      for (int i = 0; i <= {6}; i++) {{
+         if (abs(d) < {1} || t >= {2})
             break;
-         else if (i == config.mDetail)
-            t = config.mFarMax;
+         else if (i == {6})
+            t = {2};
 
          if (sign(d) != sgn) {{
-            doBisect = true;
+            t = Bisect(camera, told, t);
             break;
          }}
 
          told = t;
          if (d > 1.0)
-            t += d * config.mFarStride;
+            t += d * {3};
          else
-            t += log(abs(d) + 1.0 + config.mMinStep) * config.mBaseStride;
+            t += log(abs(d) + 1.0 + {5}) * {4};
 
-         d = Scene(camera.mDirection * t + camera.mOrigin);
+         d = {0}(camera.mDirection * t + camera.mOrigin);
       }}
 
-      if (doBisect)
-         t = Bisect(config, camera, told, t);
-
-      return RaymarchResult(t);
+      return RaymarchResult(1.0 - t / {2});
    }}
-)shader";
-
-/// Raymarch usage                                                            
-constexpr Token RaymarchUsage = R"shader(
-   RaymarchResult raymarchResult = Raymarch(raymarchConfig, camResult);
-   if (raymarchResult.mDepth >= raymarchConfig.mFarMax)
-      discard;
-   raymarchResult.mDepth = 1.0 - raymarchResult.mDepth / raymarchConfig.m;
 )shader";
 
 
@@ -122,18 +97,15 @@ Raymarch::Raymarch(const Descriptor& desc)
       mPrecision, mFarMax, mFarStride, mBaseStride, mMinStep
    );
    LANGULUS_ASSERT(mPrecision > 0, Material,
-      "Bad RaymarchConfig.mPrecision", mPrecision);
+      "Bad raymarching precision", mPrecision);
    LANGULUS_ASSERT(mFarMax > 0, Material,
-      "Bad RaymarchConfig.mFarMax", mFarMax);
+      "Bad raymarching far plane", mFarMax);
    LANGULUS_ASSERT(mFarStride > 0, Material,
-      "Bad RaymarchConfig.mFarStride", mFarStride);
+      "Bad raymarching far stride", mFarStride);
    LANGULUS_ASSERT(mBaseStride > 0, Material,
-      "Bad RaymarchConfig.mBaseStride", mBaseStride);
+      "Bad raymarching base stride", mBaseStride);
    LANGULUS_ASSERT(mMinStep > 0, Material,
-      "Bad RaymarchConfig.mMinStep", mMinStep);
-
-   // Register the outputs                                              
-   Expose<Traits::Color, Real>("rmrResult.mDepth");
+      "Bad raymarching min step", mMinStep);
 }
 
 /// Generate raymarcher code                                                  
@@ -142,19 +114,23 @@ Symbol Raymarch::Generate() {
    // Generate children first                                           
    Descend();
 
-   // In order to raymarch, we require an SDF scene                     
-   GLSL functions, scene;
-   mScene.GenerateCode(functions, scene);
-   LANGULUS_ASSERT(!scene.IsEmpty(), Material,
-      "No scene available for raymarcher");
+   // In order to raymarch, we require child scene nodes                
+   Symbols scenes;
+   ForEachChild([&scenes](Nodes::Scene& scene) {
+      scenes << scene.GenerateSDF();
+   });
+
+   LANGULUS_ASSERT(!scenes.IsEmpty(), Material,
+      "No scenes available for raymarcher");
+
+   if (scenes.GetCount() > 1)
+      TODO(); // another SDFUnion indirection required here
 
    // Add raymarching functions and dependencies                        
-   functions += TemplateFill(SceneFunction, scene);
-   functions += TemplateFill(RaymarchConfig,
-      mPrecision, mFarMax, mFarStride, mBaseStride, mMinStep, mDetail);
-   functions += RaymarchFunction;
+   mMaterial->AddDefine("Raymarch", TemplateFill(RaymarchFunction,
+      scenes[0].mCode, mPrecision, mFarMax, mFarStride, mBaseStride, 
+      mMinStep, mDetail)
+   );
 
-   // Commit                                                            
-   Commit(ShaderToken::Functions, functions);
-   Commit(ShaderToken::Transform, RaymarchUsage);
+   return Expose("Raymarch({})", MetaOf<Nodes::Camera>());
 }

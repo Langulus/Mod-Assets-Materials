@@ -10,7 +10,7 @@
 using namespace Nodes;
 
 
-/// Triangle structure                                                        
+/// Triangle structure with texture coordinates and a normal                  
 constexpr Token TriangleStruct = R"shader(
    struct Triangle {
       vec3 a; vec2 aUV;
@@ -20,11 +20,21 @@ constexpr Token TriangleStruct = R"shader(
    };
 )shader";
 
+/// Triangle array                                                            
+///   @param {0} number of triangles                                          
+///   @param {1] list of triangles                                            
+constexpr Token TriangleList = R"shader(
+   const Triangle cTriangles[{0}] = Triangle[{0}]({1});
+)shader";
+
 
 /// Generate scene code                                                       
 ///   @return the array of triangles symbol                                   
 Symbol Scene::GenerateTriangles() {
-   // Get the triangle code for each geometry construct                 
+   GLSL triangles;
+   Count countCombined;
+
+   // Get the triangles of each geometry construct                      
    for (auto pair : mDescriptor.mConstructs) {
       if (!pair.mKey->template CastsTo<A::Geometry>())
          continue;
@@ -45,60 +55,59 @@ Symbol Scene::GenerateTriangles() {
          Verb::DefaultCreateInner(geometryBlock, additional, unusedSideproducts);
          mGeometry->Generate();
 
-         // Triangles                                                   
-         mMaterial->AddDefine("Triangle", TriangleStruct);
-
-         // Aggregate all triangles in an array of sorts:               
-         // const Triangle cTriangles[N] = Triangle[N](                 
-         //      Triangle(a, aUV, b, bUV, c, cUV, n),                   
-         //      ... N times                                            
-         //   );                                                        
          const auto count = mGeometry->GetTriangleCount();
          for (Count i = 0; i < count; ++i) {
             auto position = mGeometry->GetTriangleTrait<Traits::Place>(i);
-            if (position.IsEmpty())
-               LANGULUS_THROW(Material, "Can't rasterize a triangle without Traits::Place");
+            LANGULUS_ASSERT(!position.IsEmpty(), Material,
+               "Can't rasterize a triangle without Traits::Place");
 
             if (!position.template CastsTo<Vec3>(1))
                TODO();
 
             auto normal = mGeometry->GetTriangleTrait<Traits::Aim>(i);
-            if (normal.IsEmpty())
-               LANGULUS_THROW(Material, "Can't rasterize a triangle without Traits::Aim");
+            LANGULUS_ASSERT(!normal.IsEmpty(), Material,
+               "Can't rasterize a triangle without Traits::Aim");
 
             if (!normal.template CastsTo<Vec3>(1))
                TODO();
 
             auto texture = mGeometry->GetTriangleTrait<Traits::Sampler>(i);
-            if (texture.IsEmpty())
-               LANGULUS_THROW(Material, "Can't rasterize a triangle without Traits::Sampler");
+            LANGULUS_ASSERT(!texture.IsEmpty(), Material,
+               "Can't rasterize a triangle without Traits::Sampler");
 
             if (!texture.template CastsTo<Vec2>(1))
                TODO();
 
-            static const GLSL separator = ", ";
-            if (triangleCount > 0) {
-               sceneTriangles += separator;
-               sceneTriangles += "\n";
-            }
-
-            sceneTriangles += "   Triangle(";
-            sceneTriangles += position.As<Vec3>(0);
-            sceneTriangles += ", ";
-            sceneTriangles += texture.As<Vec2>(0);
-            sceneTriangles += ", ";
-            sceneTriangles += position.As<Vec3>(1);
-            sceneTriangles += ", ";
-            sceneTriangles += texture.As<Vec2>(1);
-            sceneTriangles += ", ";
-            sceneTriangles += position.As<Vec3>(2);
-            sceneTriangles += ", ";
-            sceneTriangles += texture.As<Vec2>(2);
-            sceneTriangles += ", ";
-            sceneTriangles += normal.As<Vec3>(0);
-            sceneTriangles += ")";
-            ++triangleCount;
+            if (triangleCount > 0)
+               triangles += ", \n";
+            triangles += "     Triangle(";
+            triangles += position.As<Vec3>(0);
+            triangles += ", ";
+            triangles += texture.As<Vec2>(0);
+            triangles += ", ";
+            triangles += position.As<Vec3>(1);
+            triangles += ", ";
+            triangles += texture.As<Vec2>(1);
+            triangles += ", ";
+            triangles += position.As<Vec3>(2);
+            triangles += ", ";
+            triangles += texture.As<Vec2>(2);
+            triangles += ", ";
+            triangles += normal.As<Vec3>(0);
+            triangles += ")";
+            ++countCombined;
          }
       }
    }
+
+   LANGULUS_ASSERT(countCombined, Material, "No triangles available");
+
+   // Aggregate all triangles in an array:                              
+   // const Triangle cTriangles[N] = Triangle[N](                       
+   //      Triangle(a, aUV, b, bUV, c, cUV, n),                         
+   //      ... N times                                                  
+   //   );                                                              
+   mMaterial->AddDefine("Triangle", TriangleStruct);
+   mMaterial->AddDefine("cTriangles",
+      TemplateFill(TriangleList, countCombined, triangles));
 }

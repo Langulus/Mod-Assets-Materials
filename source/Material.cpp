@@ -13,7 +13,7 @@
 /// Material construction                                                     
 ///   @param producer - the producer                                          
 ///   @param descriptor - instructions for configuring the material           
-Material::Material(MaterialLibrary* producer, const Descriptor& descriptor)
+Material::Material(A::AssetModule* producer, const Descriptor& descriptor)
    : A::Material {MetaOf<Material>(), producer, descriptor}
    , mRoot {this, descriptor} {
    // Extract default rate if any                                       
