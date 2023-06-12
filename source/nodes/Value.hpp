@@ -17,8 +17,10 @@ namespace Nodes
    ///                                                                        
    struct Value : Node {
    private:
-      Trait mTrait;
-      GLSL mUniform, mName, mUse;
+      Temporal mKeyframes;
+
+      //Trait mTrait;
+      //GLSL mUniform, mName, mUse;
 
    public:
       LANGULUS_VERBS(Verbs::Do);

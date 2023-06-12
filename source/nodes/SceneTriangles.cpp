@@ -5,121 +5,100 @@
 /// Distributed under GNU General Public License v3+                          
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
-#include "SceneTriangles.hpp"
+#include "Scene.hpp"
 
 using namespace Nodes;
 
 
-/// Scene node as member constructor                                          
-///   @param parent - the owning node                                         
-///   @param desc - the node descriptor                                       
-SceneTriangles::SceneTriangles(Node* parent, const Descriptor& desc)
-   : Node {MetaOf<SceneTriangles>(), parent, desc} {}
+/// Triangle structure                                                        
+constexpr Token TriangleStruct = R"shader(
+   struct Triangle {
+      vec3 a; vec2 aUV;
+      vec3 b; vec2 bUV;
+      vec3 c; vec2 cUV;
+      vec3 n;
+   };
+)shader";
 
-/// Scene node descriptor-constructor                                         
-///   @param desc - the node descriptor                                       
-SceneTriangles::SceneTriangles(const Descriptor& desc)
-   : Node {MetaOf<SceneTriangles>(), desc} {}
-
-/// For logging                                                               
-SceneTriangles::operator Debug() const {
-   Code result;
-   result += Node::DebugBegin();
-      //result += pcSerialize<Debug>(mGeometry);
-   result += Node::DebugEnd();
-   return result;
-}
 
 /// Generate scene code                                                       
 ///   @return the array of triangles symbol                                   
-Symbol SceneTriangles::Generate() {
-   Descend();
+Symbol Scene::GenerateTriangles() {
+   // Get the triangle code for each geometry construct                 
+   for (auto pair : mDescriptor.mConstructs) {
+      if (!pair.mKey->template CastsTo<A::Geometry>())
+         continue;
 
-   if (!mGeometry->IsGenerated()) {
-      // By default, geometry doesn't generate vertex positions         
-      // and rasterizer requires it, so we create them                  
-      // We generate normals and texture coordinates while we're at it  
-      auto additional = Any::Wrap(
-         DataID::Of<ATriangle>,
-         DataID::Of<Point3>,
-         DataID::Of<Normal>,
-         DataID::Of<Sampler2>
-      );
+      for (auto& construct : pair.mValue) {
+         // By default, geometry doesn't generate vertex positions      
+         // and rasterizer requires it, so we create them               
+         // We generate normals and texture coordinates, too            
+         auto additional = Any::Wrap(
+            MetaOf<A::Triangle>,
+            MetaOf<Point3>,
+            MetaOf<Normal>,
+            MetaOf<Sampler2>
+         );
 
-      Any unusedSideproducts;
-      Any geometryBlock {mGeometry->GetBlock()};
-      Verb::DefaultCreateInner(geometryBlock, additional, unusedSideproducts);
-      mGeometry->Generate();
-   }
+         Any unusedSideproducts;
+         Any geometryBlock {mGeometry->GetBlock()};
+         Verb::DefaultCreateInner(geometryBlock, additional, unusedSideproducts);
+         mGeometry->Generate();
 
-   if (!mGeometry->CheckTopology<ATriangle>())
-      throw Except::Content(pcLogSelfError
-         << "Incompatible topology for: " << mGeometry);
+         // Triangles                                                   
+         mMaterial->AddDefine("Triangle", TriangleStruct);
 
-   // Triangles                                                         
-   static const GLSL triangleStruct =
-      "struct Triangle {\n"
-      "   vec3 a; vec2 aUV;\n"
-      "   vec3 b; vec2 bUV;\n"
-      "   vec3 c; vec2 cUV;\n"
-      "   vec3 n;\n"
-      "};\n\n";
+         // Aggregate all triangles in an array of sorts:               
+         // const Triangle cTriangles[N] = Triangle[N](                 
+         //      Triangle(a, aUV, b, bUV, c, cUV, n),                   
+         //      ... N times                                            
+         //   );                                                        
+         const auto count = mGeometry->GetTriangleCount();
+         for (Count i = 0; i < count; ++i) {
+            auto position = mGeometry->GetTriangleTrait<Traits::Place>(i);
+            if (position.IsEmpty())
+               LANGULUS_THROW(Material, "Can't rasterize a triangle without Traits::Place");
 
-   if (!define.Find(triangleStruct))
-      define += triangleStruct;
+            if (!position.template CastsTo<Vec3>(1))
+               TODO();
 
-   // Aggregate all triangles in an array of sorts:                     
-   // const Triangle cTriangles[N] = Triangle[N](                       
-   //      Triangle(a, aUV, b, bUV, c, cUV, n),                         
-   //      ... N times                                                  
-   //   );                                                              
-   const auto count = mGeometry->GetTriangleCount();
-   for (pcptr i = 0; i < count; ++i) {
-      auto position = mGeometry->GetTriangleTrait<Traits::Position>(i);
-      if (position.IsEmpty())
-         throw Except::Content(pcLogSelfError
-            << "Can't rasterize a triangle without Traits::Position");
+            auto normal = mGeometry->GetTriangleTrait<Traits::Aim>(i);
+            if (normal.IsEmpty())
+               LANGULUS_THROW(Material, "Can't rasterize a triangle without Traits::Aim");
 
-      if (!position.InterpretsAs<vec3>(1))
-         TODO();
+            if (!normal.template CastsTo<Vec3>(1))
+               TODO();
 
-      auto normal = mGeometry->GetTriangleTrait<Traits::Aim>(i);
-      if (normal.IsEmpty())
-         throw Except::Content(pcLogSelfError
-            << "Can't rasterize a triangle without Traits::Aim");
+            auto texture = mGeometry->GetTriangleTrait<Traits::Sampler>(i);
+            if (texture.IsEmpty())
+               LANGULUS_THROW(Material, "Can't rasterize a triangle without Traits::Sampler");
 
-      if (!normal.InterpretsAs<vec3>(1))
-         TODO();
+            if (!texture.template CastsTo<Vec2>(1))
+               TODO();
 
-      auto texture = mGeometry->GetTriangleTrait<Traits::Sampler>(i);
-      if (texture.IsEmpty())
-         throw Except::Content(pcLogSelfError
-            << "Can't rasterize a triangle without Traits::Sampler");
+            static const GLSL separator = ", ";
+            if (triangleCount > 0) {
+               sceneTriangles += separator;
+               sceneTriangles += "\n";
+            }
 
-      if (!texture.InterpretsAs<vec2>(1))
-         TODO();
-
-      static const GLSL separator = ", ";
-      if (triangleCount > 0) {
-         sceneTriangles += separator;
-         sceneTriangles += "\n";
+            sceneTriangles += "   Triangle(";
+            sceneTriangles += position.As<Vec3>(0);
+            sceneTriangles += ", ";
+            sceneTriangles += texture.As<Vec2>(0);
+            sceneTriangles += ", ";
+            sceneTriangles += position.As<Vec3>(1);
+            sceneTriangles += ", ";
+            sceneTriangles += texture.As<Vec2>(1);
+            sceneTriangles += ", ";
+            sceneTriangles += position.As<Vec3>(2);
+            sceneTriangles += ", ";
+            sceneTriangles += texture.As<Vec2>(2);
+            sceneTriangles += ", ";
+            sceneTriangles += normal.As<Vec3>(0);
+            sceneTriangles += ")";
+            ++triangleCount;
+         }
       }
-
-      sceneTriangles += "   Triangle(";
-      sceneTriangles += position.As<vec3>(0);
-      sceneTriangles += ", ";
-      sceneTriangles += texture.As<vec2>(0);
-      sceneTriangles += ", ";
-      sceneTriangles += position.As<vec3>(1);
-      sceneTriangles += ", ";
-      sceneTriangles += texture.As<vec2>(1);
-      sceneTriangles += ", ";
-      sceneTriangles += position.As<vec3>(2);
-      sceneTriangles += ", ";
-      sceneTriangles += texture.As<vec2>(2);
-      sceneTriangles += ", ";
-      sceneTriangles += normal.As<vec3>(0);
-      sceneTriangles += ")";
-      ++triangleCount;
    }
 }

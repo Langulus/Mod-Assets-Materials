@@ -46,9 +46,8 @@ public:
    NOD() const A::Material* GetLOD(const LOD&) const;
 
    NOD() const Rate& GetDefaultRate() const noexcept;
-   NOD()       GLSL& GetStage(Offset);
    NOD() const GLSL& GetStage(Offset) const;
-   NOD() TAny<GLSL>& GetStages();
+   NOD() const TAny<GLSL>& GetStages() const;
 
    void Commit(Offset, const Token&, const GLSL&);
 

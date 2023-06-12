@@ -27,13 +27,9 @@ namespace Nodes
       DMeta mTopology {};
       // The depth range in which we're rasterizing                     
       Range1 mDepth {0, 1000};
-      // Scene, depending on topology, it is either SceneLines or       
-      // SceneTriangles                                                 
-      Node* mScene;
 
    public:
       Raster(const Descriptor&);
-      ~Raster();
 
       Symbol Generate() final;
 

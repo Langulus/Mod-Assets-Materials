@@ -33,9 +33,7 @@ namespace Nodes
       NOD() operator Debug() const;
 
    private:
-      GLSL GenerateDefinition(KeyframeMap*, const GLSL&);
-      GLSL GetKeyframe(KeyframeMap*, Offset, const GLSL&);
-      GLSL GetTextureCoordinates();
+      GLSL GenerateKeyframe(const Temporal&);
    };
 
 } // namespace Nodes

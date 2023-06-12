@@ -183,7 +183,7 @@ bool Value::IsValid() const {
 /// Project the value by multiplying to a matrix                              
 /// If value is smaller than the matrix ranks, it will be filled with 1       
 ///   @param verb - the projector                                             
-void Value::Project(Verb& verb) {
+/*void Value::Project(Verb& verb) {
    DMeta matrixType = nullptr;
    GLSL transfomation;
    verb.GetArgument().ForEachDeep([&](const TraitID& t) {
@@ -216,7 +216,7 @@ void Value::Project(Verb& verb) {
    mOutputs.GetValue(0) = mUse;
    VERBOSE_NODE("Projected: ", Logger::Cyan, mUse);
    verb << this;
-}
+}*/
 
 /// Attempt selecting traits inside this value, or any of its parents         
 ///   @param verb - the selector                                              

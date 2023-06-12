@@ -5,7 +5,7 @@
 /// Distributed under GNU General Public License v3+                          
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
-#include "Transform.hpp"
+/*#include "Transform.hpp"
 
 using namespace Nodes;
 
@@ -22,7 +22,7 @@ Transform::operator Debug() const {
       //result += mKeyframes;
    result += Node::DebugEnd();
    return result;
-}
+}*/
 
 /// Move/rotate/scale instance                                                
 ///   @param verb - the move verb                                             
@@ -45,7 +45,7 @@ Transform::operator Debug() const {
 /// Get a transformation matrix from a specific keyframe                      
 ///   @param idx - the keyframe index                                         
 ///   @return the instance                                                    
-TInstance<Vec3> Transform::GetInstance(Offset idx) {
+/*TInstance<Vec3> Transform::GetInstance(Offset idx) {
    auto keyframe = mKeyframes.GetValue(idx);
    //bool relative = IsRelativeKeyframe(keyframe);
    TInstance<Vec3> instance;
@@ -577,3 +577,4 @@ void Transform::GenerateDefinition() {
 Symbol Transform::Generate() {
    Descend();
 }
+*/

@@ -7,7 +7,6 @@
 ///                                                                           
 #pragma once
 #include "../Node.hpp"
-#include "SceneSDF.hpp"
 
 namespace Nodes
 {
@@ -35,8 +34,6 @@ namespace Nodes
       float mMinStep {0.1f};
       // Max number of raymarching steps                                
       int mDetail {60};
-      // The scene to probe                                             
-      SceneSDF mScene;
 
    public:
       Raymarch(const Descriptor&);

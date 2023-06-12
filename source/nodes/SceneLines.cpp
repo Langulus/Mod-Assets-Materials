@@ -5,36 +5,14 @@
 /// Distributed under GNU General Public License v3+                          
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
-#include "SceneLines.hpp"
+#include "Scene.hpp"
 
 using namespace Nodes;
 
 
-/// Scene node as member constructor                                          
-///   @param parent - the owning node                                         
-///   @param desc - the node descriptor                                       
-SceneLines::SceneLines(Node* parent, const Descriptor& desc)
-   : Node {MetaOf<SceneLines>(), parent, desc} {}
-
-/// Scene node descriptor-constructor                                         
-///   @param desc - the node descriptor                                       
-SceneLines::SceneLines(const Descriptor& desc)
-   : Node {MetaOf<SceneLines>(), desc} {}
-
-/// For logging                                                               
-SceneLines::operator Debug() const {
-   Code result;
-   result += Node::DebugBegin();
-      //result += pcSerialize<Debug>(mGeometry);
-   result += Node::DebugEnd();
-   return result;
-}
-
 /// Generate scene code                                                       
 ///   @return the array of lines symbol                                       
-Symbol SceneLines::Generate() {
-   Descend();
-
+Symbol Scene::GenerateLines() {
    if (!mGeometry->IsGenerated()) {
       // By default, geometry doesn't generate vertex positions         
       // and rasterizer requires it, so we create them                  

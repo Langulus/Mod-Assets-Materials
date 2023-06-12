@@ -31,7 +31,7 @@ protected:
    // The parents that lead to this node                                
    Ref<Node> mParent;
    // The children that this node leads to                              
-   TAny<Ref<Node>> mChildren;
+   TAny<Node*> mChildren;
 
    // The input traits that this node consumes                          
    TUnorderedMap<Trait, GLSL> mInputs;
@@ -127,6 +127,8 @@ protected:
 
    NOD() Debug DebugBegin() const;
    NOD() Debug DebugEnd() const;
+
+   GLSL AddDefine(const Token&, const GLSL&);
 };
 
 NOD() bool IsRelativeKeyframe(const Verb&);

@@ -18,13 +18,18 @@ namespace Nodes
    /// Can generate shader code that resermbles the described scene, either   
    /// by adding signed distance field functions, or triangles/lines          
    ///                                                                        
-   struct SceneTriangles : Node {
-      SceneTriangles(Node*, const Descriptor&);
-      SceneTriangles(const Descriptor&);
+   struct Scene : Node {
+      Scene(Node*, const Descriptor&);
+      Scene(const Descriptor&);
 
       Symbol Generate() final;
 
       NOD() operator Debug() const;
+
+   private:
+      Symbol GenerateSDF();
+      Symbol GenerateLines();
+      Symbol GenerateTriangles();
    };
 
 } // namespace Nodes

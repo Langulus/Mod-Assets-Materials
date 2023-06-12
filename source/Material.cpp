@@ -43,25 +43,18 @@ void Material::Commit(Offset stage, const Token& place, const GLSL& addition) {
    VERBOSE_NODE(addition.Pretty());
 }
 
-/// Get a GLSL stage                                                          
+/// Get a GLSL stage (const)                                                  
 ///   @param stage - the stage index                                          
 ///   @return the code associated with the stage                              
-GLSL& Material::GetStage(Offset stage) {
+const GLSL& Material::GetStage(Offset stage) const {
    LANGULUS_ASSUME(DevAssumes, stage < ShaderStage::Counter,
       "Bad stage offset");
    return GetStages()[stage];
 }
 
-/// Get a GLSL stage (const)                                                  
-///   @param stage - the stage index                                          
-///   @return the code associated with the stage                              
-const GLSL& Material::GetStage(Offset stage) const {
-   const_cast<Material*>(this)->GetStage(stage);
-}
-
 /// Get the list of GLSL stages                                               
 ///   @return the list                                                        
-TAny<GLSL>& Material::GetStages() {
+const TAny<GLSL>& Material::GetStages() const {
    auto stages = GetDataList<Traits::Data>();
    LANGULUS_ASSUME(DevAssumes, stages,
       "No data inside material");
@@ -69,7 +62,7 @@ TAny<GLSL>& Material::GetStages() {
       "Bad material data count");
    LANGULUS_ASSUME(DevAssumes, stages->template Is<GLSL>(),
       "Material data type mismatch");
-   return *reinterpret_cast<TAny<GLSL>*>(stages);
+   return *reinterpret_cast<const TAny<GLSL>*>(stages);
 }
 
 /// Add an external input trait                                               

@@ -91,8 +91,8 @@ Symbol FBM::Generate() {
       auto temporary = Nodes::Value::Local(this);
 
       // Update inputs for each octave, octave code might use them      
-      temporary.mInputs[Trait::From<Traits::Index>()] = i;
-      temporary.mInputs[Trait::From<Traits::Mass>()] = f;
+      temporary.mInputs[Traits::Index {}] = i;
+      temporary.mInputs[Traits::Mass {}] = f;
 
       // Run octave code for this node                                  
       temporary.Run(mCode);

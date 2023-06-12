@@ -654,54 +654,23 @@ const TraitProperties& Node::GetDefaultTrait(TMeta trait) {
 ///   @param meta - the type to decay                                         
 ///   @return the decayed type                                                
 DMeta Node::DecayToGLSLType(DMeta meta) {
-   if (meta->Is<rgba>())
-      return MetaData::Of<vec4f>();
-   else if (meta->Is<rgb>())
-      return MetaData::Of<vec3f>();
-   else if (meta->Is<vec4f>())
-      return MetaData::Of<vec4f>();
-   else if (meta->Is<vec3f>())
-      return MetaData::Of<vec3f>();
-   else if (meta->Is<vec2f>())
-      return MetaData::Of<vec2f>();
-   else if (meta->Is<vec4d>())
-      return MetaData::Of<vec4d>();
-   else if (meta->Is<vec3d>())
-      return MetaData::Of<vec3d>();
-   else if (meta->Is<vec2d>())
-      return MetaData::Of<vec2d>();
+   if (meta->template CastsTo<Double>(4))
+      return MetaData::Of<Vec4d>();
+   else if (meta->template CastsTo<Double>(3))
+      return MetaData::Of<Vec3d>();
+   else if (meta->template CastsTo<Double>(2))
+      return MetaData::Of<Vec2d>();
+   else if (meta->template CastsTo<Double>(1))
+      return MetaData::Of<Double>();
 
-   LinkedBase outputBase;
-
-   // Color types                                                       
-   if (meta->GetBase<vec4u8>(0, outputBase) && outputBase.mStaticBase.mMapping)
-      return MetaData::Of<vec4f>();
-   else if (meta->GetBase<vec3u8>(0, outputBase) && outputBase.mStaticBase.mMapping)
-      return MetaData::Of<vec3f>();
-   else if (meta->GetBase<vec2u8>(0, outputBase) && outputBase.mStaticBase.mMapping)
-      return MetaData::Of<vec2f>();
-   else if (meta->GetBase<pcu8>(0, outputBase) && outputBase.mStaticBase.mMapping)
-      return MetaData::Of<pcr32>();
-
-   // Single precision                                                  
-   if (meta->GetBase<vec4f>(0, outputBase) && outputBase.mStaticBase.mMapping)
-      return outputBase.mBase;
-   else if (meta->GetBase<vec3f>(0, outputBase) && outputBase.mStaticBase.mMapping)
-      return outputBase.mBase;
-   else if (meta->GetBase<vec2f>(0, outputBase) && outputBase.mStaticBase.mMapping)
-      return outputBase.mBase;
-   else if (meta->GetBase<pcr32>(0, outputBase) && outputBase.mStaticBase.mMapping)
-      return outputBase.mBase;
-
-   // Double precision                                                  
-   if (meta->GetBase<vec4d>(0, outputBase) && outputBase.mStaticBase.mMapping)
-      return outputBase.mBase;
-   else if (meta->GetBase<vec3d>(0, outputBase) && outputBase.mStaticBase.mMapping)
-      return outputBase.mBase;
-   else if (meta->GetBase<vec2d>(0, outputBase) && outputBase.mStaticBase.mMapping)
-      return outputBase.mBase;
-   else if (meta->GetBase<pcr64>(0, outputBase) && outputBase.mStaticBase.mMapping)
-      return outputBase.mBase;
-
-   return nullptr;
+   else if (meta->template CastsTo<Float>(4) || meta->template CastsTo<A::Number>(4))
+      return MetaData::Of<Vec4f>();
+   else if (meta->template CastsTo<Float>(3) || meta->template CastsTo<A::Number>(3))
+      return MetaData::Of<Vec3f>();
+   else if (meta->template CastsTo<Float>(2) || meta->template CastsTo<A::Number>(2))
+      return MetaData::Of<Vec2f>();
+   else if (meta->template CastsTo<Float>(1) || meta->template CastsTo<A::Number>(1))
+      return MetaData::Of<Float>();
+   else
+      LANGULUS_THROW(Material, "Can't decay type");
 }

@@ -10,6 +10,54 @@
 using namespace Nodes;
 
 
+/// Get pixel from sampler                                                    
+///   @param {0} - sampler name                                               
+///   @param {1} - texture coordinates                                        
+constexpr Token GetPixelFunction = R"shader(
+   texture({0}, {1})
+)shader";
+
+/// Texture flow function                                                     
+///   @param {0} - first keyframe code                                        
+///   @param {1} - intermediate keyframe branches                             
+///   @param {2} - last keyframe code                                         
+constexpr Token TextureFlowFunction = R"shader(
+   vec4 TextureFlow(in float startTime, in float time, in vec2 uv) {{
+      if (time <= startTime) {{
+         // Time before/at start returns first keyframe
+         return {0};
+      }}
+      {1}
+      else {{
+         // Time at/after last keyframe returns last keyframe
+         return {2};
+      }}
+   }}
+)shader";
+
+/// Keyframe without texture transition                                       
+///   @param {0} - frame end time                                             
+///   @param {1} - GetPixelFunction function call                             
+constexpr Token TextureFlowBranch = R"shader(
+   else if (time < {0}) {{
+      return {1};
+   }}
+)shader";
+
+/// Keyframe with transition                                                  
+///   @param {0} - frame end time                                             
+///   @param {1} - frame start time                                           
+///   @param {2} - frame length (end - start)                                 
+///   @param {3} - GetPixelFunction function call from start side             
+///   @param {4} - GetPixelFunction function call from end side               
+constexpr Token TextureFlowBranchMix = R"shader(
+   else if (time < {0}) {{
+      const float ratio = (time - {1}) / {2};
+      return mix({3}, {4}, ratio);
+   }}
+)shader";
+
+
 /// Texture node descriptor-constructor                                       
 ///   @param desc - the node descriptor                                       
 Texture::Texture(const Descriptor& desc)
@@ -19,35 +67,7 @@ Texture::Texture(const Descriptor& desc)
    mDescriptor.ExtractDataAs(mTextureId);
 
    // Extract animation keyframes                                       
-   for (auto& verb : mDescriptor.mVerbs) {
-      const Time time {std::chrono::duration<Real> {verb.GetTime()}};
-      KeyframeMap* frameMap = nullptr;
-      if (usingTextureId) {
-         // Check if keyframe channel exists                            
-         if (mKeyframes.FindKey(textureId) == uiNone)
-            mKeyframes.Add(textureId, {});
-
-         frameMap = &mKeyframes[textureId];
-      }
-      else {
-         // Or use the global keyframes if no channel specified         
-         frameMap = &mKeyframesGlobal;
-      }
-
-      if (frameMap->FindKey(time) == uiNone) {
-         // No such keyframe exists, so create it                       
-         VERBOSE_NODE("Texture #", textureId, " keyframe added at ", time, ": ", verb);
-         frameMap->Insert(time, verb);
-         verb << this;
-         return;
-      }
-
-      // Combine the keyframes' verbs                                   
-      if (relative)
-         (*frameMap)[time].GetArgument() << verb.GetArgument();
-      else
-         (*frameMap)[time] = verb;
-   }
+   mKeyframes.Push(mDescriptor.mVerbs);
 }
 
 /// For logging                                                               
@@ -69,22 +89,18 @@ GLSL Texture::GetTextureCoordinates() {
 }
 
 /// Assembles a GLSL texture(...) function                                    
-///   @param textureSymbol - the name of the sampler                          
-///   @param meta - the format of the texture                                 
-///   @return the resulting texture(...) code                                 
-GLSL GetPixel(const GLSL& textureSymbol, const GLSL& uvSymbol, DMeta meta) {
+///   @param sampler - sampler token                                          
+///   @param uv - texture coordinates                                         
+///   @param result - the resulting color format                              
+///   @return generated texture call                                          
+GLSL GetPixel(const GLSL& sampler, const GLSL& uv, DMeta result) {
    LANGULUS_ASSERT(meta, Material, "Unknown texture format");
-   GLSL symbol;
-   const auto channels = meta->GetMemberCount();
-   switch (channels) {
-   case 1:
-      return "texture(" + textureSymbol + ", " + uvSymbol + ").rrrr";
-   case 2:
-      return "texture(" + textureSymbol + ", " + uvSymbol + ").rgrg";
-   case 3: case 4:
-      return "texture(" + textureSymbol + ", " + uvSymbol + ")";
-   default:
-      LANGULUS_THROW(Material, "Unsupported texture format");
+   const auto pixel = TemplateFill(GetPixelFunction, sampler, uv);
+   switch (result->GetMemberCount()) {
+   case 1:           return pixel + ".rrrr";
+   case 2:           return pixel + ".rgrg";
+   case 3: case 4:   return pixel;
+   default: LANGULUS_THROW(Material, "Unsupported texture format");
    }
 }
 
@@ -93,7 +109,7 @@ GLSL GetPixel(const GLSL& textureSymbol, const GLSL& uvSymbol, DMeta meta) {
 ///   @param keyIdx - the index of the keyframe                               
 ///   @param uv - the texture coordinate symbol                               
 ///   @return the generated GLSL code                                         
-GLSL Texture::GetKeyframe(KeyframeMap* frameMap, pcptr keyIdx, const GLSL& uv) {
+GLSL Texture::GenerateKeyframe(const Temporal& keyframe) {
    // Scan the keyframe arguments                                       
    GLSL symbol;
    auto& keyframe = frameMap->GetValue(keyIdx);

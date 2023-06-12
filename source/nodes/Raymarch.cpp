@@ -107,8 +107,7 @@ constexpr Token RaymarchUsage = R"shader(
 /// Raymarcher node descriptor-constructor                                    
 ///   @param desc - raymarch descriptor                                       
 Raymarch::Raymarch(const Descriptor& desc)
-   : Node {MetaOf<Raymarch>(), desc}
-   , mScene {this, desc} {
+   : Node {MetaOf<Raymarch>(), desc} {
    // Extract RaymarchConfig.mDetail                                    
    mDescriptor.ExtractTrait<Traits::Count>(mDetail);
    LANGULUS_ASSERT(mDetail > 0, Material,

@@ -5,7 +5,7 @@
 /// Distributed under GNU General Public License v3+                          
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
-#include "SceneSDF.hpp"
+#include "Scene.hpp"
 
 using namespace Nodes;
 
@@ -109,32 +109,9 @@ GLSL InterpretAsSDF(const Construct& what, GLSL& dep) {
    TODO();
 }
 
-/// Scene node as member constructor                                          
-///   @param parent - the owning node                                         
-///   @param desc - the node descriptor                                       
-SceneSDF::SceneSDF(Node* parent, const Descriptor& desc)
-   : Node {MetaOf<SceneSDF>(), parent, desc} {}
-
-/// Scene node descriptor-constructor                                         
-///   @param desc - the node descriptor                                       
-SceneSDF::SceneSDF(const Descriptor& desc)
-   : Node {MetaOf<SceneSDF>(), desc} {}
-
-/// For logging                                                               
-SceneSDF::operator Debug() const {
-   Code result;
-   result += Node::DebugBegin();
-      //result += pcSerialize<Debug>(mGeometry);
-   result += Node::DebugEnd();
-   return result;
-}
-
 /// Generate scene code                                                       
 ///   @return the SDF scene function template symbol                          
-Symbol SceneSDF::Generate() {
-   // Generate children first                                           
-   Descend();
-
+Symbol Scene::GenerateSDF() {
    // Scene nodes are usually inside Raster/Raycast/Raymarch/Raytrace   
    // nodes, and the place trait should come from there                 
    auto symPos = GetSymbol<Traits::Place, Vec3>(PerPixel);

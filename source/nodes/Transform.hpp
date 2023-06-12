@@ -5,7 +5,7 @@
 /// Distributed under GNU General Public License v3+                          
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
-#pragma once
+/*#pragma once
 #include "../Node.hpp"
 #include <Anyness/TMap.hpp>
 #include <Math/TInstance.hpp>
@@ -40,4 +40,4 @@ namespace Nodes
       TInstance<Vec3> GetInstance(Offset);
    };
 
-} // namespace Nodes
+} // namespace Nodes*/

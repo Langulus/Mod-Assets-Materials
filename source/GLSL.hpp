@@ -14,30 +14,52 @@ private:
    /// GLSL template for each programmable shader stage                       
    static constexpr Token Templates[ShaderStage::Counter] = {
       // ShaderStage::Vertex                                            
-      "//#VERSION\n\n"
-      "//#DEFINES\n\n"
-      "//#INPUT\n\n"
-      "//#OUTPUT\n\n"
-      "//#UNIFORM\n\n"
-      "//#FUNCTIONS\n\n"
-      "void main () {\n"
-      "   //#TEXTURIZE\n\n"
-      "   //#COLORIZE\n\n"
-      "   //#TRANSFORM\n\n"
-      "   //#POSITION\n\n"
-      "}",
+      R"shader(
+      //#VERSION
+
+      //#DEFINES
+
+      //#INPUT
+
+      //#OUTPUT
+
+      //#UNIFORM
+
+      //#FUNCTIONS
+
+      void main () {
+         //#TEXTURIZE
+
+         //#COLORIZE
+
+         //#TRANSFORM
+
+         //#POSITION
+
+      }
+      )shader",
 
       // ShaderStage::Geometry                                          
-      "//#VERSION\n\n"
-      "//#DEFINES\n\n"
-      "//#INPUT\n\n"
-      "//#OUTPUT\n\n"
-      "//#UNIFORM\n\n"
-      "//#FUNCTIONS\n\n"
-      "void main () {\n"
-      "   //#FOREACHSTART\n\n"
-      "   //#FOREACHEND\n\n"
-      "}\n",
+      R"shader(
+      //#VERSION
+
+      //#DEFINES
+
+      //#INPUT
+
+      //#OUTPUT
+
+      //#UNIFORM
+
+      //#FUNCTIONS
+
+      void main () {
+         //#FOREACHSTART
+
+         //#FOREACHEND
+
+      }
+      )shader",
 
       // ShaderStage::TessCtrl                                          
       "",
@@ -46,17 +68,28 @@ private:
       "",
 
       // ShaderStage::Pixel                                             
-      "//#VERSION\n\n"
-      "//#DEFINES\n\n"
-      "//#INPUT\n\n"
-      "//#OUTPUT\n\n"
-      "//#UNIFORM\n\n"
-      "//#FUNCTIONS\n\n"
-      "void main () {\n"
-      "   //#TRANSFORM\n\n"
-      "   //#TEXTURIZE\n\n"
-      "   //#COLORIZE\n\n"
-      "}",
+      R"shader(
+      //#VERSION
+
+      //#DEFINES
+
+      //#INPUT
+
+      //#OUTPUT
+
+      //#UNIFORM
+
+      //#FUNCTIONS
+
+      void main () {
+         //#TRANSFORM
+
+         //#TEXTURIZE
+
+         //#COLORIZE
+
+      }"
+      )shader",
 
       // ShaderStage::Compute                                           
       ""

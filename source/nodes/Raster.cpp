@@ -6,8 +6,7 @@
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
 #include "Raster.hpp"
-#include "SceneTriangles.hpp"
-#include "SceneLines.hpp"
+#include "Scene.hpp"
 
 using namespace Nodes;
 
@@ -43,24 +42,11 @@ Raster::Raster(const Descriptor& desc)
       mTopology = MetaOf<A::Triangle>();
    }
 
-   // Parse scene                                                       
-   if (mTopology->CastsTo<A::Triangle>())
-      mScene = new SceneTriangles {this, desc};
-   else if (mTopology->CastsTo<A::Line>())
-      mScene = new SceneLines {this, desc};
-   else
-      LANGULUS_THROW(Material, "Bad topology for rasterizer");
-
    // Register the outputs                                              
-   Expose<Traits::Color, Real>("rasResult.mDepth");
+   Expose<Traits::Color,   Real>("rasResult.mDepth");
    Expose<Traits::Sampler, Vec2>("rasResult.mUV");
-   Expose<Traits::Aim, Vec3>("rasResult.mNormal");
-   Expose<Traits::Texture, int>("int(rasResult.mFront)");
-}
-
-Raster::~Raster() {
-   if (mScene)
-      delete mScene;
+   Expose<Traits::Aim,     Vec3>("rasResult.mNormal");
+   Expose<Traits::Texture, int> ("int(rasResult.mFront)");
 }
 
 /// Generate rasterizer definition code                                       
@@ -215,7 +201,7 @@ void AddPerVertexOutput(GLSL& vs, const GLSL& symbol) {
 
    vs.Select(ShaderToken::Output) >> "out gl_PerVertex {\n";
 
-   if constexpr (CT::Same<T, Traits::Position>) {
+   if constexpr (CT::Same<T, Traits::Place>) {
       vs.Select(ShaderToken::Output)      >> "\tvec4 gl_Position;\n";
       vs.Select(ShaderToken::Transform)   >> "gl_Position = " + symbol + ";\n";
    }
