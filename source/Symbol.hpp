@@ -34,6 +34,16 @@ struct Symbol {
    // If an expression with many uses, the symbol will be moved to a    
    // variable, that will be used instead                               
    Count mUses {1};
+
+   template<CT::Data T, class... ARGS>
+   NOD() static Symbol Function(Rate, const Token&, ARGS&&...);
+
+protected:
+   void PushArgument(DMeta&&);
+   void PushArgument(TMeta&&);
+   void PushArgument(Trait&&);
 };
 
 using Symbols = TAny<Symbol>;
+
+#include "Symbol.inl"

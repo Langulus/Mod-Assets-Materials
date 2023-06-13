@@ -7,6 +7,7 @@
 ///                                                                           
 #include "FBM.hpp"
 #include "Value.hpp"
+#include "../Material.hpp"
 
 using namespace Nodes;
 
@@ -17,7 +18,7 @@ using namespace Nodes;
 ///   @param {1} - argument(s) for the FBM function                           
 ///   @param {2} - octave code                                                
 constexpr Token FBMTemplate = R"shader(
-   float FBM{0}({1}) {{
+   float FBM{0}(vec2 uv) {{
       const mat2 m = mat2(1.6, 1.2, -1.2, 1.6);
       float f = 0.0;
       {2}
@@ -33,9 +34,16 @@ constexpr Token FBMOctave = R"shader(
 )shader";
 
 /// FBM rotate template                                                       
-///   @param {0} - place trait to rotate for next octave                      
 constexpr Token FBMRotate = R"shader(
-      {0} = m * {0};
+      uv = m * uv;
+)shader";
+
+/// FBM usage template                                                        
+///   @param {0} - unique ID for the FBM function, used only in case of       
+///                multiple FBM nodes in hierarchy                            
+///   @param {1} - argument(s) for the FBM function                           
+constexpr Token FBMUsage = R"shader(
+      FBM{0}({1})
 )shader";
 
 
@@ -78,10 +86,6 @@ Symbol FBM::Generate() {
    // Generate children first                                           
    Descend();
 
-   // FBM takes place as input                                          
-   auto symPos = GetSymbol<Traits::Place, Vec2>(mRate);
-   LANGULUS_ASSERT(!symPos.IsEmpty(), Material, "No position for FBM");
-
    // Generate octaves                                                  
    Real f {mBaseWeight};
    GLSL octaves;
@@ -93,6 +97,7 @@ Symbol FBM::Generate() {
       // Update inputs for each octave, octave code might use them      
       temporary.mInputs[Traits::Index {}] = i;
       temporary.mInputs[Traits::Mass {}] = f;
+      temporary.mInputs[Traits::Place {}] = "uv";
 
       // Run octave code for this node                                  
       temporary.Run(mCode);
@@ -100,15 +105,13 @@ Symbol FBM::Generate() {
       // Generate shader code for octaves                               
       octaves += TemplateFill(FBMOctave, f, temporary.GetOutputSymbol());
       if (i < mOctaveCount - 1)
-         octaves += TemplateFill(FBMRotate, symPos);
+         octaves += FBMRotate;
       f *= mBaseWeight;
    }
 
-   // Commit                                                            
-   GLSL definition = TemplateFill(FBMTemplate, "", "", octaves);
-   Commit(ShaderToken::Functions, definition);
+   // Define the FBM function                                           
+   AddDefine("FBM", TemplateFill(FBMTemplate, "", "", octaves));
 
-   // Generate the function template as output symbol                   
-   const GLSL use = "FBM_" + GetNodeID() + "(" + mCodePerUse + ")";
-   mOutputs.Insert(Trait::From<Traits::Color, Real>(), use);
+   // Expose the FBM function template for use by the other nodes       
+   return Expose<Real>("FBM({})", Traits::Place::OfType<Vec2>());
 }

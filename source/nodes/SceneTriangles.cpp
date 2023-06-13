@@ -107,7 +107,6 @@ Symbol Scene::GenerateTriangles() {
    //      Triangle(a, aUV, b, bUV, c, cUV, n),                         
    //      ... N times                                                  
    //   );                                                              
-   mMaterial->AddDefine("Triangle", TriangleStruct);
-   mMaterial->AddDefine("cTriangles",
-      TemplateFill(TriangleList, countCombined, triangles));
+   AddDefine("Triangle", TriangleStruct);
+   AddDefine("cTriangles", TemplateFill(TriangleList, countCombined, triangles));
 }

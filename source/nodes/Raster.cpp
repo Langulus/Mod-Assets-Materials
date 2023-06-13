@@ -140,12 +140,6 @@ Raster::Raster(const Descriptor& desc)
       // Rasterizing triangles by default                               
       mTopology = MetaOf<A::Triangle>();
    }
-
-   // Register the outputs                                              
-   Expose<Traits::Color,   Real>("rasResult.mDepth");
-   Expose<Traits::Sampler, Vec2>("rasResult.mUV");
-   Expose<Traits::Aim,     Vec3>("rasResult.mNormal");
-   Expose<Traits::Texture, int> ("int(rasResult.mFront)");
 }
 
 /// Generate rasterizer definition code                                       
@@ -271,4 +265,6 @@ Symbol Raster::Generate() {
       GeneratePerPixel();
    else
       LANGULUS_THROW(Material, "Bad rate for rasterizer");
+
+   return Expose<Raster>("Rasterize({})", MetaOf<Camera>());
 }

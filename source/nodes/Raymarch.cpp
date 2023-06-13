@@ -6,6 +6,7 @@
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
 #include "Raymarch.hpp"
+#include "Scene.hpp"
 
 using namespace Nodes;
 
@@ -127,10 +128,10 @@ Symbol Raymarch::Generate() {
       TODO(); // another SDFUnion indirection required here
 
    // Add raymarching functions and dependencies                        
-   mMaterial->AddDefine("Raymarch", TemplateFill(RaymarchFunction,
+   AddDefine("Raymarch", TemplateFill(RaymarchFunction,
       scenes[0].mCode, mPrecision, mFarMax, mFarStride, mBaseStride, 
       mMinStep, mDetail)
    );
 
-   return Expose("Raymarch({})", MetaOf<Nodes::Camera>());
+   return Expose<Raymarch>("Raymarch({})", MetaOf<Camera>());
 }

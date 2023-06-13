@@ -29,13 +29,34 @@ LANGULUS_EXCEPTION(Material);
 template<class... ARGS>
 Text TemplateFill(const Token& format, ARGS&&...args) {
    const auto size = fmt::formatted_size(
-      fmt::format_string<ARGS...>(format), 
+      fmt::format_string<ARGS...> {format},
       Forward<ARGS>(args)...
    );
+
    Text result;
    result.Reserve(size);
    fmt::format_to_n(result.GetRaw(), size, format, Forward<ARGS>(args)...);
    return Abandon(result);
+}
+
+namespace Nodes::Inner
+{
+   template<::std::size_t...N>
+   constexpr auto CheckPattern(const Token& pattern, ::std::index_sequence<N...>) {
+      return fmt::format_string<N...> {pattern};
+   }
+}
+
+/// Attempt filling the template, statically checking if argument count is    
+/// satisfied, and other erroneous conditions. Since arguments contain        
+/// unformattable data, that has more to do with seeking actual data from the 
+/// node hierarchy later, arguments are substituted with an index sequence.   
+///   @tparam ...ARGS - arguments for the template                            
+///   @param format - the template string                                     
+///   @param args... - the arguments                                          
+template<class... ARGS>
+constexpr auto TemplateCheck(const Token& format, ARGS&&...args) {
+   return Nodes::Inner::CheckPattern(format, ::std::make_index_sequence<sizeof...(ARGS)> {});
 }
 
 namespace Nodes
@@ -48,9 +69,7 @@ namespace Nodes
    struct Raycast;
    struct Raymarch;
    struct Raytrace;
-   struct SceneSDF;
-   struct SceneTriangles;
-   struct SceneLines;
+   struct Scene;
    struct Texture;
    struct Transform;
    struct Value;

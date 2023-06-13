@@ -96,8 +96,11 @@ public:
    template<class T>
    T* FindChild();
 
-   template<CT::Trait, CT::Data>
-   void Expose(const GLSL&);
+   //template<CT::Trait, CT::Data>
+   //void Expose(const GLSL&);
+
+   template<CT::Data T, class... ARGS>
+   Symbol Expose(const Token&, ARGS&&...);
 
    template<class T>
    NOD() T* EmplaceChild(T&&);
@@ -128,6 +131,8 @@ protected:
    NOD() Debug DebugBegin() const;
    NOD() Debug DebugEnd() const;
 
+   GLSL AddInput(const Trait&, bool allowDuplicates);
+   GLSL AddOutput(const Trait&, bool allowDuplicates);
    GLSL AddDefine(const Token&, const GLSL&);
 };
 

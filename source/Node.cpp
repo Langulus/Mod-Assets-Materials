@@ -51,7 +51,7 @@ Node::Node(DMeta classid, const Descriptor& descriptor)
          if (trait.TraitIs<Traits::Parent>()) {
             return !trait.ForEach([this](const Node* owner) {
                mParent = owner;
-               owner->mChildren << this;
+               const_cast<Node*>(owner)->mChildren << this;
                mMaterial = owner->GetMaterial();
                return Flow::Break;
             });

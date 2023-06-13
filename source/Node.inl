@@ -68,10 +68,23 @@ T* Node::FindChild() {
 /// Add an output connection to this node                                     
 ///   @param constructor - the instance constructor                           
 ///   @return a pointer to the child                                          
-template<CT::Trait T, CT::Data D>
+/*template<CT::Trait T, CT::Data D>
 LANGULUS(INLINED)
 void Node::Expose(const GLSL& code) {
    mOutputs.Insert(Trait::From<T, D>(), code);
+}*/
+
+/// Add an output symbol to the node                                          
+///   @tparam ...ARGS - optional arguments, if symbol is a function template  
+///                     these arguments can be DMetas, or TMetas, or both by  
+///                     providing a Trait with a given type                   
+///   @tparam T - the data type of the output (or return type of function)    
+///   @param pattern - the symbol name/function template                      
+///   @param ... - parameters, in case pattern is a function template         
+///   @return the symbol handle                                               
+template<CT::Data T, class... ARGS>
+Symbol Node::Expose(const Token& pattern, ARGS&&...) {
+
 }
 
 /// Add an output connection to this node                                     

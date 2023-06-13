@@ -77,10 +77,10 @@ GLSL Material::AddInput(Rate rate, const Trait& traitOriginal, bool allowDuplica
    // actual uniform will be updated PerTick. So this is                
    // where we step in to override any wrongly provided rate            
    if (rate == Rate::Auto)
-      rate = Node::DefaultTraitRate(traitOriginal.GetTrait());
+      rate = Node::GetDefaultTrait(traitOriginal.GetTrait()).mRate;
 
    // Find any matching available inputs                                
-   auto& inputs = GetDataAs<Traits::Trait, TAny<Trait>>(rate.GetInputIndex());
+   auto& inputs = GetInputs(rate);
    if (!allowDuplicates) {
       auto found = inputs.Find(traitOriginal);
       if (!found.IsSpecial())

@@ -143,7 +143,7 @@ Symbol Scene::GenerateSDF() {
 
          // Each consecutive element is SDFUnion'ed                     
          // Define the union operation if not yet defined               
-         mMaterial->AddDefine("SDFUnion", SDFUnion);
+         AddDefine("SDFUnion", SDFUnion);
 
          // Nest the union function for each new element                
          scene = TemplateFill(SDFUnionUsage, scene, element);
@@ -153,5 +153,5 @@ Symbol Scene::GenerateSDF() {
    LANGULUS_ASSERT(!scene.IsEmpty(), Material, "SDF scene is empty");
 
    // Define the scene function                                         
-   mMaterial->AddDefine("Scene", TemplateFill(SceneFunction, scene));
+   AddDefine("Scene", TemplateFill(SceneFunction, scene));
 }
