@@ -32,7 +32,7 @@ const Rate& Material::GetDefaultRate() const noexcept {
 ///   @param place - the shader token to commit changes at                    
 ///   @param addition - the code to commit                                    
 void Material::Commit(Offset stage, const Token& place, const GLSL& addition) {
-   auto& code = GetStage(stage);
+   GLSL& code = const_cast<GLSL&>(GetStage(stage));
    if (code.IsEmpty()) {
       code += GLSL::Template(stage);
       VERBOSE_NODE("Added default template for ", ShaderStage::Names[stage]);
