@@ -82,10 +82,10 @@ public:
    NOD() static DMeta DecayToGLSLType(DMeta);
 
    template<CT::Trait, class = void>
-   NOD() Nodes::Value GetValue(Rate = PerAuto, bool addIfMissing = true);
+   NOD() Nodes::Value GetValue(Rate = Rate::Auto, bool addIfMissing = true);
 
    template<CT::Trait, class = void>
-   NOD() GLSL GetSymbol(Rate = PerAuto, bool addIfMissing = true);
+   NOD() GLSL GetSymbol(Rate = Rate::Auto, bool addIfMissing = true);
 
    void AddChild(Node*);
    void RemoveChild(Node*);
