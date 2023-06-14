@@ -1,4 +1,4 @@
-///                                                                           
+//                                                                           
 /// Langulus::Module::Assets::Materials                                       
 /// Copyright(C) 2016 Dimo Markov <langulusteam@gmail.com>                    
 ///                                                                           
@@ -146,23 +146,20 @@ Raster::Raster(const Descriptor& desc)
 /// This is a 'fake' per-pixel rasterizer - very suboptimal, but useful in    
 /// various scenarios                                                         
 void Raster::GeneratePerPixel() {
-   // In order to rasterize, we require a scene                         
-   auto scene = mScene.Generate();
-   LANGULUS_ASSERT(!scene.IsEmpty(), Material,
-      "No scene available for rasterizer");
+   // Generate children first                                           
+   Descend();
 
-   // In order to rasterize, we require either triangle or line data    
-   // Scan all parent nodes for scenes in order to generate these       
-   GLSL triangleDef, sceneTriangles, sceneLines;
-   Count triangleCount = 0, lineCount = 0;
-   ForEachChild([&](MaterialNodeScene& scene) {
-      scene.GenerateTriangleCode(triangleDef, sceneTriangles, triangleCount);
+   // In order to raymarch, we require child scene nodes                
+   Symbols scenes;
+   ForEachChild([&scenes](Nodes::Scene& scene) {
+      scenes << scene.GenerateTriangles();
    });
 
-   if (!lineCount && !triangleCount)
-      throw Except::Content(pcLogSelfError << "No geometry available for rasterizer");
+   LANGULUS_ASSERT(!scenes.IsEmpty(), Material,
+      "No scenes available for rasterizer");
 
-   GLSL define = RasterResult;
+   if (scenes.GetCount() > 1)
+      TODO(); // multiple triangle lists
 
    // Do face culling if required                                       
    GLSL culling;
@@ -173,41 +170,12 @@ void Raster::GeneratePerPixel() {
    else
       culling += "if (a <= 0.0) return;";
 
-   // Define the triangle rasterizing function                          
-   GLSL rasterizeTriangle = TemplateFill(RasterTriangles, culling);
+   // Add rasterizer functions and dependencies                         
+   AddDefine("RasterizeResult", RasterResult);
+   AddDefine("RasterizeTriangle", TemplateFill(RasterTriangles, culling));
+   AddDefine("RasterizeTriangleList", TemplateFill(RasterizeTriangleList, scenes[0].mCount, scenes[0].mCode));
 
-   // Finish up the SceneRAS() if anything was defined in it            
-   GLSL sceneFunction = "void SceneRAS(in CameraResult camera, inout RasterizeResult result) {\n";
-   if (!sceneTriangles.IsEmpty()) {
-      // Finish up the triangle array                                   
-      sceneTriangles = triangleDef 
-         + "const Triangle cTriangles[" + triangleCount + "] = Triangle["
-         + triangleCount + "](\n" + sceneTriangles + "\n);\n\n";
-
-      // Add the required rasterizer to the definitions                 
-      define += sceneTriangles;
-      if (!define.Find(rasterizeTriangle))
-         define += rasterizeTriangle;
-   }
-
-   if (!sceneLines.IsEmpty()) {
-      // Finish up the line array
-      /*sceneLines = lineDef 
-         + "const Lines cLines[" + lineCount + "] = Line["
-         + lineCount + "](\n" + sceneLines + "\n);\n\n";*/
-
-      // Add the required rasterizer to the definitions
-      define += sceneLines;
-      if (!define.Find(rasterizeLine))
-         define += rasterizeLine;
-   }
-
-   define += sceneFunction;
-
-   // Rasterize usage                                                   
-   GLSL usage = TemplateFill(RasterLineList, mDepth.mMax);
-   Commit(ShaderToken::Functions, define);
-   Commit(ShaderToken::Transform, usage);
+   return Expose<Raster>("Rasterize({})", MetaOf<Camera>());
 }
 
 /// Wrap a per vertex symbol to the built-in gl_PerVertex structure           

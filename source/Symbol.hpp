@@ -26,6 +26,8 @@ struct Symbol {
    // The generated code for the symbol. Will contain a template, if    
    // this symbol is for a function call                                
    GLSL mCode;
+   // Number of elements, if symbold is an array                        
+   Count mCount {1};
    // List of arguments, in case this symbol is a function call template
    // One must TemplateFill mCode with these traits to instantiate the  
    // symbol                                                            

@@ -25,7 +25,7 @@ Node::Node(DMeta classid, Material* material, const Descriptor& descriptor)
    InnerCreate();
 }
 
-/// Material node construction for members                                    
+/// Material node construction for members/locals                             
 ///   @param classid - the node type                                          
 ///   @param parent - the parent node                                         
 ///   @param descriptor - the node descriptor                                 
