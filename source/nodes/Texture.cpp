@@ -6,56 +6,9 @@
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
 #include "Texture.hpp"
+#include <Math/Colors.hpp>
 
 using namespace Nodes;
-
-
-/// Get pixel from sampler                                                    
-///   @param {0} - sampler name                                               
-///   @param {1} - texture coordinates                                        
-constexpr Token GetPixelFunction = R"shader(
-   texture({0}, {1})
-)shader";
-
-/// Texture flow function                                                     
-///   @param {0} - first keyframe code                                        
-///   @param {1} - intermediate keyframe branches                             
-///   @param {2} - last keyframe code                                         
-constexpr Token TextureFlowFunction = R"shader(
-   vec4 TextureFlow(in float startTime, in float time, in vec2 uv) {{
-      if (time <= startTime) {{
-         // Time before/at start returns first keyframe
-         return {0};
-      }}
-      {1}
-      else {{
-         // Time at/after last keyframe returns last keyframe
-         return {2};
-      }}
-   }}
-)shader";
-
-/// Keyframe without texture transition                                       
-///   @param {0} - frame end time                                             
-///   @param {1} - GetPixelFunction function call                             
-constexpr Token TextureFlowBranch = R"shader(
-   else if (time < {0}) {{
-      return {1};
-   }}
-)shader";
-
-/// Keyframe with transition                                                  
-///   @param {0} - frame end time                                             
-///   @param {1} - frame start time                                           
-///   @param {2} - frame length (end - start)                                 
-///   @param {3} - GetPixelFunction function call from start side             
-///   @param {4} - GetPixelFunction function call from end side               
-constexpr Token TextureFlowBranchMix = R"shader(
-   else if (time < {0}) {{
-      const float ratio = (time - {1}) / {2};
-      return mix({3}, {4}, ratio);
-   }}
-)shader";
 
 
 /// Texture node descriptor-constructor                                       
@@ -82,11 +35,11 @@ Texture::operator Debug() const {
 /// Retrieves sampler coordinates from the node environment                   
 /// May either return a local 'uv' symbol, or a uniform/varying               
 ///   @return the texture coordinate symbol                                   
-GLSL Texture::GetTextureCoordinates() {
+/*GLSL Texture::GetTextureCoordinates() {
    auto sampler = GetValue(MetaTrait::Of<Traits::Sampler>(), nullptr, GetRate(), false);
    LANGULUS_ASSERT(sampler.IsValid(), Material, "No texture coordinates available");
    return sampler.GetOutputSymbolAs(MetaData::Of<Vec2f>(), 0);
-}
+}*/
 
 /// Assembles a GLSL texture(...) function                                    
 ///   @param sampler - sampler token                                          
@@ -94,7 +47,7 @@ GLSL Texture::GetTextureCoordinates() {
 ///   @param result - the resulting color format                              
 ///   @return generated texture call                                          
 GLSL GetPixel(const GLSL& sampler, const GLSL& uv, DMeta result) {
-   LANGULUS_ASSERT(meta, Material, "Unknown texture format");
+   LANGULUS_ASSERT(result, Material, "Unknown texture format");
    const auto pixel = TemplateFill(GetPixelFunction, sampler, uv);
    switch (result->GetMemberCount()) {
    case 1:           return pixel + ".rrrr";
@@ -110,13 +63,10 @@ GLSL GetPixel(const GLSL& sampler, const GLSL& uv, DMeta result) {
 ///   @param uv - the texture coordinate symbol                               
 ///   @return the generated GLSL code                                         
 GLSL Texture::GenerateKeyframe(const Temporal& keyframe) {
-   // Scan the keyframe arguments                                       
    GLSL symbol;
-   auto& keyframe = frameMap->GetValue(keyIdx);
-   VERBOSE_NODE("Analyzing keyframe #", keyIdx, ": ", keyframe);
 
    // Scan the keyframe verb                                            
-   bool usingChannelId {};
+   /*bool usingChannelId {};
    Offset channelId {};
    keyframe.ForEachDeep([&](const Block& group) {
       group.ForEach(
@@ -142,13 +92,12 @@ GLSL Texture::GenerateKeyframe(const Temporal& keyframe) {
             bool relevantConstruct = false;
             if (construct.CastsTo<A::File>()) {
                // Generate keyframe from a texture file                 
-               auto creator = Verb::From<Verbs::Create>({}, &construct);
+               Verbs::Create creator {&construct};
                Any environment = mProducer->GetOwners();
                Verb::ExecuteVerb(environment, creator);
-               creator.GetOutput().ForEachDeep([&](CGeneratorTexture* t) {
+               creator.GetOutput().ForEachDeep([&](A::Texture* t) {
                   t->Generate();
-                  auto uniform = GetProducer()->AddInput(
-                     RRate::PerAuto, Trait::From<Traits::Texture>(t), true);
+                  auto uniform = GetProducer()->AddInput(Rate::Auto, Trait::From<Traits::Texture>(t), true);
                   symbol = GetPixel(
                      uniform,
                      uv.IsEmpty() ? GetTextureCoordinates() : uv,
@@ -176,7 +125,7 @@ GLSL Texture::GenerateKeyframe(const Temporal& keyframe) {
          uv.IsEmpty() ? GetTextureCoordinates() : uv, 
          trait.GetMeta()
       );
-   }
+   }*/
 
    LANGULUS_ASSERT(!symbol.IsEmpty(), Material, "Bad keyframe symbol");
    return symbol;
@@ -186,7 +135,7 @@ GLSL Texture::GenerateKeyframe(const Temporal& keyframe) {
 ///   @param frameMap - the keyframe map to generate                          
 ///   @param uv - the texture coordinate symbol                               
 ///   @return the generated GLSL code                                         
-GLSL Texture::GenerateDefinition(KeyframeMap* frameMap, const GLSL& uv) {
+/*GLSL Texture::GenerateDefinition(KeyframeMap* frameMap, const GLSL& uv) {
    if (frameMap->IsEmpty())
       return {};
 
@@ -247,13 +196,13 @@ GLSL Texture::GenerateDefinition(KeyframeMap* frameMap, const GLSL& uv) {
    // And return its usage                                              
    return "AnimateTextures_"_glsl + functionId + "(time, " 
       + (uv.IsEmpty() ? GetTextureCoordinates() : uv) + ")";
-}
+}*/
 
 /// Generate the shader stages                                                
-Symbol Texture::Generate() {
+Symbol& Texture::Generate() {
    Descend();
 
-   Count totalKeyframeCount {};
+   /*Count totalKeyframeCount {};
    totalKeyframeCount += mKeyframesGlobal.GetCount();
    for (auto& channel : mKeyframes)
       totalKeyframeCount += channel.GetCount();
@@ -320,5 +269,5 @@ Symbol Texture::Generate() {
    LANGULUS_ASSERT(!channel.IsEmpty(), Material, "No texture channel available")
    const GLSL define = "vec4 texturized = Texturize(" + channel + ", " + uv + ");\n\n";
    Commit(ShaderToken::Texturize, define);
-   Expose<Traits::Color, Vec4>("texturized");
+   Expose<Traits::Color, Vec4>("texturized");*/
 }

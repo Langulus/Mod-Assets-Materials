@@ -61,17 +61,34 @@ GLSL::GLSL(DMeta meta)
 ///   @param trait - trait to serialize                                       
 LANGULUS(INLINED)
 GLSL::GLSL(TMeta meta)
-   : Text {meta->mToken} {}
+   : Text {"trait"} {
+   operator += (meta->mToken);
+}
+
+/// Rate to GLSL                                                              
+///   @param rate - rate to stringify                                         
+LANGULUS(INLINED)
+GLSL::GLSL(Rate rate) {
+   for (auto& constant : Rate::CTTI_NamedValues) {
+      if (Rate {constant.mValue} == rate) {
+         operator += (constant.mToken);
+         return;
+      }
+   }
+
+   LANGULUS_THROW(Material, "Bad rate token");
+}
 
 /// Meta constant -> GLSL serializer                                          
 ///   @param trait - trait to serialize                                       
 LANGULUS(INLINED)
-GLSL::GLSL(CMeta meta)
-   : Text {meta->mToken} {}
+GLSL::GLSL(CMeta meta) {
+   TODO(); //expand the constant
+}
 
 /// Vector -> GLSL serializer                                                 
 ///   @tparam T - vector type (deducible)                                     
-///   @tparam S - vector size (deducible)                                     
+///   @tparam C - vector size (deducible)                                     
 ///   @param vector - vector to serialize                                     
 template<CT::DenseNumber T, Count C>
 LANGULUS(INLINED)
@@ -92,8 +109,8 @@ GLSL::GLSL(const TVector<T, C>& vector) {
 
 /// Matrix -> GLSL serializer                                                 
 ///   @tparam T - matrix type (deducible)                                     
-///   @tparam S1 - matrix columns (deducible)                                 
-///   @tparam S2 - matrix rows (deducible)                                    
+///   @tparam C - matrix columns (deducible)                                  
+///   @tparam R - matrix rows (deducible)                                     
 ///   @param matrix - matrix to serialize                                     
 template<CT::DenseNumber T, Count C, Count R>
 LANGULUS(INLINED)
@@ -131,7 +148,7 @@ GLSL::GLSL(const TQuaternion<T>& quaternion) {
 template<CT::Data T>
 LANGULUS(INLINED)
 GLSL GLSL::Type() {
-   return Type(MetaData::Of<Decay<T>>());
+   return Type(MetaOf<Decay<T>>());
 }
 
 /// GLSL type string conversion                                               

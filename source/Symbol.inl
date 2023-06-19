@@ -16,6 +16,7 @@
 ///   @return the symbol instance                                             
 template<CT::Data T, class... ARGS>
 Symbol Symbol::Function(Rate rate, const Token& pattern, ARGS&&... arguments) {
+   LANGULUS_ASSUME(DevAssumes, rate != Rate::Auto, "Rate should be resolved");
    constexpr auto check = TemplateCheck(pattern, arguments...);
 
    Symbol s;
@@ -24,6 +25,17 @@ Symbol Symbol::Function(Rate rate, const Token& pattern, ARGS&&... arguments) {
    s.mCode = pattern;
    (s.PushArgument(Forward<ARGS>(arguments)), ...);
    return s;
+}
+
+/// Check if symbol matches data and/or rate filter                           
+///   @param d - data type to be similar to (use nullptr for no filter)       
+///   @param r - the rate this symbol needs to be at (or lower)               
+///              use Rate::Auto for no filter                                 
+///   @return true if this symbol matches the filter requirements             
+LANGULUS(INLINED)
+bool Symbol::MatchesFilter(DMeta d, Rate r) const noexcept {
+   LANGULUS_ASSUME(DevAssumes, mRate != Rate::Auto, "Rate should be resolved");
+   return (!d || mTrait.CastsToMeta(d)) && (r == Rate::Auto || r <= mRate);
 }
 
 LANGULUS(INLINED)

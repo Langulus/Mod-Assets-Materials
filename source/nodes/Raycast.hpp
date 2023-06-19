@@ -18,7 +18,7 @@ namespace Nodes
    struct Raycast : Node {
       Raycast(const Descriptor&);
 
-      Symbol Generate() final;
+      Symbol& Generate() final;
    };
 
 } // namespace Nodes

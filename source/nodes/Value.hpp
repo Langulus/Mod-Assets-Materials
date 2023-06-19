@@ -31,7 +31,7 @@ namespace Nodes
       NOD() static Value Output(Node*, const Trait& = {}, Rate = Rate::Auto, const GLSL& name = {});
       NOD() static Value Local (Node*, const Trait& = {}, Rate = Rate::Auto, const GLSL& name = {});
 
-      Symbol Generate() final;
+      Symbol& Generate() final;
 
       void Do(Verb&);
 

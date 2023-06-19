@@ -8,8 +8,6 @@
 #include "Node.hpp"
 #include "Material.hpp"
 #include "MaterialLibrary.hpp"
-#include <Flow/Verbs/Create.hpp>
-#include <Flow/Verbs/Select.hpp>
 #include "nodes/Value.hpp"
 
 
@@ -32,8 +30,8 @@ Node::Node(DMeta classid, Material* material, const Descriptor& descriptor)
 Node::Node(DMeta classid, Node* parent, const Descriptor& descriptor)
    : Unit {classid, descriptor}
    , mDescriptor {descriptor}
-   , mParent {parent}
-   , mMaterial {parent->GetMaterial()} {
+   , mMaterial {parent->GetMaterial()}
+   , mParent {parent} {
    parent->mChildren << this;
    // Satisfy the rest of the descriptor                                
    InnerCreate();
@@ -92,6 +90,7 @@ void Node::InnerCreate() {
 
 /// Create a child node from a construct                                      
 ///   @param construct - the construct to satisfy                             
+///   @return a pointer to the child node                                     
 Node* Node::NodeFromConstruct(const Construct& construct) {
    if (construct.CastsTo<Node>()) {
       // Create a child node                                            
@@ -129,19 +128,13 @@ MaterialLibrary* Node::GetLibrary() const noexcept {
    return static_cast<MaterialLibrary*>(mMaterial->GetProducer());
 }
 
-/// Get node's environment hierarchy                                          
-///   @return the material owners                                             
-const Hierarchy& Node::GetOwners() const noexcept {
-   return mMaterial->GetOwners();
-}
-
 /// Create new nodes                                                          
 ///   @param verb - the selection verb                                        
 void Node::Create(Verb& verb) {
    verb.ForEachDeep([&](const Block& group) {
       group.ForEach(
-         [&](const MetaData& type) {
-            verb << NodeFromConstruct(Construct {&type});
+         [&](DMeta type) {
+            verb << NodeFromConstruct(Construct {type});
          },
          [&](const Construct& content) {
             verb << NodeFromConstruct(content);
@@ -150,25 +143,178 @@ void Node::Create(Verb& verb) {
    });
 }
 
-/// Interface inputs/outputs in node hierarchy                                
+/// Select symbols/nodes inside the node hierarchy                            
+/// You can filter based on data/node type, trait, index, and rate            
 ///   @param verb - the selection verb                                        
 void Node::Select(Verb& verb) {
-   Rate rate = Rate::Auto;
+   if (verb.GetMass() <= 0)
+      return;
+
+   Rate rateFilter = Rate::Auto;
+   Index index = IndexNone;
+   TMeta traitFilter = {};
+   DMeta dataFilter = {};
+
+   // Collect filters from verb argument                                
    verb.ForEachDeep([&](const Block& group) {
       group.ForEach(
-         [&](const Rate& r) {
-            rate = r;
-         },
-         [&](const MetaTrait& trait) {
-            auto foundOrCreated = GetValue(&trait, nullptr, rate, true);
-            verb << foundOrCreated;
-         },
-         [&](const Trait& trait) {
-            auto foundOrCreated = GetValue(trait.GetTrait(), trait.GetType(), rate, true);
-            verb << foundOrCreated;
+         [&](const Rate& r)      noexcept { rateFilter = r; },
+         [&](const Index& i)     noexcept { index = i; },
+         [&](const Real& i)      noexcept { index = static_cast<Index>(i); },
+         [&](TMeta trait)        noexcept { traitFilter = trait; },
+         [&](DMeta type)         noexcept { dataFilter = type; },
+         [&](const Trait& trait) noexcept {
+            dataFilter  = trait.GetType();
+            traitFilter = trait.GetTrait();
          }
       );
    });
+
+   if (rateFilter == Rate::Auto || !index || !traitFilter || !dataFilter)
+      return;
+
+   // Search for the symbol                                             
+   const auto found = GetSymbol(traitFilter, dataFilter, rateFilter, index);
+   if (found)
+      verb << found;
+}
+
+/// An arithmetic verb implementation                                         
+/// Uses a pattern to modify all output symbols                               
+///   @param verb - the verb to satisfy                                       
+///   @param pos - the positive pattern                                       
+///   @param neg - the negative pattern (optional)                            
+///   @param unary - the unary pattern (optional)                             
+void Node::ArithmeticVerb(Verb& verb, const Token& pos, const Token& neg, const Token& unary) {
+   if (verb.GetMass() == 0)
+      return;
+
+   const bool inverse = verb.GetMass() < 0;
+   bool success {};
+   if (verb.IsEmpty() && inverse && unary.size()) {
+      // No argument, so an unary minus sign                            
+      ForEachOutput([&success,&unary](Symbol& symbol) {
+         symbol.mCode = TemplateFill(unary, symbol.mCode);
+         success = true;
+      });
+
+      if (!success)
+         Logger::Warning(Self(), "Unable to ", verb);
+      verb << this;
+      return;
+   }
+
+   // Scan arguments: anything convertible to GLSL can be added to      
+   // output symbols' expressions                                       
+   verb.ForEachDeep([&](const Block& group) {
+      group.ForEachElement([&](const Block& element) {
+         try {
+            const auto code = element.AsCast<GLSL>();
+            if (code.IsEmpty())
+               return;
+
+            if (neg.empty() || !inverse) {
+               ForEachOutput([&](Symbol& symbol) {
+                  symbol.mCode = TemplateFill(pos, symbol.mCode, code);
+                  success = true;
+               });
+            }
+            else {
+               ForEachOutput([&](Symbol& symbol) {
+                  symbol.mCode = TemplateFill(neg, symbol.mCode, code);
+                  success = true;
+               });
+            }
+         }
+         catch (...) { }
+      });
+   });
+
+   if (!success)
+      Logger::Warning(Self(), "Unable to ", verb);
+   verb << this;
+}
+
+/// Add/subtract inputs                                                       
+///   @param verb - the addition/subtraction verb                             
+void Node::Add(Verb& verb) {
+   ArithmeticVerb(verb, "({} + {})", "({} - {})", "-{}");
+}
+
+/// Multiply/divide inputs                                                    
+///   @param verb - the multiplication verb                                   
+void Node::Multiply(Verb& verb) {
+   ArithmeticVerb(verb, "({} * {})", "({} / {})", "1.0 / {}");
+}
+
+/// Modulate inputs                                                           
+///   @param verb - the modulation verb                                       
+void Node::Modulate(Verb& verb) {
+   ArithmeticVerb(verb, "mod({}, {})");
+}
+
+/// Exponentiate inputs                                                       
+///   @param verb - the exponentiation verb                                   
+void Node::Exponent(Verb& verb) {
+   ArithmeticVerb(verb, "pow({}, {})");
+}
+
+/// Randomize inputs                                                          
+///   @param verb - the randomization verb                                    
+void Node::Randomize(Verb& verb) {
+   if (verb.GetMass() == 0)
+      return;
+
+   // Collect randomization methods and output types                    
+   DMeta otype {};
+   Text method = "simplex";
+   verb.ForEachDeep([&method,&otype](const Block& group) {
+      group.ForEach(
+         [&](const Text& token) { method = token; },
+         [&](const DMeta& t)    { otype = t; }
+      );
+   });
+
+   // Randomize each output symbol                                      
+   bool success {};
+   ForEachOutput([&success](Symbol& symbol) {
+      DMeta itype = symbol.mTrait.GetType();
+
+      // Call the appropriate noise/hash function                       
+      if (itype->CastsTo<A::Number>(1)) {
+         TODO();
+      }
+      else if (itype->CastsTo<A::Number>(2)) {
+         noiseFunction = "SimplexNoise2D";
+         mDependencies += THoskins<float>::Hash<2, 2, true>();
+         mDependencies += SimplexNoise2D;
+      }
+      else if (itype == "vec3") {
+         noiseFunction = "SimplexNoise3D";
+         mDependencies += THoskins<float>::Hash<3, 3, true>();
+         mDependencies += SimplexNoise3D;
+      }
+      else if (itype == "vec4") {
+         noiseFunction = "SimplexNoise4D";
+         TODO();
+      }
+      else TODO();
+
+      // Wrap input into the noise function                                
+      mUse = noiseFunction + "(" + GetOutputSymbol() + ")";
+      if (otype != "float") {
+         // Cast the noise function output if required                     
+         mUse = otype + "(" + mUse + ")";
+      }
+
+      symbol.mCode = TemplateFill(unary, symbol.mCode);
+      success = true;
+   });
+
+
+   if (!success)
+      Logger::Warning(Self(), "Unable to ", verb);
+   verb << this;
 }
 
 /// Get stage from node rate                                                  
@@ -655,22 +801,94 @@ const TraitProperties& Node::GetDefaultTrait(TMeta trait) {
 ///   @return the decayed type                                                
 DMeta Node::DecayToGLSLType(DMeta meta) {
    if (meta->template CastsTo<Double>(4))
-      return MetaData::Of<Vec4d>();
+      return MetaOf<Vec4d>();
    else if (meta->template CastsTo<Double>(3))
-      return MetaData::Of<Vec3d>();
+      return MetaOf<Vec3d>();
    else if (meta->template CastsTo<Double>(2))
-      return MetaData::Of<Vec2d>();
+      return MetaOf<Vec2d>();
    else if (meta->template CastsTo<Double>(1))
-      return MetaData::Of<Double>();
+      return MetaOf<Double>();
 
    else if (meta->template CastsTo<Float>(4) || meta->template CastsTo<A::Number>(4))
-      return MetaData::Of<Vec4f>();
+      return MetaOf<Vec4f>();
    else if (meta->template CastsTo<Float>(3) || meta->template CastsTo<A::Number>(3))
-      return MetaData::Of<Vec3f>();
+      return MetaOf<Vec3f>();
    else if (meta->template CastsTo<Float>(2) || meta->template CastsTo<A::Number>(2))
-      return MetaData::Of<Vec2f>();
+      return Meta<Vec2f>();
    else if (meta->template CastsTo<Float>(1) || meta->template CastsTo<A::Number>(1))
-      return MetaData::Of<Float>();
+      return MetaOf<Float>();
    else
       LANGULUS_THROW(Material, "Can't decay type");
+}
+
+/// Select a symbol from the node hierarchy                                   
+/// Checks local symbols first, then climbs up the hierarchy up to Root, where
+/// it starts selecting global material inputs/constants                      
+///   @param t - trait type filter                                            
+///   @param d - data type filter                                             
+///   @param r - rate filter                                                  
+///   @param i - index filter                                                 
+///   @return a pointer to the symbol, or nullptr if not found                
+Symbol* Node::GetSymbol(TMeta t, DMeta d, Rate r, Index i) {
+   Offset nth = i.IsSpecial() ? 0 : i.GetOffset();
+
+   if (t) {
+      // Filter by traits                                               
+      const auto foundt = mLocalsT.FindKeyIndex(t);
+      if (foundt) {
+         auto& candidates = mLocalsT.GetValue(foundt);
+         if (i && i.IsSpecial()) {
+            // Pick a special index                                     
+            auto& candidate = candidates[i];
+            if (candidate.MatchesFilter(d, r))
+               return &candidate;
+         }
+         else {
+            // Pick specific match from all candidates                  
+            for (auto& candidate : candidates) {
+               if (candidate.MatchesFilter(d, r)) {
+                  if (0 == nth)
+                     return &candidate;
+                  --nth;
+               }
+            }
+         }
+      }
+   }
+   else if (d) {
+      // Filter by data type                                            
+      for (auto pair : mLocalsD) {
+         if (!pair.mKey->CastsTo(d))
+            continue;
+
+         auto& candidates = pair.mValue;
+         if (i && i.IsSpecial()) {
+            // Pick a special index                                     
+            auto& candidate = candidates[i];
+            if (candidate.MatchesFilter(d, r))
+               return &candidate;
+         }
+         else {
+            // Pick specific match from all candidates                  
+            for (auto& candidate : candidates) {
+               if (candidate.MatchesFilter(d, r)) {
+                  if (0 == nth)
+                     return &candidate;
+                  --nth;
+               }
+            }
+         }
+      }
+   }
+   else if (r != Rate::Auto) {
+      // Filter by rate                                                 
+      TODO();
+   }
+   else if (i) {
+      // Just return the nth (filter by index only)                     
+      TODO();
+   }
+
+   // Nothing was found                                                 
+   return nullptr;
 }

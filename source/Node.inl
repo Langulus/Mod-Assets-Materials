@@ -11,36 +11,9 @@
 
 /// Get the material this node belongs to                                     
 ///   @return pointer to the material                                         
+LANGULUS(INLINED)
 Material* Node::GetMaterial() const noexcept {
    return mMaterial;
-}
-
-/// Get input symbol (with modifications if any)                              
-///   @param rate - the rate of the trait to use                              
-///   @param addIfMissing - add an input automatically, if missing            
-///   @return the symbol and usage                                            
-template<CT::Trait T, class D>
-LANGULUS(INLINED)
-Nodes::Value Node::GetValue(Rate rate, bool addIfMissing) {
-   return GetValue(
-      RTTI::MetaTrait::Of<T>(), 
-      RTTI::MetaData::Of<D>(),
-      rate, addIfMissing
-   );
-}
-
-/// Get input symbol (with modifications if any)                              
-///   @param rate - the rate of the trait to use                              
-///   @param addIfMissing - add an input automatically, if missing            
-///   @return the symbol and usage                                            
-template<CT::Trait T, class D>
-LANGULUS(INLINED)
-GLSL Node::GetSymbol(Rate rate, bool addIfMissing) {
-   return GetSymbol(
-      RTTI::MetaTrait::Of<T>(), 
-      RTTI::MetaData::Of<D>(),
-      rate, addIfMissing
-   );
 }
 
 /// Execute a function in each child node                                     
@@ -53,27 +26,6 @@ Count Node::ForEachChild(F&& call) {
    return counter;
 }
 
-/// Check if a child of specific type exists                                  
-template<class T>
-LANGULUS(INLINED)
-T* Node::FindChild() {
-   for (auto child : mChildren) {
-      auto asT = dynamic_cast<T*>(child);
-      if (asT)
-         return asT;
-   }
-   return nullptr;
-}
-
-/// Add an output connection to this node                                     
-///   @param constructor - the instance constructor                           
-///   @return a pointer to the child                                          
-/*template<CT::Trait T, CT::Data D>
-LANGULUS(INLINED)
-void Node::Expose(const GLSL& code) {
-   mOutputs.Insert(Trait::From<T, D>(), code);
-}*/
-
 /// Add an output symbol to the node                                          
 ///   @tparam ...ARGS - optional arguments, if symbol is a function template  
 ///                     these arguments can be DMetas, or TMetas, or both by  
@@ -83,32 +35,54 @@ void Node::Expose(const GLSL& code) {
 ///   @param ... - parameters, in case pattern is a function template         
 ///   @return the symbol handle                                               
 template<CT::Data T, class... ARGS>
-Symbol Node::Expose(const Token& pattern, ARGS&&...) {
-
+Symbol& Node::Expose(const Token& pattern, ARGS&&...) {
+   TODO();
 }
 
-/// Add an output connection to this node                                     
-///   @param constructor - the instance constructor                           
-///   @return a pointer to the child                                          
-template<class T>
+/// Select a symbol from the node hierarchy (const)                           
+/// Checks local symbols first, then climbs up the hierarchy up to Root, where
+/// it starts selecting global material inputs/constants                      
+///   @param t - trait type filter                                            
+///   @param d - data type filter                                             
+///   @param r - rate filter                                                  
+///   @param i - index filter                                                 
+///   @return a pointer to the symbol, or nullptr if not found                
 LANGULUS(INLINED)
-T* Node::EmplaceChild(T&& constructor) {
-   const auto newNode = new T {Forward<T>(constructor)};
-   AddChild(newNode);
-   return static_cast<T*>(mChildren.Last());
+const Symbol* Node::GetSymbol(TMeta t, DMeta d, Rate r, Index i) const {
+   return const_cast<Node*>(this)->GetSymbol(t, d, r, i);
 }
 
-/// Add an output connection to this node, reusing a node of same type        
-///   @param constructor - the instance constructor                           
-///   @return a pointer to the child                                          
-template<class T>
+/// Select a symbol from the node hierarchy                                   
+/// Checks local symbols first, then climbs up the hierarchy up to Root, where
+/// it starts selecting global material inputs/constants                      
+///   @tparam T - trait type filter (use void to disable)                     
+///   @tparam D - data type filter (use void to disable)                      
+///   @param r - rate filter                                                  
+///   @param i - index filter                                                 
+///   @return a pointer to the symbol, or nullptr if not found                
+template<class T, class D>
 LANGULUS(INLINED)
-T* Node::EmplaceChildUnique(T&& constructor) {
-   T* result = nullptr;
-   mChildren.ForEach([&](T* node) {
-      result = node;
-   });
-   return result ? result : EmplaceChild<T>(Forward<T>(constructor));
+Symbol* Node::GetSymbol(Rate r, Index i) {
+   static_assert(CT::Void<T> || CT::Trait<T>,
+      "T must be either trait, or void");
+   static_assert(CT::Void<D> || CT::Data<D>,
+      "D must be either data type, or void");
+
+   return GetSymbol(MetaOf<T>(), MetaOf<D>(), r, i);
+}
+
+/// Select a symbol from the node hierarchy (const)                           
+/// Checks local symbols first, then climbs up the hierarchy up to Root, where
+/// it starts selecting global material inputs/constants                      
+///   @tparam T - trait type filter (use void to disable)                     
+///   @tparam D - data type filter (use void to disable)                      
+///   @param r - rate filter                                                  
+///   @param i - index filter                                                 
+///   @return a pointer to the symbol, or nullptr if not found                
+template<class T, class D>
+LANGULUS(INLINED)
+const Symbol* Node::GetSymbol(Rate r, Index i) const {
+   return const_cast<Node*>(this)->template GetSymbol<T, D>(r, i);
 }
 
 /// Get the refresh rate of the node                                          
@@ -118,41 +92,74 @@ Rate Node::GetRate() const noexcept {
    return mRate;
 }
 
-/// Consume the node (mark as generated)                                      
-LANGULUS(INLINED)
-void Node::Consume() noexcept {
-   mGenerated = true;
+/// Execute a function for each symbol in the inputs                          
+///   @tparam F - function signature (deducible)                              
+///   @param call - the function to call for each symbol                      
+///   @return the number of execution of call                                 
+template<class F>
+Count Node::ForEachInput(F&& call) {
+   using A = ArgumentOf<F>;
+   using R = ReturnOf<F>;
+   static_assert(CT::Same<A, Symbol>, "Function argument must be a Symbol");
+
+   Count counter {};
+   for (auto pair : mInputsT) {
+      for (auto& symbol : pair.mValue) {
+         if constexpr (CT::Bool<R>) {
+            if (!call(symbol))
+               return counter;
+         }
+         else call(symbol);
+         ++counter;
+      }
+   }
+
+   for (auto pair : mOutputsD) {
+      for (auto& symbol : pair.mValue) {
+         if constexpr (CT::Bool<R>) {
+            if (!call(symbol))
+               return counter;
+         }
+         else call(symbol);
+         ++counter;
+      }
+   }
+
+   return counter;
 }
 
-/// Check if this node's code is already generated                            
-LANGULUS(INLINED)
-bool Node::IsConsumed() const noexcept {
-   return mGenerated;
-}
+/// Execute a function for each symbol in the outputs                         
+///   @tparam F - function signature (deducible)                              
+///   @param call - the function to call for each symbol                      
+///   @return the number of execution of call                                 
+template<class F>
+Count Node::ForEachOutput(F&&) {
+   using A = ArgumentOf<F>;
+   using R = ReturnOf<F>;
+   static_assert(CT::Same<A, Symbol>, "Function argument must be a Symbol");
 
-/// Check if this node's code is already generated                            
-LANGULUS(INLINED)
-auto& Node::GetOutputs() const noexcept {
-   return mOutputs;
-}
+   Count counter {};
+   for (auto pair : mOutputsT) {
+      for (auto& symbol : pair.mValue) {
+         if constexpr (CT::Bool<R>) {
+            if (!call(symbol))
+               return counter;
+         }
+         else call(symbol);
+         ++counter;
+      }
+   }
 
-LANGULUS(INLINED)
-bool Node::IsInput() const {
-   return mType == ValueType::Input;
-}
+   for (auto pair : mOutputsD) {
+      for (auto& symbol : pair.mValue) {
+         if constexpr (CT::Bool<R>) {
+            if (!call(symbol))
+               return counter;
+         }
+         else call(symbol);
+         ++counter;
+      }
+   }
 
-/// Check if keyframe is relative, by searching for corresponding trait       
-///   @param keyframe - the keyframe to analyze                               
-///   @return true if keyframe is relative                                    
-LANGULUS(INLINED)
-bool IsRelativeKeyframe(const Verb& keyframe) {
-   bool relative = false;
-   keyframe.ForEachDeep([&](const Block& group) {
-      group.ForEach([&](const Trait& trait) {
-         if (trait.TraitIs<Traits::Relative>())
-            relative = trait.AsCast<bool>();
-      });
-   });
-
-   return relative;
+   return counter;
 }

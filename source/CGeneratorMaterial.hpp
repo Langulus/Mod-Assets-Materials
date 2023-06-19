@@ -61,12 +61,7 @@ public:
 	void Commit(ShaderStage::Enum, ShaderToken::Enum, const GLSL&);
 	void InitializeFromShadertoy(const GLSL&);
 
-	NOD() GLSL GenerateInputName(RRate, const Trait&) const;
-	NOD() GLSL GenerateOutputName(RRate, const Trait&) const;
 
 private:
 	void AutoComplete();
-	void GenerateUniforms();
-	void GenerateInputs();
-	void GenerateOutputs();
 };

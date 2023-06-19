@@ -43,7 +43,7 @@ namespace Nodes::Inner
 {
    template<::std::size_t...N>
    constexpr auto CheckPattern(const Token& pattern, ::std::index_sequence<N...>) {
-      return fmt::format_string<N...> {pattern};
+      return fmt::format_string<decltype(N)...> {pattern};
    }
 }
 

@@ -33,7 +33,7 @@ Value::Value(const Descriptor& desc)
 }*/
 
 ///                                                                           
-Value Value::Input(Node* parent, const Trait& trait, Rate rate, const GLSL& name) {
+/*Value Value::Input(Node* parent, const Trait& trait, Rate rate, const GLSL& name) {
    Value result {parent};
    result.mType = ValueType::Input;
    result.mTrait = trait;
@@ -45,7 +45,7 @@ Value Value::Input(Node* parent, const Trait& trait, Rate rate, const GLSL& name
    LANGULUS_ASSERT(!result.mName.IsEmpty(), Material, "Bad output symbol");
    result.mOutputs.Insert(result.mTrait, result.mName);
    return result;
-}
+}*/
 
 ///                                                                           
 /*Value Value::Output(Material* producer, const Trait& trait, Rate rate, const GLSL& name) {
@@ -64,7 +64,7 @@ Value Value::Input(Node* parent, const Trait& trait, Rate rate, const GLSL& name
 }*/
 
 ///                                                                           
-Value Value::Output(Node* parent, const Trait& trait, Rate rate, const GLSL& name) {
+/*Value Value::Output(Node* parent, const Trait& trait, Rate rate, const GLSL& name) {
    Value result {parent};
    result.mType = ValueType::Output;
    result.mTrait = trait;
@@ -76,10 +76,10 @@ Value Value::Output(Node* parent, const Trait& trait, Rate rate, const GLSL& nam
    LANGULUS_ASSERT(!result.mName.IsEmpty(), Material, "Bad output symbol");
    result.mOutputs.Insert(result.mTrait, result.mName);
    return result;
-}
+}*/
 
 ///                                                                           
-Value Value::Local(Node* parent, const Trait& trait, Rate rate, const GLSL& name) {
+/*Value Value::Local(Node* parent, const Trait& trait, Rate rate, const GLSL& name) {
    Value result {parent};
    result.mType = ValueType::Input;
    result.mTrait = trait;
@@ -113,10 +113,10 @@ void Value::BindTo(const Trait& trait, const Node* source) {
 
    mOutputs.Reset();
    mOutputs.Insert(mTrait, mName);
-}
+}*/
 
 /// Decide trait type and symbol if not decided yet                           
-void Value::AutoCompleteTrait() {
+/*void Value::AutoCompleteTrait() {
    if (mTrait.IsUntyped()) {
       // An input must always be declared with a type                   
       // If no such type is provided, try adding a built-in one         
@@ -130,10 +130,10 @@ void Value::AutoCompleteTrait() {
       // Constant provided, just set name to it                         
       mName = Serialize<GLSL>(mTrait);
    }
-}
+}*/
 
 /// For logging and serialization                                             
-Value::operator Debug() const {
+/*Value::operator Debug() const {
    Code result;
    result += Node::DebugBegin();
       result += mTrait.GetTrait();
@@ -178,7 +178,7 @@ TMeta Value::GetTrait() const noexcept {
 
 bool Value::IsValid() const {
    return !mName.IsEmpty();
-}
+}*/
 
 /// Project the value by multiplying to a matrix                              
 /// If value is smaller than the matrix ranks, it will be filled with 1       
@@ -218,303 +218,6 @@ bool Value::IsValid() const {
    verb << this;
 }*/
 
-/// Attempt selecting traits inside this value, or any of its parents         
-///   @param verb - the selector                                              
-void Value::Select(Verb& verb) {
-   Trait found;
-   GLSL symbol;
-   verb.GetArgument().ForEachDeep([&](const Block& group) {
-      EitherDoThis
-         group.ForEach([&](const TraitID& trait) {
-            symbol = SelectMember(trait, found);
-            return symbol.IsEmpty();
-         })
-      OrThis
-         group.ForEach([&](const Trait& trait) {
-            symbol = SelectMember(trait.GetTraitID(), found);
-            return symbol.IsEmpty();
-         });
-      return symbol.IsEmpty();
-   });
-
-   if (!symbol.IsEmpty()) {
-      auto newValue = Ptr<MaterialNodeValue>::New(
-         MaterialNodeValue::Local(this, found, mRate, symbol));
-      verb << newValue.Get();
-      VERBOSE_NODE("Selected: ", Logger::Cyan, symbol);
-   }
-}
-
-/// Add/subtract inputs                                                       
-///   @param verb - the addition/subtraction verb                             
-void Value::Add(Verb& verb) {
-   if (verb.GetArgument().IsEmpty() && verb.GetMass() < 0) {
-      // Invert the input                                               
-      mUse = "-(" + GetOutputSymbol() + ")";
-      mOutputs.GetValue(0) = mUse;
-      VERBOSE_NODE("Inverted (-): ", Logger::Cyan, mUse);
-      verb << this;
-      return;
-   }
-
-   // Gather numbers                                                    
-   real numbers = 0;
-   auto found = verb.GetArgument().ForEach([&](const real& number) {
-      numbers += number;
-      return true;
-   });
-
-   // Gather symbols                                                    
-   TAny<GLSL> symbols;
-   found += verb.GetArgument().ForEach([&](const MaterialNode& node) {
-      symbols << node.GetOutputSymbol();
-      return true;
-   });
-
-   if (!found)
-      return;
-
-   const auto totalNumbers = pcAbs(verb.GetMass()) * numbers;
-   if (totalNumbers) {
-      // Add numbers                                                    
-      mUse = "(" + GetOutputSymbol()
-         + (verb.GetMass() > 0 ? " + " : " - ") + numbers + ")";
-      mOutputs.GetValue(0) = mUse;
-      VERBOSE_NODE("Added/subtracted: ", Logger::Cyan, mUse);
-   }
-
-   if (!symbols.IsEmpty()) {
-      // Add symbols                                                    
-      mUse = "(" + GetOutputSymbol();
-      for (const auto& s : symbols)
-         mUse += GLSL(verb.GetMass() > 0 ? " + " : " - ") + s;
-      mUse += ")";
-      mOutputs.GetValue(0) = mUse;
-      VERBOSE_NODE("Added/subtracted: ", Logger::Cyan, mUse);
-   }
-
-   verb << this;
-}
-
-/// Multiply/divide inputs                                                    
-///   @param verb - the multiplication verb                                   
-void Value::Multiply(Verb& verb) {
-   if (verb.GetArgument().IsEmpty() && verb.GetMass() < 0) {
-      // Invert the input                                               
-      mUse = "1.0 / (" + GetOutputSymbol() + ")";
-      mOutputs.GetValue(0) = mUse;
-      VERBOSE_NODE("Inverted (/): " << ccCyan << mUse);
-      verb << this;
-      return;
-   }
-
-   real numbers = verb.GetMass();
-   TAny<GLSL> symbols;
-   bool continueSearching = true;
-   pcptr found = 0;
-
-   // Scan for relevant arguments, like numbers or symbols              
-   verb.GetArgument().ForEachDeep([&](const Block& group) {
-      group.ForEach([&](const real& number) {
-         numbers *= number;
-         if (0 == numbers) {
-            // If a zero exists in a chain of multiplications we can    
-            // immediately return                                       
-            verb << real(0);
-            continueSearching = false;
-            return continueSearching;
-         }
-
-         ++found;
-         return continueSearching;
-      });
-
-      // Gather symbols                                                 
-      if (continueSearching) {
-         group.ForEach([&](const MaterialNode& node) {
-            symbols << node.GetOutputSymbol();
-            ++found;
-            return continueSearching;
-         });
-      }
-
-      return continueSearching;
-   });
-
-   if (verb.IsDone() || !found)
-      return;
-
-   // Modify usage                                                      
-   if (pcAbs(numbers) != 1) {
-      mUse = "(" + GetOutputSymbol() 
-         + (verb.GetMass() > 0 ? " * " : " / " ) + numbers + ")";
-      mOutputs.GetValue(0) = mUse;
-      VERBOSE_NODE("Multiplied/divided: " << ccCyan << mUse);
-   }
-
-   if (!symbols.IsEmpty()) {
-      // Multiply symbols                                               
-      mUse = "(" + GetOutputSymbol();
-      for (const auto& s : symbols)
-         mUse += GLSL(verb.GetMass() > 0 ? " * " : " / ") + s;
-      mUse += ")";
-      mOutputs.GetValue(0) = mUse;
-      VERBOSE_NODE("Multiplied/divided: ", Logger::Cyan, mUse);
-   }
-
-   verb << this;
-}
-
-/// Modulate inputs                                                           
-///   @param verb - the modulation verb                                       
-void Value::Modulate(Verb& verb) {
-   real accumulate = verb.GetMass();
-   auto found = verb.GetArgument().ForEach([&](const real& number) {
-      accumulate = verb.GetMass() * number;
-      return true;
-   });
-
-   if (!found)
-      return;
-
-   // Modify usage                                                      
-   mUse = "mod(" + GetOutputSymbol() + ", " + accumulate + ")";
-   mOutputs.GetValue(0) = mUse;
-   VERBOSE_NODE("Modulated: ", Logger::Cyan, mUse);
-   verb << this;
-}
-
-/// Exponentiate inputs                                                       
-///   @param verb - the exponentiation verb                                   
-void Value::Exponent(Verb& verb) {
-   real accumulate = verb.GetMass();
-   auto found = verb.GetArgument().ForEach([&](const real& number) {
-      accumulate *= number;
-      return true;
-   });
-
-   if (!found)
-      return;
-
-   // Modify usage                                                      
-   if (pcAbs(accumulate) != 1) {
-      mUse = "pow(" + GetOutputSymbol() + ", " + accumulate + ")";
-      mOutputs.GetValue(0) = mUse;
-      VERBOSE_NODE("Exponentiated: ", Logger::Cyan, mUse);
-   }
-   verb << this;
-}
-
-/// Randomize inputs                                                          
-///   @param verb - the randomization verb                                    
-void Value::Randomize(Verb& verb) {
-   // Input type is the trait type                                      
-   const GLSL itype = GLSL::Type(GetOutputTrait().GetMeta());
-
-   // Check verb argument for the output type                           
-   GLSL otype;
-   verb.GetArgument().ForEachDeep([&otype](const DataID& type) {
-      otype = GLSL::Type(type.GetMeta());
-   });
-
-   if (otype.IsEmpty())
-      otype = itype;
-
-   // Do the thingamagick, calling the appropriate noise/hash function  
-   // to modify the interfaced variable                                 
-   GLSL noiseFunction;
-   if (itype == "float") {
-      noiseFunction = "SimplexNoise1D";
-      TODO();
-   }
-   else if (itype == "vec2") {
-      noiseFunction = "SimplexNoise2D";
-      mDependencies += THoskins<float>::Hash<2, 2, true>();
-      mDependencies +=
-         "float SimplexNoise2D(in vec2 p) {\n"
-         "   const float K1 = 0.366025404; // (sqrt(3)-1)/2;\n"
-         "   const float K2 = 0.211324865; // (3-sqrt(3))/6;\n\n"
-         "   vec2 i = floor(p + (p.x + p.y) * K1);\n"
-         "   vec2 a = p - i + (i.x + i.y) * K2;\n"
-         "   vec2 o = (a.x > a.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);\n"
-         "   vec2 b = a - o + K2;\n"
-         "   vec2 c = a - 1.0 + 2.0 * K2;\n"
-         "   vec3 h = max(0.5 - vec3(dot(a, a), dot(b, b), dot(c, c)), 0.0);\n"
-         "   vec3 n = h * h * h * h * vec3(\n"
-         "      dot(a, HoskinsHash22(i + 0.0)),\n"
-         "      dot(b, HoskinsHash22(i + o)),\n"
-         "      dot(c, HoskinsHash22(i + 1.0))\n"
-         "   );\n"
-         "   return dot(n, vec3(70.0));\n"
-         "}\n\n";
-   }
-   else if (itype == "vec3") {
-      noiseFunction = "SimplexNoise3D";
-      mDependencies += THoskins<float>::Hash<3, 3, true>();
-      mDependencies +=
-         "float SimplexNoise3D(in vec3 p) {\n"
-         "   // 1. find current tetrahedron T and it's four vertices\n"
-         "   //    s, s+i1, s+i2, s+1.0 - absolute skewed (integer) coordinates of T vertices\n"
-         "   //    x, x1, x2, x3 - unskewed coordinates of p relative to each of T vertices\n"
-
-         "   // calculate s and x\n"
-         "   vec3 s = floor(p + dot(p, vec3(F3)));\n"
-         "   vec3 x = p - s + dot(s, vec3(G3));\n"
-
-         "   // calculate i1 and i2\n"
-         "   vec3 e = step(vec3(0.0), x - x.yzx);\n"
-         "   vec3 i1 = e * (1.0 - e.zxy);\n"
-         "   vec3 i2 = 1.0 - e.zxy * (1.0 - e);\n"
-
-         "   // x1, x2, x3\n"
-         "   vec3 x1 = x - i1 + G3;\n"
-         "   vec3 x2 = x - i2 + 2.0 * G3;\n"
-         "   vec3 x3 = x - 1.0 + 3.0 * G3;\n"
-
-         "   // 2. find four surflets and store them in d\n"
-         "   vec4 w, d;\n"
-
-         "   // calculate surflet weights\n"
-         "   w.x = dot(x, x);\n"
-         "   w.y = dot(x1, x1);\n"
-         "   w.z = dot(x2, x2);\n"
-         "   w.w = dot(x3, x3);\n"
-
-         "   // w fades from 0.6 at the center of the surflet to 0.0 at the margin\n"
-         "   w = max(0.6 - w, 0.0);\n"
-
-         "   // calculate surflet components\n"
-         "   d.x = dot(HoskinsHash33(s), x);\n"
-         "   d.y = dot(HoskinsHash33(s + i1), x1);\n"
-         "   d.z = dot(HoskinsHash33(s + i2), x2);\n"
-         "   d.w = dot(HoskinsHash33(s + 1.0), x3);\n"
-
-         "   // multiply d by w^4\n"
-         "   w *= w;\n"
-         "   w *= w;\n"
-         "   d *= w;\n"
-
-         "   // 3. return the sum of the four surflets\n"
-         "   return dot(d, vec4(52.0));\n"
-         "}\n\n";
-   }
-   else if (itype == "vec4") {
-      noiseFunction = "SimplexNoise4D";
-      TODO();
-   }
-   else TODO();
-
-   // Wrap input into the noise function                                
-   mUse = noiseFunction + "(" + GetOutputSymbol() + ")";
-   if (otype != "float") {
-      // Cast the noise function output if required                     
-      mUse = otype + "(" + mUse + ")";
-   }
-
-   VERBOSE_NODE("Randomized: ", Logger::Cyan, mUse);
-   mOutputs.GetValue(0) = mUse;
-   verb << this;
-}
 
 /// Execute a GASM script in the context of the value node                    
 ///   @param code - the code to execute                                       
@@ -529,6 +232,7 @@ void Value::Randomize(Verb& verb) {
 }*/
 
 /// Generate the shader stages                                                
-void Value::Generate() {
+Symbol& Value::Generate() {
    Descend();
+   TODO();
 }

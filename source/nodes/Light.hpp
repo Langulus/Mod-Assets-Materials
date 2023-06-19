@@ -18,7 +18,7 @@ namespace Nodes
    struct Light : Node {
       Light(const Descriptor&);
 
-      Symbol Generate() final;
+      Symbol& Generate() final;
    };
 
 } // namespace Nodes
