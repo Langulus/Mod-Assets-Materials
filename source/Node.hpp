@@ -9,11 +9,12 @@
 #include "Symbol.hpp"
 #include <Flow/Verbs/Create.hpp>
 #include <Flow/Verbs/Select.hpp>
-#include <Flow/Verbs/Add.hpp>
-#include <Flow/Verbs/Multiply.hpp>
-#include <Flow/Verbs/Modulate.hpp>
-#include <Flow/Verbs/Exponent.hpp>
-#include <Flow/Verbs/Randomize.hpp>
+
+#include <Math/Verbs/Add.hpp>
+#include <Math/Verbs/Multiply.hpp>
+#include <Math/Verbs/Modulate.hpp>
+#include <Math/Verbs/Exponent.hpp>
+#include <Math/Verbs/Randomize.hpp>
 
 
 ///                                                                           
@@ -55,6 +56,8 @@ protected:
       Rate  mRate;
    };
 
+   static inline const Symbol NoSymbol {};
+
 public:
    LANGULUS_VERBS(
       Verbs::Create,
@@ -81,7 +84,7 @@ public:
    NOD() operator Debug() const;
    void Dump() const;
 
-   virtual Symbol& Generate() = 0;
+   virtual const Symbol& Generate() = 0;
 
    NOD() Rate GetRate() const noexcept;
    NOD() Offset GetStage() const;
@@ -97,9 +100,6 @@ public:
    template<class F>
    Count ForEachChild(F&&);
 
-   template<CT::Data T, class... ARGS>
-   Symbol& Expose(const Token&, ARGS&&...);
-
    NOD()       Symbol* GetSymbol(TMeta, DMeta = nullptr, Rate = Rate::Auto, Index = IndexLast);
    NOD() const Symbol* GetSymbol(TMeta, DMeta = nullptr, Rate = Rate::Auto, Index = IndexLast) const;
 
@@ -112,68 +112,26 @@ public:
    Count ForEachInput(F&&);
    template<class F>
    Count ForEachOutput(F&&);
-
-   //NOD() const Hierarchy& GetOwners() const noexcept;
-
-   /*NOD() const Trait& GetOutputTrait() const;
-   NOD() Trait GetOutputTrait(const Trait&) const;
-   NOD() const GLSL& GetOutputSymbol() const;
-   NOD() GLSL GetOutputSymbol(const Trait&) const;
-   NOD() GLSL GetOutputSymbolAs(DMeta, Real) const;
-   NOD() GLSL GetOutputSymbolAs(const Trait&, DMeta, Real) const;
-
-   NOD() Nodes::Value GetValue(TMeta, DMeta, Rate, bool = true);
-
-   NOD() GLSL GetSymbol(TMeta, DMeta, Rate, bool = true);*/
-
-
-   /*template<CT::Trait, class = void>
-   NOD() Nodes::Value GetValue(Rate = Rate::Auto, bool addIfMissing = true);
-
-   template<CT::Trait, class = void>
-   NOD() GLSL GetSymbol(Rate = Rate::Auto, bool addIfMissing = true);*/
-
-
-
-   //template<class T>
-   //T* FindChild();
-
-   //template<CT::Trait, CT::Data>
-   //void Expose(const GLSL&);
-
-
-   /*template<class T>
-   NOD() T* EmplaceChild(T&&);
-   template<class T>
-   NOD() T* EmplaceChildUnique(T&&);*/
-
-   //NOD() bool IsConsumed() const noexcept;
-   //NOD() auto& GetOutputs() const noexcept;
-
-   //void Consume() noexcept;
-   //void Commit(const Token&, const GLSL&);
-
-   /*NOD() GLSL CodeFromConstruct(const Construct&);
-   NOD() GLSL CodeFromScope(const Any&);
-   NOD() bool IsInput() const;*/
-
+   
 protected:
    void InnerCreate();
    Node* NodeFromConstruct(const Construct&);
 
-   /*NOD() bool InnerGetValue(const Trait&, Rate, bool, Nodes::Value&) const;
-   bool IsInHierarchy(Node*) const;*/
-
    NOD() Debug DebugBegin() const;
    NOD() Debug DebugEnd() const;
 
-   GLSL AddInput(const Trait&, bool allowDuplicates);
-   GLSL AddOutput(const Trait&, bool allowDuplicates);
-   GLSL AddDefine(const Token&, const GLSL&);
+   template<CT::Trait T, CT::Data D>
+   const Symbol& AddLocal(D&&, const Token& = {});
+
+   template<CT::Data T, class... ARGS>
+   Symbol& ExposeData(const Token&, ARGS&&...);
+
+   template<CT::Trait T, CT::Data D, class... ARGS>
+   Symbol& ExposeTrait(const Token&, ARGS&&...);
+
+   void AddDefine(const Token&, const GLSL&);
 
    void ArithmeticVerb(Verb&, const Token& pos, const Token& neg = {}, const Token& una = {});
 };
-
-//NOD() bool IsRelativeKeyframe(const Verb&);
 
 #include "Node.inl"

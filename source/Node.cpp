@@ -9,6 +9,7 @@
 #include "Material.hpp"
 #include "MaterialLibrary.hpp"
 #include "nodes/Value.hpp"
+#include <Math/Randomness/SimplexNoise.hpp>
 
 
 /// Material node construction for Nodes::Root                                
@@ -268,7 +269,7 @@ void Node::Randomize(Verb& verb) {
    // Collect randomization methods and output types                    
    DMeta otype {};
    Text method = "simplex";
-   verb.ForEachDeep([&method,&otype](const Block& group) {
+   verb.ForEachDeep([&](const Block& group) {
       group.ForEach(
          [&](const Text& token) { method = token; },
          [&](const DMeta& t)    { otype = t; }
@@ -277,38 +278,21 @@ void Node::Randomize(Verb& verb) {
 
    // Randomize each output symbol                                      
    bool success {};
-   ForEachOutput([&success](Symbol& symbol) {
+   ForEachOutput([&](Symbol& symbol) {
       DMeta itype = symbol.mTrait.GetType();
 
-      // Call the appropriate noise/hash function                       
-      if (itype->CastsTo<A::Number>(1)) {
-         TODO();
-      }
-      else if (itype->CastsTo<A::Number>(2)) {
-         noiseFunction = "SimplexNoise2D";
-         mDependencies += THoskins<float>::Hash<2, 2, true>();
-         mDependencies += SimplexNoise2D;
-      }
-      else if (itype == "vec3") {
-         noiseFunction = "SimplexNoise3D";
-         mDependencies += THoskins<float>::Hash<3, 3, true>();
-         mDependencies += SimplexNoise3D;
-      }
-      else if (itype == "vec4") {
-         noiseFunction = "SimplexNoise4D";
-         TODO();
+      // Call the appropriate noise function                            
+      if (otype->template CastsTo<A::Number>(1)) {
+         if (itype->template CastsTo<A::Number>(2))
+            AddDefine("SimplexNoise1", TSimplex<1, 2, float>::template Hash<true>());
+         else if (itype->template CastsTo<A::Number>(3))
+            AddDefine("SimplexNoise1", TSimplex<1, 3, float>::template Hash<true>());
+         else TODO();
+
+         symbol.mCode = TemplateFill("SimplexNoise1({})", symbol.mCode);
+         success = true;
       }
       else TODO();
-
-      // Wrap input into the noise function                                
-      mUse = noiseFunction + "(" + GetOutputSymbol() + ")";
-      if (otype != "float") {
-         // Cast the noise function output if required                     
-         mUse = otype + "(" + mUse + ")";
-      }
-
-      symbol.mCode = TemplateFill(unary, symbol.mCode);
-      success = true;
    });
 
 
@@ -345,9 +329,9 @@ void Node::Descend() {
 /// Commit a code snippet to a specific stage and place                       
 ///   @param place - the shader token to commit changes at                    
 ///   @param addition - the code to commit                                    
-void Node::Commit(const Token& place, const GLSL& addition) {
+/*void Node::Commit(const Token& place, const GLSL& addition) {
    mMaterial->Commit(GetStage(), place, addition);
-}
+}*/
 
 /// Log the material node hierarchy                                           
 void Node::Dump() const {
@@ -386,12 +370,6 @@ Node::operator Debug() const {
    result += DebugBegin();
    result += DebugEnd();
    return result;
-}
-
-/// Convert node's output to GLSL code                                        
-///   @return GLSL code equivalent to the node's output                       
-Node::operator GLSL() const {
-   return mOutputs.GetValue(0);
 }
 
 /// Generate GLSL code from a construct                                       
@@ -484,7 +462,7 @@ void Node::RemoveChild(MaterialNode* child) {
 
 /// Return the first output trait                                             
 ///   @return trait                                                           
-const Trait& Node::GetOutputTrait() const {
+/*const Trait& Node::GetOutputTrait() const {
    LANGULUS_ASSERT(!mOutputs.IsEmpty(), Material, "Node has no outputs");
    return mOutputs.GetKey(0);
 }
@@ -516,7 +494,7 @@ GLSL Node::GetOutputSymbol(const Trait& trait) const {
 const GLSL& Node::GetOutputSymbol() const {
    LANGULUS_ASSERT(!mOutputs.IsEmpty(), Material, "Node has no outputs");
    return mOutputs.GetValue(0);
-}
+}*/
 
 /// Convert a symbol from one type to another in GLSL                         
 ///   @param trait - the trait to convert                                     
@@ -611,7 +589,7 @@ GLSL ConvertSymbol(const Trait& trait, const GLSL& symbol, DMeta as, Real filler
 ///   @param as - the type we want to convert to                              
 ///   @param filler - value to fill expanded parts (if any)                   
 ///   @return the symbol                                                      
-GLSL Node::GetOutputSymbolAs(DMeta as, Real filler) const {
+/*GLSL Node::GetOutputSymbolAs(DMeta as, Real filler) const {
    LANGULUS_ASSERT(!mOutputs.IsEmpty(), Material, "Node has no outputs");
    for (auto pair : mOutputs)
       return ConvertSymbol(pair.mKey, pair.mValue, as, filler);
@@ -629,7 +607,7 @@ GLSL Node::GetOutputSymbolAs(const Trait& trait, DMeta as, Real filler) const {
    }
 
    return {};
-}
+}*/
 
 /// Get (or make) node that contains an input we're searching for             
 ///   @param trait - the trait to search for (nullptr for any)                
@@ -637,7 +615,7 @@ GLSL Node::GetOutputSymbolAs(const Trait& trait, DMeta as, Real filler) const {
 ///   @param checkHere - whether or not to check local outputs                
 ///   @param output - [out] the resulting value node                          
 ///   @return true if output has been set                                     
-bool Node::InnerGetValue(const Trait& trait, Rate rate, bool checkHere, Nodes::Value& output) const {
+/*bool Node::InnerGetValue(const Trait& trait, Rate rate, bool checkHere, Nodes::Value& output) const {
    // Check here                                                        
    if (checkHere) {
       VERBOSE_NODE("Searching for ", trait, " inside ", this);
@@ -689,7 +667,7 @@ bool Node::InnerGetValue(const Trait& trait, Rate rate, bool checkHere, Nodes::V
    }
 
    return false;
-}
+}*/
 
 /// Get (or make) node that contains an input we're searching for             
 ///   @param tmeta - the trait to search for (nullptr for any)                
@@ -697,7 +675,7 @@ bool Node::InnerGetValue(const Trait& trait, Rate rate, bool checkHere, Nodes::V
 ///   @param rate - the rate of the trait to use                              
 ///   @param addIfMissing - whether or not to generate default usage          
 ///   @return the symbol and usage                                            
-Nodes::Value Node::GetValue(TMeta tmeta, DMeta dmeta, Rate rate, bool addIfMissing) {
+/*Nodes::Value Node::GetValue(TMeta tmeta, DMeta dmeta, Rate rate, bool addIfMissing) {
    if (rate == Rate::Auto)
       rate = mRate;
 
@@ -725,35 +703,14 @@ Nodes::Value Node::GetValue(TMeta tmeta, DMeta dmeta, Rate rate, bool addIfMissi
    }
 
    return result;
-}
-
-/// Get input symbol from nodes                                               
-///   @param tmeta - the trait to search for (nullptr for any)                
-///   @param dmeta - the data to search for (nullptr for any)                 
-///   @param rate - the rate of the trait to use                              
-///   @param addIfMissing - whether or not to generate default usage          
-///   @return the symbol and usage                                            
-GLSL Node::GetSymbol(TMeta tmeta, DMeta dmeta, Rate rate, bool addIfMissing) {
-   auto found = GetValue(tmeta, dmeta, rate, addIfMissing);
-   const auto trait = Trait::FromMeta(tmeta, dmeta);
-   auto symbol = found.GetOutputSymbol(trait);
-   if (symbol.IsEmpty()) {
-      VERBOSE_NODE(Logger::Red, 
-         "Undefined input ", tmeta, 
-         " (of type ", (dmeta ? dmeta->mToken : "any"), 
-         ") @ ", rate
-      );
-      return {};
-   }
-
-   return symbol;
-}
+}*/
 
 /// Get a default type of each of the standard traits                         
 ///   @param trait - the trait definition                                     
-///   @return the associated data type                                        
-const TraitProperties& Node::GetDefaultTrait(TMeta trait) {
-   static TUnorderedMap<TMeta, TraitProperties> properties;
+///   @return the default trait properties                                    
+const Node::DefaultTrait& Node::GetDefaultTrait(TMeta trait) {
+   static TUnorderedMap<TMeta, DefaultTrait> properties;
+
    if (properties.IsEmpty()) {
       properties[MetaOf<Traits::Time>()] =
          {MetaOf<Real>(), PerTick};
@@ -788,11 +745,11 @@ const TraitProperties& Node::GetDefaultTrait(TMeta trait) {
          {MetaOf<Vec4>(), PerVertex};
    }
 
-   auto found = properties.FindKey(trait);
+   auto found = properties.FindKeyIndex(trait);
    if (found)
-      return properties.GetKey(found);
+      return properties.GetValue(found);
 
-   Langulus::Error("Undefined trait: ", trait);
+   Logger::Error("Undefined trait: ", trait);
    LANGULUS_THROW(Material, "Undefined trait");
 }
 
@@ -814,7 +771,7 @@ DMeta Node::DecayToGLSLType(DMeta meta) {
    else if (meta->template CastsTo<Float>(3) || meta->template CastsTo<A::Number>(3))
       return MetaOf<Vec3f>();
    else if (meta->template CastsTo<Float>(2) || meta->template CastsTo<A::Number>(2))
-      return Meta<Vec2f>();
+      return MetaOf<Vec2f>();
    else if (meta->template CastsTo<Float>(1) || meta->template CastsTo<A::Number>(1))
       return MetaOf<Float>();
    else

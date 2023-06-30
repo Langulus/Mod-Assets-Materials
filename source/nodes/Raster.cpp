@@ -1,4 +1,4 @@
-//                                                                           
+///                                                                           
 /// Langulus::Module::Assets::Materials                                       
 /// Copyright(C) 2016 Dimo Markov <langulusteam@gmail.com>                    
 ///                                                                           
@@ -35,11 +35,11 @@ Raster::Raster(const Descriptor& desc)
 /// Generate rasterizer definition code                                       
 /// This is a 'fake' per-pixel rasterizer - very suboptimal, but useful in    
 /// various scenarios                                                         
-void Raster::GeneratePerPixel() {
+const Symbol& Raster::GeneratePerPixel() {
    // Generate children first                                           
    Descend();
 
-   // In order to raymarch, we require child scene nodes                
+   // In order to rasterize per pixel, we require child scene nodes     
    Symbols scenes;
    ForEachChild([&scenes](Nodes::Scene& scene) {
       scenes << scene.GenerateTriangles();
@@ -61,68 +61,49 @@ void Raster::GeneratePerPixel() {
       culling += "if (a <= 0.0) return;";
 
    // Add rasterizer functions and dependencies                         
-   AddDefine("RasterizeResult", RasterResult);
-   AddDefine("RasterizeTriangle", TemplateFill(RasterTriangles, culling));
-   AddDefine("RasterizeTriangleList", TemplateFill(RasterizeTriangleList, scenes[0].mCount, scenes[0].mCode));
+   AddDefine("RasterizeResult",
+      RasterResult);
+   AddDefine("RasterizeTriangle",
+      TemplateFill(RasterTriangle, culling));
+   AddDefine("RasterizeTriangleList",
+      TemplateFill(RasterTriangleList, scenes[0].mCount, scenes[0].mCode));
 
-   return Expose<Raster>("Rasterize({})", MetaOf<Camera>());
+   return ExposeData<Raster>("Rasterize({})", MetaOf<Camera>());
 }
 
-/// Wrap a per vertex symbol to the built-in gl_PerVertex structure           
-///   @param vs - the vertex shader code                                      
-template<CT::Trait T>
-void AddPerVertexOutput(GLSL& vs, const GLSL& symbol) {
-   if (vs.Find("out gl_PerVertex {"))
-      return;
-
-   vs.Select(ShaderToken::Output) >> "out gl_PerVertex {\n";
-
-   if constexpr (CT::Same<T, Traits::Place>) {
-      vs.Select(ShaderToken::Output)      >> "\tvec4 gl_Position;\n";
-      vs.Select(ShaderToken::Transform)   >> "gl_Position = " + symbol + ";\n";
-   }
-
-   vs.Select(ShaderToken::Output) >> "};\n";
-
-   //TODO 
-   //float gl_PointSize;
-   //float gl_ClipDistance[];
-}
-
-/// Generate fixed-pipeline rasterization                                     
-/// Uses relevant attributes and rasterizes them, by forwarding them to the   
-/// pixel shader                                                              
-void Raster::GeneratePerVertex() {
-   // If a pixel shader is missing, add a default one                   
-   GLSL& ps = GetProducer()->GetStage(ShaderStage::Pixel);
-   if (ps.IsEmpty())
-      ps = GLSL::From(ShaderStage::Pixel);
-
-   // Wrap the output token                                             
-   GLSL& vs = GetProducer()->GetStage(ShaderStage::Vertex);
-   if (vs.IsEmpty())
-      vs = GLSL::From(ShaderStage::Vertex);
-
+/// Generate fixed-pipeline rasterizer                                        
+/// Uses the scene provided from the geometry shader, and rasterizes it using 
+/// the default hardware rasterizer. Exposes symbols PerPixel as a result     
+///   @return NoSymbol, as functionality is in the fixed-pipeline             
+const Symbol& Raster::GeneratePerVertex() {
    auto position = GetSymbol<Traits::Place>(PerVertex);
-   if (!position.IsEmpty())
-      AddPerVertexOutput<Traits::Place>(vs, position);
 
-   //TODO 
-   //float gl_PointSize;
-   //float gl_ClipDistance[];
+   AddDefine("gl_PerVertex",
+      R"shader(
+         out gl_PerVertex {
+            vec4 gl_Position;
+            float gl_PointSize;
+            float gl_ClipDistance[];
+         };
+      )shader"
+   );
+
+   // We expose the built-in pixel shader inputs                        
+   ExposeTrait<Traits::Place, Vec4>("gl_FragCoord");
+   ExposeTrait<Traits::Place, Vec2>("gl_PointCoord");
+   ExposeTrait<Traits::Signed, bool>("gl_FrontFacing");
+   return NoSymbol;
 }
 
 /// Generate the rasterizer code                                              
 ///   @return the rasterizer function template                                
-Symbol& Raster::Generate() {
+const Symbol& Raster::Generate() {
    Descend();
 
-   if (mRate == PerVertex)
-      GeneratePerVertex();
+   if (mRate == PerVertex || mRate == PerPrimitive)
+      return GeneratePerVertex();
    else if (mRate == PerPixel)
-      GeneratePerPixel();
+      return GeneratePerPixel();
    else
       LANGULUS_THROW(Material, "Bad rate for rasterizer");
-
-   return Expose<Raster>("Rasterize({})", MetaOf<Camera>());
 }

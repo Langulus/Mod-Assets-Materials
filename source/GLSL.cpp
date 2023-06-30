@@ -13,11 +13,77 @@ GLSL GLSL::Template(Offset stage) {
    return Templates[stage];
 }
 
+/// Check if a character is blank space                                       
+///   @param c - the character to test                                        
+///   @return true if character is space                                      
+bool GLSL::IsOperator(char c) {
+   switch (c) {
+   case ';': case '.': case ',': case '!': case ':': case '?':
+   case '+': case '-': case '*': case '/': case '=': case '|':
+   case '[': case ']': case '(': case ')': case '{': case '}':
+   case '<': case '>': case '~': case '"': case '\'':
+      return true;
+   default:
+      return false;
+   }
+}
+
 /// Check if a #define exists for a symbol                                    
 ///   @param symbol - the definition to search for                            
 ///   @return true if definition exists                                       
-bool GLSL::IsDefined(const Text& symbol) {
-   return Text::FindWild("*#define "_text + symbol + "*"_text);
+bool GLSL::IsDefined(const Token& symbol) const {
+   return FindKeyword("#define "_text + symbol) != IndexNone;
+}
+
+/// Find an isolated token                                                    
+///   @param symbol - the definition to search for                            
+///   @return the index of the first match, or IndexNone if not found         
+Index GLSL::FindKeyword(const Token& symbol) const {
+   if (symbol.size() == 0)
+      return IndexNone;
+
+   Offset progress {};
+   while (FindOffset(symbol, progress)) {
+      // Match found                                                    
+      // For it to be keyword, its left side must be either the start,  
+      // isspace, an operator, or:                                      
+      //  - a number, if the symbol starts with a letter                
+      if (progress == 0) {
+         // LHS is valid, lets check RHS                                
+         // For it to be keyword, its right must be either the end,     
+         // isspace, or an operator                                     
+         if (symbol.size() >= GetCount()) {
+            // Found                                                    
+            return progress;
+         }
+         else {
+            const char rhs = (*this)[symbol.size()];
+            if (IsSpace(rhs) || IsOperator(rhs))
+               return progress;
+         }
+      }
+      else {
+         const char lhs = (*this)[progress - 1];
+         if (IsSpace(lhs) || IsOperator(lhs) || (IsAlpha(symbol[0]) && IsDigit(lhs))) {
+            // LHS is valid, lets check RHS                             
+            // For it to be keyword, its right must be either the end,  
+            // isspace, or an operator                                  
+            if (progress + symbol.size() >= GetCount()) {
+               // Found                                                 
+               return progress;
+            }
+            else {
+               const char rhs = (*this)[progress + symbol.size()];
+               if (IsSpace(rhs) || IsOperator(rhs))
+                  return progress;
+            }
+         }
+      }
+
+      progress += symbol.size();
+   }
+
+   return IndexNone;
 }
 
 /// Generate a log-friendly pretty version of the code, with line             
@@ -72,22 +138,23 @@ Text GLSL::Pretty() const {
 /// Add a definition to code                                                  
 ///   @param definition - the definition to add                               
 ///   @return a reference to this code                                        
-GLSL& GLSL::Define(const Text& definition) {
-   const Text defined {"#define "_text + definition};
-   if (Text::Find(defined))
+GLSL& GLSL::Define(const Token& definition) {
+   const Text defined {"#define "_text + definition + '\n'};
+   if (FindKeyword(defined))
       return *this;
 
-   Edit(this).Select(ShaderToken::Defines) >> defined >> "\n";
+   Edit(this).Select(ShaderToken::Defines) >> defined;
    return *this;
 }
 
 /// Set GLSL version for the code                                             
 ///   @param version - the version string                                     
 ///   @return a reference to this code                                        
-GLSL& GLSL::SetVersion(const Text& version) {
-   if (Text::Find("#version"))
+GLSL& GLSL::SetVersion(const Token& version) {
+   const Text defined {"#version "_text + version + '\n'};
+   if (FindKeyword(defined))
       return *this;
 
-   Edit(this).Select(ShaderToken::Version) >> "#version " >> version >> "\n";
+   Edit(this).Select(ShaderToken::Version) >> defined;
    return *this;
 }

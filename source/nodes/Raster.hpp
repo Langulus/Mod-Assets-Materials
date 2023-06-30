@@ -15,7 +15,7 @@ namespace Nodes
    ///                                                                        
    ///   Rasterizer material node                                             
    ///                                                                        
-   struct Raster : Node {
+   struct Raster final : Node {
    private:
       // Code for the rasterizer                                        
       Code mCode;
@@ -31,11 +31,11 @@ namespace Nodes
    public:
       Raster(const Descriptor&);
 
-      Symbol& Generate() final;
+      const Symbol& Generate();
 
    private:
-      void GeneratePerPixel();
-      void GeneratePerVertex();
+      const Symbol& GeneratePerPixel();
+      const Symbol& GeneratePerVertex();
    };
 
 } // namespace Nodes

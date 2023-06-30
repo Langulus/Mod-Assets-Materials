@@ -15,10 +15,10 @@ namespace Nodes
    ///                                                                        
    ///   Light material node                                                  
    ///                                                                        
-   struct Light : Node {
+   struct Light final : Node {
       Light(const Descriptor&);
 
-      Symbol& Generate() final;
+      const Symbol& Generate();
    };
 
 } // namespace Nodes

@@ -199,7 +199,7 @@ GLSL Texture::GenerateKeyframe(const Temporal& keyframe) {
 }*/
 
 /// Generate the shader stages                                                
-Symbol& Texture::Generate() {
+const Symbol& Texture::Generate() {
    Descend();
 
    /*Count totalKeyframeCount {};

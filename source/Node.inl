@@ -35,7 +35,21 @@ Count Node::ForEachChild(F&& call) {
 ///   @param ... - parameters, in case pattern is a function template         
 ///   @return the symbol handle                                               
 template<CT::Data T, class... ARGS>
-Symbol& Node::Expose(const Token& pattern, ARGS&&...) {
+Symbol& Node::ExposeData(const Token& pattern, ARGS&&...) {
+   TODO();
+}
+
+/// Add an output symbol to the node                                          
+///   @tparam ...ARGS - optional arguments, if symbol is a function template  
+///                     these arguments can be DMetas, or TMetas, or both by  
+///                     providing a Trait with a given type                   
+///   @tparam D - the trait type of the output                                
+///   @tparam T - the data type of the output (or return type of function)    
+///   @param pattern - the symbol name/function template                      
+///   @param ... - parameters, in case pattern is a function template         
+///   @return the symbol handle                                               
+template<CT::Trait T, CT::Data D, class... ARGS>
+Symbol& Node::ExposeTrait(const Token& pattern, ARGS&&...) {
    TODO();
 }
 
@@ -103,7 +117,7 @@ Count Node::ForEachInput(F&& call) {
    static_assert(CT::Same<A, Symbol>, "Function argument must be a Symbol");
 
    Count counter {};
-   for (auto pair : mInputsT) {
+   for (auto pair : mLocalsT) {
       for (auto& symbol : pair.mValue) {
          if constexpr (CT::Bool<R>) {
             if (!call(symbol))
@@ -114,7 +128,7 @@ Count Node::ForEachInput(F&& call) {
       }
    }
 
-   for (auto pair : mOutputsD) {
+   for (auto pair : mLocalsD) {
       for (auto& symbol : pair.mValue) {
          if constexpr (CT::Bool<R>) {
             if (!call(symbol))

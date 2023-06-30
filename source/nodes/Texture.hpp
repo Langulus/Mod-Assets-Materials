@@ -20,7 +20,7 @@ namespace Nodes
    /// or generates static textures if required. Supports texture animations  
    /// of all kinds, solid colors, etc.                                       
    ///                                                                        
-   struct Texture : Node {
+   struct Texture final : Node {
    private:
       Temporal mKeyframes;
       Offset mTextureId {};
@@ -28,7 +28,7 @@ namespace Nodes
    public:
       Texture(const Descriptor&);
 
-      Symbol& Generate() final;
+      const Symbol& Generate();
 
       NOD() operator Debug() const;
 

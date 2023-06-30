@@ -15,10 +15,10 @@ namespace Nodes
    ///                                                                        
    ///   Root node                                                            
    ///                                                                        
-   struct Root : Node {
+   struct Root final : Node {
       Root(Material*, const Descriptor&);
 
-      Symbol& Generate() final;
+      const Symbol& Generate();
    };
 
 } // namespace Nodes

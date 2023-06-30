@@ -17,7 +17,7 @@ Light::Light(const Descriptor& desc)
 
 /// Generate the light functionality                                          
 ///   @return the light function template                                     
-Symbol& Light::Generate() {
+const Symbol& Light::Generate() {
    // Generate children first, if any                                   
    Descend();
    TODO();

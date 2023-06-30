@@ -17,7 +17,7 @@ Raycast::Raycast(const Descriptor& desc)
 
 /// Generate the raycaster code                                               
 ///   @return the raycaster function template                                 
-Symbol& Raycast::Generate() {
+const Symbol& Raycast::Generate() {
    Descend();
    TODO();
 }

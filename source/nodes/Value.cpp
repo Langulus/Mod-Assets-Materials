@@ -232,7 +232,7 @@ bool Value::IsValid() const {
 }*/
 
 /// Generate the shader stages                                                
-Symbol& Value::Generate() {
+const Symbol& Value::Generate() {
    Descend();
    TODO();
 }

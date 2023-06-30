@@ -14,7 +14,7 @@ namespace Nodes
    ///                                                                        
    ///   Raymarch material node                                               
    ///                                                                        
-   struct Raymarch : Node {
+   struct Raymarch final : Node {
    private:
       // Raymarcher precision                                           
       float mPrecision {0.008f};
@@ -38,7 +38,7 @@ namespace Nodes
    public:
       Raymarch(const Descriptor&);
 
-      Symbol& Generate() final;
+      const Symbol& Generate();
    };
 
 } // namespace Nodes

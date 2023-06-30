@@ -17,7 +17,7 @@ Raytrace::Raytrace(const Descriptor& desc)
 
 /// Generate raytracer code                                                   
 ///   @return the output symbol                                               
-Symbol& Raytrace::Generate() {
+const Symbol& Raytrace::Generate() {
    Descend();
    TODO();
 }

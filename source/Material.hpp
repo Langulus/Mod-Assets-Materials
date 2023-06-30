@@ -51,7 +51,7 @@ public:
    NOD()       TAny<GLSL>& GetStages();
    NOD() const TAny<GLSL>& GetStages() const;
 
-   void Commit(Rate, const Token&, const GLSL&);
+   void Commit(Rate, const Token&, const Token&);
 
    GLSL AddInput (Rate, const Trait&, bool allowDuplicates);
    GLSL AddOutput(Rate, const Trait&, bool allowDuplicates);
@@ -63,4 +63,5 @@ private:
    void GenerateUniforms();
    void GenerateInputs();
    void GenerateOutputs();
+   void InitializeFromShadertoy(const GLSL&);
 };

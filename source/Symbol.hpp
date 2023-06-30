@@ -47,6 +47,8 @@ struct Symbol {
 
    NOD() bool MatchesFilter(DMeta, Rate) const noexcept;
 
+   NOD() GLSL Generate(const Node*) const;
+
 protected:
    void PushArgument(DMeta&&);
    void PushArgument(TMeta&&);

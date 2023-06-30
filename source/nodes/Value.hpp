@@ -15,12 +15,9 @@ namespace Nodes
    ///                                                                        
    ///   Value node                                                           
    ///                                                                        
-   struct Value : Node {
+   struct Value final : Node {
    private:
       Temporal mKeyframes;
-
-      //Trait mTrait;
-      //GLSL mUniform, mName, mUse;
 
    public:
       LANGULUS_VERBS(Verbs::Do);
@@ -31,7 +28,7 @@ namespace Nodes
       NOD() static Value Output(Node*, const Trait& = {}, Rate = Rate::Auto, const GLSL& name = {});
       NOD() static Value Local (Node*, const Trait& = {}, Rate = Rate::Auto, const GLSL& name = {});
 
-      Symbol& Generate() final;
+      const Symbol& Generate();
 
       void Do(Verb&);
 

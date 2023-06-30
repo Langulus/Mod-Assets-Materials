@@ -17,18 +17,16 @@ Camera::Camera(const Descriptor& desc)
    : Node {MetaOf<Camera>(), desc} { }
 
 /// Generate the camera code                                                  
-Symbol& Camera::Generate() {
+///   @return the output symbol                                               
+const Symbol& Camera::Generate() {
    // Generate children first                                           
    Descend();
 
-   GLSL types;
-   types += CameraResult;
-
-   GLSL functions;
-   bool explicitCamera = false;
+   AddDefine("CameraResult", CameraResult);
 
    // Check traits in descriptor to figure out what kind of camera we   
    // are creating                                                      
+   bool explicitCamera = false;
    for (auto pair : mDescriptor.mTraits) {
       if (!pair.mKey->template Is<Traits::View>())
          continue;
@@ -43,7 +41,8 @@ Symbol& Camera::Generate() {
          // Combine pixel position with the view matrix to from         
          // the projection per pixel. This allows for optically         
          // realistic rendering (near and far planes are not flat)      
-         functions += TemplateFill(CameraFuncPerPixel, symRes, symView, symFov, symProj);
+         AddDefine("Camera", 
+            TemplateFill(CameraFuncPerPixel, symRes, symView, symFov, symProj));
          explicitCamera = true;
       }
       else if (mRate == PerVertex) {
@@ -52,7 +51,8 @@ Symbol& Camera::Generate() {
 
          // Combine vertex position with the view matrix to from        
          // the projection per vertex                                   
-         functions += TemplateFill(CameraFuncPerVertex, symView, symPos);
+         AddDefine("Camera", 
+            TemplateFill(CameraFuncPerVertex, symView, symPos));
          explicitCamera = true;
       }
       else TODO();
@@ -63,17 +63,16 @@ Symbol& Camera::Generate() {
       Logger::Warning("No explicit camera defined - using default 2D screen projection");
       mRate = PerPixel;
       auto symRes = GetSymbol<Traits::Size, Vec2>(PerTick);
-      functions += TemplateFill(CameraFuncDefault, symRes);
+      AddDefine("Camera",
+         TemplateFill(CameraFuncDefault, symRes));
    }
 
-   GLSL constants = "CameraResult camResult = Camera();\n\n";
-
-   Commit(ShaderToken::Functions, types + functions + constants);
-
    // Expose the results to the rest of the nodes                       
-   Expose<Traits::Place, Vec2>("camResult.mFragment");
+   return ExposeData<Camera>("Camera()");
+
+   /*Expose<Traits::Place, Vec2>("camResult.mFragment");
    Expose<Traits::Sampler, Vec2>("camResult.mScreenUV");
    Expose<Traits::Place, Vec3>("camResult.mOrigin");
    Expose<Traits::Projection, Mat4>("camResult.mProjectedView");
-   Expose<Traits::Aim, Vec3>("camResult.mDirection");
+   Expose<Traits::Aim, Vec3>("camResult.mDirection");*/
 }

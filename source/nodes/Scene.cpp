@@ -6,6 +6,8 @@
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
 #include "Scene.hpp"
+#include "../Material.hpp"
+#include <Math/Colors.hpp>
 
 using namespace Nodes;
 
@@ -32,18 +34,17 @@ Scene::operator Debug() const {
 
 /// Generate scene code                                                       
 ///   @return the SDF scene function template symbol                          
-Symbol& Scene::Generate() {
+const Symbol& Scene::Generate() {
    Descend();
 
    // Intentionally does nothing. It is generated on demand by a        
    // raycaster/raymarcher/raytracer/rasterizer                         
-   TODO();
+   return NoSymbol;
 }
-
 
 /// Generate scene code                                                       
 ///   @return the array of lines symbol                                       
-Symbol& Scene::GenerateLines() {
+const Symbol& Scene::GenerateLines() {
    GLSL lines;
    Count countCombined;
 
@@ -56,27 +57,28 @@ Symbol& Scene::GenerateLines() {
          // By default, geometry doesn't generate vertex positions      
          // and rasterizer requires it, so we create them               
          // We generate color, too                                      
-         Any additional {
-            MetaOf<A::Line>(),
-            MetaOf<Point3>(),
-            MetaOf<RGBA>()
-         };
+         auto geometryDescriptor = construct;
+         geometryDescriptor <<= MetaOf<A::Line>();
+         geometryDescriptor <<= MetaOf<Point3>();
+         geometryDescriptor <<= MetaOf<RGBA>();
 
-         Any unusedSideproducts;
-         Any geometryBlock {mGeometry->GetBlock()};
-         Verb::DefaultCreateInner(geometryBlock, additional, unusedSideproducts);
-         mGeometry->Generate();
+         Verbs::Create creator {geometryDescriptor};
+         if (!mMaterial->DoInHierarchy(creator))
+            continue;
 
-         const auto count = mGeometry->GetLineCount();
+         // Get the generated geometry asset                            
+         auto geometry = creator.GetOutput().As<const A::Geometry*>();
+         const auto count = geometry->GetLineCount();
          for (Count i = 0; i < count; ++i) {
-            auto position = mGeometry->GetLineTrait<Traits::Place>(i);
+            // Extract each line, and convert it to shader code         
+            auto position = geometry->GetLineTrait<Traits::Place>(i);
             LANGULUS_ASSERT(!position.IsEmpty(), Material,
                "Can't rasterize a line without Traits::Place");
 
             if (!position.template CastsTo<Vec3>(1))
                TODO();
 
-            auto color = mGeometry->GetLineTrait<Traits::Color>(i);
+            auto color = geometry->GetLineTrait<Traits::Color>(i);
             LANGULUS_ASSERT(!color.IsEmpty(), Material,
                "Can't rasterize a line without Traits::Color");
 
@@ -108,7 +110,7 @@ Symbol& Scene::GenerateLines() {
    //   );                                                              
    AddDefine("Line", LineStruct);
    AddDefine("cLines", TemplateFill(LineList, countCombined, lines));
-   return Expose<Scene>("cLines");
+   return ExposeData<Scene>("cLines");
 }
 
 /// Interpret a construct as an SDF function                                  
@@ -121,7 +123,7 @@ GLSL InterpretAsSDF(const Construct& what, Material& global) {
 
 /// Generate scene code                                                       
 ///   @return the SDF scene function template symbol                          
-Symbol& Scene::GenerateSDF() {
+const Symbol& Scene::GenerateSDF() {
    GLSL scene;
 
    // Get the SDF code for each geometry construct                      
@@ -152,12 +154,12 @@ Symbol& Scene::GenerateSDF() {
    AddDefine("Scene", TemplateFill(SceneFunction, scene));
 
    // Expose scene usage                                                
-   return Expose<Traits::D>("Scene({})", Traits::Place::OfType<Vec3>());
+   return ExposeTrait<Traits::D, float>("Scene({})", Traits::Place::OfType<Vec3>());
 }
 
 /// Generate scene code                                                       
 ///   @return the array of triangles symbol                                   
-Symbol& Scene::GenerateTriangles() {
+const Symbol& Scene::GenerateTriangles() {
    GLSL triangles;
    Count countCombined;
 
@@ -169,36 +171,36 @@ Symbol& Scene::GenerateTriangles() {
       for (auto& construct : pair.mValue) {
          // By default, geometry doesn't generate vertex positions      
          // and rasterizer requires it, so we create them               
-         // We generate normals and texture coordinates, too            
-         Any additional {
-            MetaOf<A::Triangle>(),
-            MetaOf<Point3>(),
-            MetaOf<Normal>(),
-            MetaOf<Sampler2>()
-         };
+         // We generate color, too                                      
+         auto geometryDescriptor = construct;
+         geometryDescriptor <<= MetaOf<A::Triangle>();
+         geometryDescriptor <<= MetaOf<Point3>();
+         geometryDescriptor <<= MetaOf<Normal>();
+         geometryDescriptor <<= MetaOf<Sampler2>();
 
-         Any unusedSideproducts;
-         Any geometryBlock {mGeometry->GetBlock()};
-         Verb::DefaultCreateInner(geometryBlock, additional, unusedSideproducts);
-         mGeometry->Generate();
+         Verbs::Create creator {geometryDescriptor};
+         if (!mMaterial->DoInHierarchy(creator))
+            continue;
 
-         const auto count = mGeometry->GetTriangleCount();
+         // Get the generated geometry asset                            
+         auto geometry = creator.GetOutput().As<const A::Geometry*>();
+         const auto count = geometry->GetTriangleCount();
          for (Count i = 0; i < count; ++i) {
-            auto position = mGeometry->GetTriangleTrait<Traits::Place>(i);
+            auto position = geometry->GetTriangleTrait<Traits::Place>(i);
             LANGULUS_ASSERT(!position.IsEmpty(), Material,
                "Can't rasterize a triangle without Traits::Place");
 
             if (!position.template CastsTo<Vec3>(1))
                TODO();
 
-            auto normal = mGeometry->GetTriangleTrait<Traits::Aim>(i);
+            auto normal = geometry->GetTriangleTrait<Traits::Aim>(i);
             LANGULUS_ASSERT(!normal.IsEmpty(), Material,
                "Can't rasterize a triangle without Traits::Aim");
 
             if (!normal.template CastsTo<Vec3>(1))
                TODO();
 
-            auto texture = mGeometry->GetTriangleTrait<Traits::Sampler>(i);
+            auto texture = geometry->GetTriangleTrait<Traits::Sampler>(i);
             LANGULUS_ASSERT(!texture.IsEmpty(), Material,
                "Can't rasterize a triangle without Traits::Sampler");
 
@@ -236,5 +238,5 @@ Symbol& Scene::GenerateTriangles() {
    //   );                                                              
    AddDefine("Triangle", TriangleStruct);
    AddDefine("cTriangles", TemplateFill(TriangleList, countCombined, triangles));
-   return Expose<Scene>("cTriangles");
+   return ExposeData<Scene>("cTriangles");
 }

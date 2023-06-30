@@ -15,10 +15,10 @@ namespace Nodes
    ///                                                                        
    ///   Raycast material node                                                
    ///                                                                        
-   struct Raycast : Node {
+   struct Raycast final : Node {
       Raycast(const Descriptor&);
 
-      Symbol& Generate() final;
+      const Symbol& Generate();
    };
 
 } // namespace Nodes

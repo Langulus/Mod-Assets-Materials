@@ -26,7 +26,7 @@ Raymarch::Raymarch(const Descriptor& desc)
    //         RaymarchConfig.mFarStride                                 
    //         RaymarchConfig.mBaseStride                                
    //         RaymarchConfig.mMinStep                                   
-   mDescriptor.ExtractTrait<Traits::Argument>(
+   mDescriptor.ExtractTrait<Traits::Input>(
       mPrecision, mFarMax, mFarStride, mBaseStride, mMinStep
    );
    LANGULUS_ASSERT(mPrecision > 0, Material,
@@ -43,7 +43,7 @@ Raymarch::Raymarch(const Descriptor& desc)
 
 /// Generate raymarcher code                                                  
 ///   @return the output symbol                                               
-Symbol& Raymarch::Generate() {
+const Symbol& Raymarch::Generate() {
    // Generate children first                                           
    Descend();
 
@@ -65,5 +65,5 @@ Symbol& Raymarch::Generate() {
       mMinStep, mDetail)
    );
 
-   return Expose<Raymarch>("Raymarch({})", MetaOf<Camera>());
+   return ExposeData<Raymarch>("Raymarch({})", MetaOf<Camera>());
 }

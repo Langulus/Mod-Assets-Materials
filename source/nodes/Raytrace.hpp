@@ -15,10 +15,10 @@ namespace Nodes
    ///                                                                        
    ///   Raytracing material node                                             
    ///                                                                        
-   struct Raytrace : Node {
+   struct Raytrace final : Node {
       Raytrace(const Descriptor&);
 
-      Symbol& Generate() final;
+      const Symbol& Generate();
    };
 
 } // namespace Nodes

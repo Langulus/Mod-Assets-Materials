@@ -15,10 +15,10 @@ namespace Nodes
    ///                                                                        
    ///   Camera node                                                          
    ///                                                                        
-   struct Camera : Node {
+   struct Camera final : Node {
       Camera(const Descriptor&);
 
-      Symbol& Generate() final;
+      const Symbol& Generate();
    };
 
 } // namespace Nodes

@@ -31,7 +31,7 @@ const Rate& Material::GetDefaultRate() const noexcept {
 ///	@param stage - the shader stage to commit to                            
 ///   @param place - the shader token to commit changes at                    
 ///   @param addition - the code to commit                                    
-void Material::Commit(Rate rate, const Token& place, const GLSL& addition) {
+void Material::Commit(Rate rate, const Token& place, const Token& addition) {
    const auto stage = rate.GetStageIndex();
    auto& code = GetStage(stage);
    if (code.IsEmpty()) {
@@ -41,7 +41,7 @@ void Material::Commit(Rate rate, const Token& place, const GLSL& addition) {
 
    Edit(code).Select(place) >> addition;
    VERBOSE_NODE("Added code: ");
-   VERBOSE_NODE(addition.Pretty());
+   VERBOSE_NODE(GLSL {addition}.Pretty());
 }
 
 /// Get a GLSL stage                                                          
@@ -356,7 +356,7 @@ void Material::GenerateOutputs() {
          )shader";
 
          const GLSL type {vkt};
-         const GLSL name {GenerateOutputName(rate, input)};
+         const GLSL name {GenerateOutputName(rate, output)};
          const auto definition = TemplateFill(layout, location, type, name);
 
          // Add output to code                                          
@@ -372,26 +372,33 @@ void Material::InitializeFromShadertoy(const GLSL& code) {
    Logger::Verbose("Code seems to be from shadertoy.com - porting:");
    Logger::Verbose(code.Pretty());
 
-   // Add the code snippet                                              
+   // Add the code snippet to the pixel shader                          
    Commit(PerPixel, ShaderToken::Functions, code);
 
    // Shadertoy has the vertical flipped, so use this iFragment macro   
    Commit(PerPixel, ShaderToken::Defines,
-      "#define iFragment vec2(gl_FragCoord.x, iResolution.y - gl_FragCoord.y)\n");
+      "#define iFragment vec2(gl_FragCoord.x, iResolution.y - gl_FragCoord.y)");
 
-   auto integrate = [&](const Trait& trait, const GLSL& wildcard) {
-      if (!code.FindWild(wildcard))
+   // Maps a code token to an input trait by using a macro              
+   auto integrate = [&](const Trait& trait, const Token& keyword) {
+      if (!code.FindKeyword(keyword))
          return;
 
+      const auto input = AddInput(PerPixel, trait, false);
+      constexpr auto layout = R"shader(
+         #define {1} {2}
+      )shader";
+
       Commit(PerPixel, ShaderToken::Defines,
-         "#define " + wildcard.Strip('*') + " " + AddInput(PerAuto, trait, false) + "\n");
+         TemplateFill(layout, keyword, input));
    };
 
-   // Satisfy traits																		
-   integrate(Traits::Time {}, "*iTime*");
-   integrate(Traits::Size {}, "*iResolution*");
-   integrate(Traits::Texture {}, "*iChannel0*");
-   integrate(Traits::View {}, "*iView*");
+   // Satisfy traits                                                    
+   integrate(Traits::Time {}, "iTime");
+   integrate(Traits::Size {}, "iResolution");
+   integrate(Traits::Texture {}, "iChannel0");
+   integrate(Traits::View {}, "iView");
+
    /*TODO
    for snippets that are not from shadertoy, search trait symbols
    integrate(Trait::From<Traits::ViewProjectTransformInverted>());
@@ -402,11 +409,16 @@ void Material::InitializeFromShadertoy(const GLSL& code) {
    integrate(Trait::From<Traits::Time>());
    integrate(Trait::From<Traits::FOV>());*/
 
-   // Add output color																	
-   auto output = AddOutput(PerPixel, Traits::Color::OfType<Vec4>(), false);
-   Commit(PerPixel, ShaderToken::Colorize, "vec4 c;\nmainImage(c, iFragment);\n");
+   // Wrap the shadertoy's mainImage function in our own ShadertoyMain  
+   Commit(PerPixel, ShaderToken::Functions, R"shader(
+      vec4 ShadertoyMain() {
+         vec4 output;
+         mainImage(output, iFragment);
+         return output;
+      }
+   )shader");
 
-   auto color = Ptr<MaterialNodeValue>::New(
-      MaterialNodeValue::Local(&mRoot, Trait::From<Traits::Color, vec4f>(), PerPixel, "c"));
-   mRoot.AddChild(color);
+   // Add output color per pixel                                        
+   auto output = AddOutput(PerPixel, Traits::Color::OfType<Vec4>(), false);
+   Commit(PerPixel, ShaderToken::Colorize, output + " = ShadertoyMain();");
 }

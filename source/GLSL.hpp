@@ -115,18 +115,20 @@ public:
    explicit GLSL(const TQuaternion<T>&);
 
    NOD() static GLSL Template(Offset);
-   NOD() bool IsDefined(const Text&);
+   NOD() static bool IsOperator(char);
+   template<CT::Data T>
+   NOD() static GLSL Type();
+
+   NOD() bool IsDefined(const Token&) const;
+   NOD() Index FindKeyword(const Token&) const;
    NOD() Text Pretty() const;
    NOD() static GLSL Type(DMeta);
 
-   GLSL& Define(const Text&);
-   GLSL& SetVersion(const Text&);
+   GLSL& Define(const Token&);
+   GLSL& SetVersion(const Token&);
 
    template<class ANYTHING>
    GLSL& operator += (const ANYTHING&);
-
-   template<CT::Data T>
-   NOD() static GLSL Type();
 };
 
 LANGULUS(INLINED)
