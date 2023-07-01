@@ -270,4 +270,5 @@ const Symbol& Texture::Generate() {
    const GLSL define = "vec4 texturized = Texturize(" + channel + ", " + uv + ");\n\n";
    Commit(ShaderToken::Texturize, define);
    Expose<Traits::Color, Vec4>("texturized");*/
+   TODO();
 }

@@ -39,6 +39,11 @@ bool Symbol::MatchesFilter(DMeta d, Rate r) const noexcept {
 }
 
 LANGULUS(INLINED)
+Symbol::operator Token() const noexcept {
+   return mCode;
+}
+
+LANGULUS(INLINED)
 void Symbol::PushArgument(DMeta&& type) {
    mArguments << Trait::FromMeta(nullptr, type);
 }

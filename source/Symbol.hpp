@@ -49,6 +49,8 @@ struct Symbol {
 
    NOD() GLSL Generate(const Node*) const;
 
+   NOD() operator Token() const noexcept;
+
 protected:
    void PushArgument(DMeta&&);
    void PushArgument(TMeta&&);

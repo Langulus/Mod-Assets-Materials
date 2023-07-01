@@ -129,6 +129,8 @@ public:
 
    template<class ANYTHING>
    GLSL& operator += (const ANYTHING&);
+
+   using Text::operator Token;
 };
 
 LANGULUS(INLINED)
