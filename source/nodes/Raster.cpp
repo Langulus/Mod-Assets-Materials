@@ -7,6 +7,7 @@
 ///                                                                           
 #include "Raster.hpp"
 #include "Scene.hpp"
+#include "Camera.hpp"
 
 using namespace Nodes;
 

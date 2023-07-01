@@ -147,7 +147,7 @@ Count Node::ForEachInput(F&& call) {
 ///   @param call - the function to call for each symbol                      
 ///   @return the number of execution of call                                 
 template<class F>
-Count Node::ForEachOutput(F&&) {
+Count Node::ForEachOutput(F&& call) {
    using A = ArgumentOf<F>;
    using R = ReturnOf<F>;
    static_assert(CT::Same<A, Symbol>, "Function argument must be a Symbol");
