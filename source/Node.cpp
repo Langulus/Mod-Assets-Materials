@@ -49,8 +49,9 @@ Node::Node(DMeta classid, const Descriptor& descriptor)
       [this](const Trait& trait) {
          if (trait.TraitIs<Traits::Parent>()) {
             return !trait.ForEach([this](const Node* owner) {
-               mParent = owner;
-               const_cast<Node*>(owner)->mChildren << this;
+               auto mutableOwner = const_cast<Node*>(owner);
+               mParent = mutableOwner;
+               mutableOwner->mChildren << this;
                mMaterial = owner->GetMaterial();
                return Flow::Break;
             });
@@ -195,7 +196,7 @@ void Node::ArithmeticVerb(Verb& verb, const Token& pos, const Token& neg, const 
    if (verb.IsEmpty() && inverse && unary.size()) {
       // No argument, so an unary minus sign                            
       ForEachOutput([&success,&unary](Symbol& symbol) {
-         symbol.mCode = TemplateFill(unary, symbol.mCode);
+         symbol.mCode = Text::TemplateRt(unary, symbol.mCode);
          success = true;
       });
 
@@ -216,13 +217,13 @@ void Node::ArithmeticVerb(Verb& verb, const Token& pos, const Token& neg, const 
 
             if (neg.empty() || !inverse) {
                ForEachOutput([&](Symbol& symbol) {
-                  symbol.mCode = TemplateFill(pos, symbol.mCode, code);
+                  symbol.mCode = Text::TemplateRt(pos, symbol.mCode, code);
                   success = true;
                });
             }
             else {
                ForEachOutput([&](Symbol& symbol) {
-                  symbol.mCode = TemplateFill(neg, symbol.mCode, code);
+                  symbol.mCode = Text::TemplateRt(neg, symbol.mCode, code);
                   success = true;
                });
             }
@@ -289,7 +290,7 @@ void Node::Randomize(Verb& verb) {
             AddDefine("SimplexNoise1", TSimplex<1, 3, float>::template Hash<true>());
          else TODO();
 
-         symbol.mCode = TemplateFill("SimplexNoise1({})", symbol.mCode);
+         symbol.mCode = Text::TemplateRt("SimplexNoise1({})", symbol.mCode);
          success = true;
       }
       else TODO();
@@ -326,12 +327,12 @@ void Node::Descend() {
       child->Generate();
 }
 
-/// Commit a code snippet to a specific stage and place                       
-///   @param place - the shader token to commit changes at                    
-///   @param addition - the code to commit                                    
-/*void Node::Commit(const Token& place, const GLSL& addition) {
-   mMaterial->Commit(GetStage(), place, addition);
-}*/
+/// Add a definition at the node's rate                                       
+///   @param name - the definition name (used to detect duplications)         
+///   @param code - the code snippet to add                                   
+void Node::AddDefine(const Token& name, const GLSL& code) {
+   mMaterial->AddDefine(mRate, name, code);
+}
 
 /// Log the material node hierarchy                                           
 void Node::Dump() const {
@@ -372,130 +373,6 @@ Node::operator Debug() const {
    return result;
 }
 
-/// Generate GLSL code from a construct                                       
-///   @param construct - the construct to interpret as GLSL                   
-///   @return the GLSL code                                                   
-/*GLSL Node::CodeFromConstruct(const Construct& construct) {
-   // Attempt static construction                                       
-   Any created;
-   try {
-      construct.StaticCreation(created);
-      return GLSL {created};
-   }
-   catch (const Except::Construct&) { }
-
-   // Propagate the construct as GLSL                                   
-   Any context {mParent};
-   auto code = GLSL::Type(construct.GetMeta()) + "(";
-   bool separator = false;
-
-   construct.ForEachDeep([&](const Block& group) {
-      if (separator)
-         code += ", ";
-
-      if (group.Is<Verb>()) {
-         // Execute verbs in parent scope if any                        
-         Any scopeResults;
-         Any scope {group};
-         Verb::ExecuteScope(context, scope, scopeResults);
-         code += scopeResults;
-      }
-      else code += group;
-
-      separator = true;
-   });
-
-   code += ")";
-   return code;
-}
-
-/// Generate GLSL code from a scope                                           
-///   @param scope - the scope to interpret as GLSL                           
-///   @return the GLSL code                                                   
-GLSL Node::CodeFromScope(const Any& scope) {
-   GLSL code;
-   Any scopeLocal {scope};
-   Any scopeResults;
-   Any context {mParent};
-   Verb::ExecuteScope(context, scopeLocal, scopeResults);
-   scopeResults.ForEach(
-      [&code](const Node& node) {
-         code += node.GetOutputSymbol();
-      }
-   );
-   return code;
-}
-
-/// Check if a node already exists in parent chain                            
-///   @param what - what node to search for                                   
-///   @return true if any of the parents match the search                     
-bool Node::IsInHierarchy(MaterialNode* what) const {
-   return mParent && (mParent == what || mParent->IsInHierarchy(what));
-}
-
-/// Add child, also sets parents for child                                    
-///   @param child - child pointer to add                                     
-void Node::AddChild(MaterialNode* child) {
-   if (this == child)
-      return;
-   if (mChildren.Find(child) != uiNone)
-      return;
-   if (IsInHierarchy(child))
-      return;
-
-   child->mParent = this;
-   mChildren << child;
-   VERBOSE_NODE("Added child ", Logger::Cyan, child);
-}
-
-/// Remove child, also removes parent of child                                
-///   @param child - child pointer to remove                                  
-void Node::RemoveChild(MaterialNode* child) {
-   auto found = mChildren.Find(child);
-   if (found.IsSpecial())
-      return;
-
-   child->mParent.Reset();
-   mChildren.RemoveIndex(static_cast<pcptr>(found));
-   VERBOSE_NODE("Removed child ", Logger::Cyan, child);
-}*/
-
-/// Return the first output trait                                             
-///   @return trait                                                           
-/*const Trait& Node::GetOutputTrait() const {
-   LANGULUS_ASSERT(!mOutputs.IsEmpty(), Material, "Node has no outputs");
-   return mOutputs.GetKey(0);
-}
-
-/// Search and return an output trait, if any                                 
-///   @param trait - the trait to search for in outputs                       
-///   @return the symbol or an empty container if nothing was found           
-Trait Node::GetOutputTrait(const Trait& trait) const {
-   for (auto pair : mOutputs) {
-      if (trait.IsSimilar(pair.mKey))
-         return pair.mKey;
-   }
-   return {};
-}
-
-/// Search and return an output symbol, if any                                
-///   @param trait - the trait to search for in outputs                       
-///   @return the symbol or an empty container if nothing was found           
-GLSL Node::GetOutputSymbol(const Trait& trait) const {
-   for (auto pair : mOutputs) {
-      if (trait.IsSimilar(pair.mKey))
-         return pair.mValue;
-   }
-   return {};
-}
-
-/// Return the first output symbol                                            
-///   @return the symbol                                                      
-const GLSL& Node::GetOutputSymbol() const {
-   LANGULUS_ASSERT(!mOutputs.IsEmpty(), Material, "Node has no outputs");
-   return mOutputs.GetValue(0);
-}*/
-
 /// Convert a symbol from one type to another in GLSL                         
 ///   @param trait - the trait to convert                                     
 ///   @param symbol - the symbol for the original trait                       
@@ -523,21 +400,21 @@ GLSL ConvertSymbol(const Trait& trait, const GLSL& symbol, DMeta as, Real filler
    // Matrix types                                                      
    if (from->template CastsTo<AM4>()) {
       if (as->template CastsTo<AM3>())
-         return TemplateFill(TypeX, "mat3", symbol);
+         return Text::TemplateRt(TypeX, "mat3", symbol);
       else if (as->template CastsTo<AM2>())
-         return TemplateFill(TypeX, "mat2", symbol);
+         return Text::TemplateRt(TypeX, "mat2", symbol);
    }
    else if (from->template CastsTo<AM3>()) {
       if (as->template CastsTo<AM4>())
-         return TemplateFill(MatXtoMatY, "mat4", symbol, filler);
+         return Text::TemplateRt(MatXtoMatY, "mat4", symbol, filler);
       else if (as->template CastsTo<AM2>())
-         return TemplateFill(TypeX, "mat2", symbol);
+         return Text::TemplateRt(TypeX, "mat2", symbol);
    }
    else if (from->template CastsTo<AM2>()) {
       if (as->template CastsTo<AM4>())
-         return TemplateFill(Mat2toMat4, symbol, filler);
+         return Text::TemplateRt(Mat2toMat4, symbol, filler);
       else if (as->template CastsTo<AM3>())
-         return TemplateFill(MatXtoMatY, "mat3", symbol, filler);
+         return Text::TemplateRt(MatXtoMatY, "mat3", symbol, filler);
    }
    // Vector types                                                      
    else if (from->template CastsTo<AV4>()) {
@@ -574,9 +451,9 @@ GLSL ConvertSymbol(const Trait& trait, const GLSL& symbol, DMeta as, Real filler
       if (as->template CastsTo<AV4>())
          return "vec4(vec3(" + symbol + "), 1.0)";
       else if (as->template CastsTo<AV3>())
-         return TemplateFill(TypeX, "vec3", symbol);
+         return Text::TemplateRt(TypeX, "vec3", symbol);
       else if (as->template CastsTo<AV2>())
-         return TemplateFill(TypeX, "vec2", symbol);
+         return Text::TemplateRt(TypeX, "vec2", symbol);
       else if (as->template CastsTo<AV1>() || as->template CastsTo<A::Number>())
          return symbol;
    }
@@ -584,126 +461,6 @@ GLSL ConvertSymbol(const Trait& trait, const GLSL& symbol, DMeta as, Real filler
    Logger::Error("Can't convert trait ", trait, " to ", as);
    LANGULUS_THROW(Material, "Can't convert type");
 }
-
-/// Return the first output symbol, converted as the desired type             
-///   @param as - the type we want to convert to                              
-///   @param filler - value to fill expanded parts (if any)                   
-///   @return the symbol                                                      
-/*GLSL Node::GetOutputSymbolAs(DMeta as, Real filler) const {
-   LANGULUS_ASSERT(!mOutputs.IsEmpty(), Material, "Node has no outputs");
-   for (auto pair : mOutputs)
-      return ConvertSymbol(pair.mKey, pair.mValue, as, filler);
-}
-
-/// Return the matching output symbol, converted as the desired type          
-///   @param trait - the trait we're searching for                            
-///   @param as - the type we want to convert to                              
-///   @param filler - value to fill expanded parts (if any)                   
-///   @return the symbol                                                      
-GLSL Node::GetOutputSymbolAs(const Trait& trait, DMeta as, Real filler) const {
-   for (auto pair : mOutputs) {
-      if (trait.IsSimilar(pair.mKey))
-         return ConvertSymbol(pair.mKey, pair.mValue, as, filler);
-   }
-
-   return {};
-}*/
-
-/// Get (or make) node that contains an input we're searching for             
-///   @param trait - the trait to search for (nullptr for any)                
-///   @param rate - the rate of the trait to use                              
-///   @param checkHere - whether or not to check local outputs                
-///   @param output - [out] the resulting value node                          
-///   @return true if output has been set                                     
-/*bool Node::InnerGetValue(const Trait& trait, Rate rate, bool checkHere, Nodes::Value& output) const {
-   // Check here                                                        
-   if (checkHere) {
-      VERBOSE_NODE("Searching for ", trait, " inside ", this);
-      for (auto pair : mOutputs) {
-         if (!trait.IsSimilar(pair.mKey))
-            continue;
-
-         output.BindTo(pair.mKey, this);
-         return true;
-      }
-   }
-
-   if (mParent) {
-      // Scan previous node's outputs                                   
-      const auto thisIndex = mParent->mChildren.Find(this);
-      const Offset start = thisIndex == IndexNone
-         ? mParent->mChildren.GetCount()
-         : thisIndex.GetOffset();
-
-      for (Offset i = start; i > 0; --i) {
-         // Check outputs of all children up to this one                
-         auto child = mParent->mChildren[i - 1];
-         VERBOSE_NODE("Searching for ", trait, " inside ", *child);
-         for (auto pair : child->mOutputs) {
-            if (!trait.IsSimilar(pair.mKey))
-               continue;
-
-            output.BindTo(pair.mKey, child);
-            return true;
-         }
-      }
-
-      // Then check the parent itself                                   
-      VERBOSE_NODE("Searching for ", trait, " inside ", mParent);
-      for (auto pair : mParent->mOutputs) {
-         if (!trait.IsSimilar(pair.mKey))
-            continue;
-
-         output.BindTo(pair.mKey, mParent);
-         return true;
-      }
-
-      // Climb the hierarchy in search of more                          
-      for (Offset i = start; i > 0; --i) {
-         auto child = mParent->mChildren[i - 1];
-         if (child->InnerGetValue(trait, rate, false, output))
-            return true;
-      }
-   }
-
-   return false;
-}*/
-
-/// Get (or make) node that contains an input we're searching for             
-///   @param tmeta - the trait to search for (nullptr for any)                
-///   @param dmeta - the data to search for (nullptr for any)                 
-///   @param rate - the rate of the trait to use                              
-///   @param addIfMissing - whether or not to generate default usage          
-///   @return the symbol and usage                                            
-/*Nodes::Value Node::GetValue(TMeta tmeta, DMeta dmeta, Rate rate, bool addIfMissing) {
-   if (rate == Rate::Auto)
-      rate = mRate;
-
-   const auto trait = Trait::FromMeta(tmeta, dmeta);
-   auto result = Nodes::Value::Local(this, trait, rate);
-   if (InnerGetValue(trait, rate, true, result)) {
-      if (result.GetRate() < rate) {
-         // We have to build a bridge to this rate                      
-         mMaterial->AddOutput(result.GetRate(), result.GetOutputTrait(), false);
-         auto newName = mMaterial->AddInput(rate, result.GetOutputTrait(), false);
-         result.mRate = rate;
-         result.mOutputs.Values()[0] = newName;
-      }
-
-      return result;
-   }
-
-   // Undefined symbol                                                  
-   if (addIfMissing) {
-      Logger::Warning(
-         "No input available, so adding default one: ", 
-         GetMaterial()->GenerateInputName(rate, trait)
-      );
-      result.BindTo(trait, nullptr);
-   }
-
-   return result;
-}*/
 
 /// Get a default type of each of the standard traits                         
 ///   @param trait - the trait definition                                     

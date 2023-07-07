@@ -60,7 +60,7 @@ const Symbol& Raymarch::Generate() {
       TODO(); // another SDFUnion indirection required here
 
    // Add raymarching functions and dependencies                        
-   AddDefine("Raymarch", TemplateFill(RaymarchFunction,
+   AddDefine("Raymarch", Text::TemplateRt(RaymarchFunction,
       scenes[0].mCode, mPrecision, mFarMax, mFarStride, mBaseStride, 
       mMinStep, mDetail)
    );

@@ -109,7 +109,7 @@ const Symbol& Scene::GenerateLines() {
    //      ... N times                                                  
    //   );                                                              
    AddDefine("Line", LineStruct);
-   AddDefine("cLines", TemplateFill(LineList, countCombined, lines));
+   AddDefine("cLines", Text::TemplateRt(LineList, countCombined, lines));
    return ExposeData<Scene>("cLines");
 }
 
@@ -144,14 +144,14 @@ const Symbol& Scene::GenerateSDF() {
          AddDefine("SDFUnion", SDFUnion);
 
          // Nest the union function for each new element                
-         scene = TemplateFill(SDFUnionUsage, scene, element);
+         scene = Text::TemplateRt(SDFUnionUsage, scene, element);
       }
    }
 
    LANGULUS_ASSERT(!scene.IsEmpty(), Material, "SDF scene is empty");
 
    // Define the scene function                                         
-   AddDefine("Scene", TemplateFill(SceneFunction, scene));
+   AddDefine("Scene", Text::TemplateRt(SceneFunction, scene));
 
    // Expose scene usage                                                
    return ExposeTrait<Traits::D, float>("Scene({})", Traits::Place::OfType<Vec3>());
@@ -183,17 +183,17 @@ const Symbol& Scene::GenerateTriangles() {
             continue;
 
          // Get the generated geometry asset                            
-         auto geometry = creator.GetOutput().As<const A::Geometry*>();
+         auto geometry = creator.GetOutput().template As<const A::Geometry*>();
          const auto count = geometry->GetTriangleCount();
          for (Count i = 0; i < count; ++i) {
-            auto position = geometry->GetTriangleTrait<Traits::Place>(i);
+            auto position = geometry->template GetTriangleTrait<Traits::Place>(i);
             LANGULUS_ASSERT(!position.IsEmpty(), Material,
                "Can't rasterize a triangle without Traits::Place");
 
             if (!position.template CastsTo<Vec3>(1))
                TODO();
 
-            auto normal = geometry->GetTriangleTrait<Traits::Aim>(i);
+            auto normal = geometry->template GetTriangleTrait<Traits::Aim>(i);
             LANGULUS_ASSERT(!normal.IsEmpty(), Material,
                "Can't rasterize a triangle without Traits::Aim");
 
@@ -237,6 +237,6 @@ const Symbol& Scene::GenerateTriangles() {
    //      ... N times                                                  
    //   );                                                              
    AddDefine("Triangle", TriangleStruct);
-   AddDefine("cTriangles", TemplateFill(TriangleList, countCombined, triangles));
+   AddDefine("cTriangles", Text::TemplateRt(TriangleList, countCombined, triangles));
    return ExposeData<Scene>("cTriangles");
 }

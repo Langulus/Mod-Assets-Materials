@@ -65,9 +65,9 @@ const Symbol& Raster::GeneratePerPixel() {
    AddDefine("RasterizeResult",
       RasterResult);
    AddDefine("RasterizeTriangle",
-      TemplateFill(RasterTriangle, culling));
+      Text::TemplateRt(RasterTriangle, culling));
    AddDefine("RasterizeTriangleList",
-      TemplateFill(RasterTriangleList, scenes[0].mCount, scenes[0].mCode));
+      Text::TemplateRt(RasterTriangleList, scenes[0].mCount, scenes[0].mCode));
 
    return ExposeData<Raster>("Rasterize({})", MetaOf<Camera>());
 }

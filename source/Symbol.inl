@@ -8,22 +8,58 @@
 #pragma once
 #include "Symbol.hpp"
 
+
 /// Create a symbol for a function                                            
 ///   @tparam T - return type of the function                                 
 ///   @tparam ...ARGS - optional arguments for the function                   
+///   @param  rate - the refresh rate of the symbol                           
 ///   @param  pattern - the template of the function (libfmt format string)   
 ///   @param ... arguments - the arguments for the pattern                    
 ///   @return the symbol instance                                             
 template<CT::Data T, class... ARGS>
 Symbol Symbol::Function(Rate rate, const Token& pattern, ARGS&&... arguments) {
    LANGULUS_ASSUME(DevAssumes, rate != Rate::Auto, "Rate should be resolved");
-   constexpr auto check = TemplateCheck(pattern, arguments...);
+   (void)Text::TemplateCheck(pattern, arguments...);
 
    Symbol s;
    s.mRate = rate;
    s.mTrait.SetType<T>();
    s.mCode = pattern;
    (s.PushArgument(Forward<ARGS>(arguments)), ...);
+   return s;
+}
+
+/// Create a symbol for a literal constant                                    
+///   @tparam T - type of the trait associated with the literal               
+///   @tparam D - type of data (deducible)                                    
+///   @param rate - the refresh rate of the symbol                            
+///   @param value - the value of the literal                                 
+///   @return the symbol instance                                             
+template<CT::Trait T, CT::Data D>
+Symbol Symbol::Literal(Rate rate, D&& value) {
+   LANGULUS_ASSUME(DevAssumes, rate != Rate::Auto, "Rate should be resolved");
+
+   Symbol s;
+   s.mRate = rate;
+   s.mTrait = T {Forward<D>(value)};
+   return s;
+}
+
+/// Create a symbol for a variable                                            
+///   @tparam T - type of the trait associated with the variable              
+///   @tparam D - type of data (deducible)                                    
+///   @param rate - the refresh rate of the symbol                            
+///   @param value - the initial value of the variable                        
+///   @param name - the variable token                                        
+///   @return the symbol instance                                             
+template<CT::Trait T, CT::Data D>
+Symbol Symbol::Variable(Rate rate, D&& value, const Token& name) {
+   LANGULUS_ASSUME(DevAssumes, rate != Rate::Auto, "Rate should be resolved");
+
+   Symbol s;
+   s.mRate = rate;
+   s.mTrait = T {Forward<D>(value)};
+   s.mCode = name;
    return s;
 }
 
@@ -36,11 +72,6 @@ LANGULUS(INLINED)
 bool Symbol::MatchesFilter(DMeta d, Rate r) const noexcept {
    LANGULUS_ASSUME(DevAssumes, mRate != Rate::Auto, "Rate should be resolved");
    return (!d || mTrait.CastsToMeta(d)) && (r == Rate::Auto || r <= mRate);
-}
-
-LANGULUS(INLINED)
-Symbol::operator Token() const noexcept {
-   return mCode;
 }
 
 LANGULUS(INLINED)

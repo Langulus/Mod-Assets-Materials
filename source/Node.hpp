@@ -121,7 +121,10 @@ protected:
    NOD() Debug DebugEnd() const;
 
    template<CT::Trait T, CT::Data D>
-   const Symbol& AddLocal(D&&, const Token& = {});
+   const Symbol& AddLocal(D&&, const Token&);
+   
+   template<CT::Trait T, CT::Data D>
+   const Symbol& AddLiteral(D&&);
 
    template<CT::Data T, class... ARGS>
    Symbol& ExposeData(const Token&, ARGS&&...);

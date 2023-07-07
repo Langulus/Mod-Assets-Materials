@@ -45,11 +45,15 @@ struct Symbol {
    template<CT::Data T, class... ARGS>
    NOD() static Symbol Function(Rate, const Token&, ARGS&&...);
 
+   template<CT::Trait T, CT::Data D>
+   NOD() static Symbol Literal(Rate, D&&);
+
+   template<CT::Trait T, CT::Data D>
+   NOD() static Symbol Variable(Rate, D&&, const Token&);
+
    NOD() bool MatchesFilter(DMeta, Rate) const noexcept;
 
    NOD() GLSL Generate(const Node*) const;
-
-   NOD() operator Token() const noexcept;
 
 protected:
    void PushArgument(DMeta&&);
@@ -60,3 +64,27 @@ protected:
 using Symbols = TAny<Symbol>;
 
 #include "Symbol.inl"
+
+namespace fmt
+{
+
+   ///                                                                        
+   /// Extend FMT to be capable of log/fill templates with symbols            
+   ///                                                                        
+   template<>
+   struct formatter<Symbol> {
+      template<class CONTEXT>
+      constexpr auto parse(CONTEXT& ctx) {
+         return ctx.begin();
+      }
+
+      template<class CONTEXT>
+      LANGULUS(INLINED)
+      auto format(Symbol const& element, CONTEXT& ctx) {
+         using namespace Langulus;
+         auto asText = element.mCode.operator Token();
+         return fmt::format_to(ctx.out(), "{}", asText);
+      }
+   };
+
+} // namespace fmt

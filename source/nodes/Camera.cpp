@@ -42,7 +42,7 @@ const Symbol& Camera::Generate() {
          // the projection per pixel. This allows for optically         
          // realistic rendering (near and far planes are not flat)      
          AddDefine("Camera", 
-            TemplateFill(CameraFuncPerPixel, symRes, symView, symFov, symProj));
+            Text::TemplateRt(CameraFuncPerPixel, *symRes, *symView, *symFov, *symProj));
          explicitCamera = true;
       }
       else if (mRate == PerVertex) {
@@ -52,7 +52,7 @@ const Symbol& Camera::Generate() {
          // Combine vertex position with the view matrix to from        
          // the projection per vertex                                   
          AddDefine("Camera", 
-            TemplateFill(CameraFuncPerVertex, symView, symPos));
+            Text::TemplateRt(CameraFuncPerVertex, *symView, *symPos));
          explicitCamera = true;
       }
       else TODO();
@@ -64,7 +64,7 @@ const Symbol& Camera::Generate() {
       mRate = PerPixel;
       auto symRes = GetSymbol<Traits::Size, Vec2>(PerTick);
       AddDefine("Camera",
-         TemplateFill(CameraFuncDefault, symRes));
+         Text::TemplateRt(CameraFuncDefault, *symRes));
    }
 
    // Expose the results to the rest of the nodes                       

@@ -30,8 +30,8 @@ private:
    // Compiled flow                                                     
    Temporal mCompiled;
 
-   // Required definitions for each shader stage                        
-   TAny<GLSL> mDefinitions[ShaderStage::Counter];
+   // Defined symbols for each shader stage                             
+   TUnorderedMap<GLSL, TAny<GLSL>> mDefinitions[ShaderStage::Counter];
 
 public:
    LANGULUS(ABSTRACT) false;
@@ -41,7 +41,7 @@ public:
    Material(A::AssetModule*, const Descriptor&);
 
    void Create(Verb&);
-   void Refresh();
+   void Refresh() {}
 
    NOD() const A::Material* GetLOD(const LOD&) const;
 
@@ -55,7 +55,7 @@ public:
 
    GLSL AddInput (Rate, const Trait&, bool allowDuplicates);
    GLSL AddOutput(Rate, const Trait&, bool allowDuplicates);
-   GLSL AddDefine(Rate, const Token&, const GLSL&);
+   void AddDefine(Rate, const Token&, const GLSL&);
 
 private:
    NOD() GLSL GenerateInputName(Rate, const Trait&) const;

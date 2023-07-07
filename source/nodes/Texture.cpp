@@ -48,7 +48,7 @@ Texture::operator Debug() const {
 ///   @return generated texture call                                          
 GLSL GetPixel(const GLSL& sampler, const GLSL& uv, DMeta result) {
    LANGULUS_ASSERT(result, Material, "Unknown texture format");
-   const auto pixel = TemplateFill(GetPixelFunction, sampler, uv);
+   const auto pixel = Text::TemplateRt(GetPixelFunction, sampler, uv);
    switch (result->GetMemberCount()) {
    case 1:           return pixel + ".rrrr";
    case 2:           return pixel + ".rgrg";

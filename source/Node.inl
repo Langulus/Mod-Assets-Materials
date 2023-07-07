@@ -17,6 +17,9 @@ Material* Node::GetMaterial() const noexcept {
 }
 
 /// Execute a function in each child node                                     
+///   @tparam F - function signature (deducible)                              
+///   @param call - the function callback                                     
+///   @return the number of successulf executions of the call                 
 template<class F>
 LANGULUS(INLINED)
 Count Node::ForEachChild(F&& call) {
@@ -26,36 +29,66 @@ Count Node::ForEachChild(F&& call) {
    return counter;
 }
 
+/// Add a local variable to the node, with a specific trait and initial value 
+///   @tparam T - type of trait to associate with the value                   
+///   @tparam D - data type of the value (deducible)                          
+///   @param value - the value itself                                         
+///   @param variable - optional name for the variable; if not name is given  
+///                     the value will be used as a literal constant          
+///   @return reference to the symbol that corresponds to the input           
+template<CT::Trait T, CT::Data D>
+const Symbol& Node::AddLocal(D&& value, const Token& variable) {
+   const auto meta = MetaOf<T>();
+   mLocalsT[meta] << Symbol::Variable<T>(mRate, Forward<D>(value), variable);
+   return mLocalsT[meta].Last();
+}
+
+/// Add a literal to the node, with a specific trait and value                
+///   @tparam T - type of trait to associate with the value                   
+///   @tparam D - data type of the value (deducible)                          
+///   @param value - the value itself                                         
+///   @return reference to the symbol that corresponds to the input           
+template<CT::Trait T, CT::Data D>
+const Symbol& Node::AddLiteral(D&& value) {
+   const auto meta = MetaOf<T>();
+   mLocalsT[meta] << Symbol::Literal<T>(mRate, Forward<D>(value));
+   return mLocalsT[meta].Last();
+}
+
 /// Add an output symbol to the node                                          
+///   @tparam T - the data type of the output (or return type of function)    
 ///   @tparam ...ARGS - optional arguments, if symbol is a function template  
 ///                     these arguments can be DMetas, or TMetas, or both by  
 ///                     providing a Trait with a given type                   
-///   @tparam T - the data type of the output (or return type of function)    
 ///   @param pattern - the symbol name/function template                      
-///   @param ... - parameters, in case pattern is a function template         
+///   @param a... - parameters, in case pattern is a function template        
 ///   @return the symbol handle                                               
 template<CT::Data T, class... ARGS>
-Symbol& Node::ExposeData(const Token& pattern, ARGS&&...) {
-   TODO();
+Symbol& Node::ExposeData(const Token& pattern, ARGS&&... a) {
+   const auto meta = MetaOf<T>();
+   mLocalsD[meta] << Symbol::Function<T>(mRate, pattern, Forward<ARGS>(a)...);
+   return mLocalsD[meta].Last();
 }
 
 /// Add an output symbol to the node                                          
 ///   @tparam ...ARGS - optional arguments, if symbol is a function template  
 ///                     these arguments can be DMetas, or TMetas, or both by  
 ///                     providing a Trait with a given type                   
-///   @tparam D - the trait type of the output                                
-///   @tparam T - the data type of the output (or return type of function)    
+///   @tparam T - the trait type of the output                                
+///   @tparam D - the data type of the output (or return type of function)    
 ///   @param pattern - the symbol name/function template                      
-///   @param ... - parameters, in case pattern is a function template         
+///   @param a... - parameters, in case pattern is a function template        
 ///   @return the symbol handle                                               
 template<CT::Trait T, CT::Data D, class... ARGS>
-Symbol& Node::ExposeTrait(const Token& pattern, ARGS&&...) {
-   TODO();
+Symbol& Node::ExposeTrait(const Token& pattern, ARGS&&... a) {
+   const auto meta = MetaOf<T>();
+   mLocalsT[meta] << Symbol::Function<D>(mRate, pattern, Forward<ARGS>(a)...);
+   return mLocalsT[meta].Last();
 }
 
 /// Select a symbol from the node hierarchy (const)                           
-/// Checks local symbols first, then climbs up the hierarchy up to Root, where
-/// it starts selecting global material inputs/constants                      
+/// Checks local symbols first, then climbs up the hierarchy up to Root,      
+/// where it starts selecting global material inputs/constants                
 ///   @param t - trait type filter                                            
 ///   @param d - data type filter                                             
 ///   @param r - rate filter                                                  
@@ -67,8 +100,8 @@ const Symbol* Node::GetSymbol(TMeta t, DMeta d, Rate r, Index i) const {
 }
 
 /// Select a symbol from the node hierarchy                                   
-/// Checks local symbols first, then climbs up the hierarchy up to Root, where
-/// it starts selecting global material inputs/constants                      
+/// Checks local symbols first, then climbs up the hierarchy up to Root,      
+/// where it starts selecting global material inputs/constants                
 ///   @tparam T - trait type filter (use void to disable)                     
 ///   @tparam D - data type filter (use void to disable)                      
 ///   @param r - rate filter                                                  
@@ -86,8 +119,8 @@ Symbol* Node::GetSymbol(Rate r, Index i) {
 }
 
 /// Select a symbol from the node hierarchy (const)                           
-/// Checks local symbols first, then climbs up the hierarchy up to Root, where
-/// it starts selecting global material inputs/constants                      
+/// Checks local symbols first, then climbs up the hierarchy up to Root,      
+/// where it starts selecting global material inputs/constants                
 ///   @tparam T - trait type filter (use void to disable)                     
 ///   @tparam D - data type filter (use void to disable)                      
 ///   @param r - rate filter                                                  

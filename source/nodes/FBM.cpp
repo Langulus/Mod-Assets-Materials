@@ -57,11 +57,11 @@ const Symbol& FBM::Generate() {
    for (Offset i = 0; i < mOctaveCount && mBaseWeight != 0; ++i) {
       // Make a temporary node for each octave, we don't want any       
       // persistent side effects from executing the code here           
-      auto temporary = Nodes::Value::Local(this);
+      Nodes::Value temporary {this};
 
       // Update inputs for each octave, octave code might use them      
-      temporary.template AddLocal<Traits::Index>(i);
-      temporary.template AddLocal<Traits::Mass>(f);
+      temporary.template AddLiteral<Traits::Index>(i);
+      temporary.template AddLiteral<Traits::Mass>(f);
       temporary.template AddLocal<Traits::Place>(Vec2 {}, "uv");
 
       // Run octave code for this node                                  
@@ -69,14 +69,14 @@ const Symbol& FBM::Generate() {
 
       // Generate shader code for octaves                               
       auto& symbol = temporary.Generate();
-      octaves += TemplateFill(FBMOctave, f, symbol.mCode);
+      octaves += Text::TemplateRt(FBMOctave, f, symbol.mCode);
       if (i < mOctaveCount - 1)
          octaves += FBMRotate;
       f *= mBaseWeight;
    }
 
    // Define the FBM function                                           
-   AddDefine("FBM", TemplateFill(FBMTemplate, "", "", octaves));
+   AddDefine("FBM", Text::TemplateRt(FBMTemplate, "", "", octaves));
 
    // Expose the FBM function template for use by the other nodes       
    return ExposeData<Real>("FBM({})", Traits::Place::OfType<Vec2>());

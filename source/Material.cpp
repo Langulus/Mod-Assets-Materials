@@ -21,6 +21,19 @@ Material::Material(A::AssetModule* producer, const Descriptor& descriptor)
       mDescriptor.ExtractData(mDefaultRate);
 }
 
+/// Create nodes inside the material                                          
+///   @param verb - creation verb                                             
+void Material::Create(Verb& verb) {
+   TODO();
+}
+
+/// Get material adapter for lower or higher level of detail                  
+///   @param lod - the level-of-detail state                                  
+///   @return a pointer to the material generator                             
+const A::Material* Material::GetLOD(const LOD& lod) const {
+   TODO();
+}
+
 /// Get default material rate                                                 
 ///   @return the rate                                                        
 const Rate& Material::GetDefaultRate() const noexcept {
@@ -146,6 +159,15 @@ GLSL Material::AddOutput(Rate rate, const Trait& traitOriginal, bool allowDuplic
    return symbol;
 }
 
+/// Adds a code snippet                                                       
+///   @param rate - the shader stage to place code at                         
+///   @param name - the name of the definition (to check for duplicated)      
+///   @param code - the code to insert                                        
+void Material::AddDefine(Rate rate, const Token& name, const GLSL& code) {
+   const auto stageIndex = rate.GetStageIndex();
+   mDefinitions[stageIndex][name] << code;
+}
+
 /// Generate input name                                                       
 ///   @param rate - the rate at which the input is declared                   
 ///   @param trait - the trait tag for the input                              
@@ -161,7 +183,7 @@ GLSL Material::GenerateInputName(Rate rate, const Trait& trait) const {
    }
 
    // Uniform name inside a uniform buffer                              
-   return TemplateFill("{}.{}", GLSL {rate}, GLSL {trait.GetTrait()});
+   return Text::TemplateRt("{}.{}", GLSL {rate}, GLSL {trait.GetTrait()});
 }
 
 /// Generate output name                                                      
@@ -216,7 +238,7 @@ void Material::GenerateUniforms() {
 
          const GLSL type {trait.GetType()};
          const GLSL name {trait.GetTrait()};
-         body += TemplateFill("{} {};", type, name);
+         body += Text::TemplateRt("{} {};", type, name);
          if (&trait != &traits.Last())
             body += '\n';
          names << name;
@@ -227,12 +249,12 @@ void Material::GenerateUniforms() {
 
       GLSL ubo;
       if (rate.IsStaticUniform()) {
-         ubo = TemplateFill(layout, 
+         ubo = Text::TemplateRt(layout,
             0, rate.GetStaticUniformIndex(), GLSL {rate}, body
          );
       }
       else if (rate.IsDynamicUniform()) {
-         ubo = TemplateFill(layout,
+         ubo = Text::TemplateRt(layout,
             1, rate.GetDynamicUniformIndex(), GLSL {rate}, body
          );
       }
@@ -272,7 +294,7 @@ void Material::GenerateUniforms() {
 
       const GLSL type {trait.GetType()};
       const GLSL name {trait.GetTrait()};
-      const auto ubo = TemplateFill(layout, textureNumber, type, name);
+      const auto ubo = Text::TemplateRt(layout, textureNumber, type, name);
 
       // Add texture to each stage it is used in                        
       for (auto& code : GetStages()) {
@@ -317,7 +339,7 @@ void Material::GenerateInputs() {
 
          const GLSL type {vkt};
          const GLSL name {GenerateInputName(rate, input)};
-         const auto definition = TemplateFill(layout, location, type, name);
+         const auto definition = Text::TemplateRt(layout, location, type, name);
 
          // Add input to code                                           
          Commit(rate, ShaderToken::Input, definition);
@@ -357,7 +379,7 @@ void Material::GenerateOutputs() {
 
          const GLSL type {vkt};
          const GLSL name {GenerateOutputName(rate, output)};
-         const auto definition = TemplateFill(layout, location, type, name);
+         const auto definition = Text::TemplateRt(layout, location, type, name);
 
          // Add output to code                                          
          Commit(rate, ShaderToken::Output, definition);
@@ -390,7 +412,7 @@ void Material::InitializeFromShadertoy(const GLSL& code) {
       )shader";
 
       Commit(PerPixel, ShaderToken::Defines,
-         TemplateFill(layout, keyword, input));
+         Text::TemplateRt(layout, keyword, input));
    };
 
    // Satisfy traits                                                    

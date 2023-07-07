@@ -15,34 +15,17 @@ namespace Nodes
    ///                                                                        
    ///   Value node                                                           
    ///                                                                        
+   /// Just a node that allows modification of inputs/outputs and execution   
+   /// of verbs in a temporary context. Also supports keyframes via the verb  
+   /// interface - you can execute verbs with time/frequency charge           
    struct Value final : Node {
    private:
       Temporal mKeyframes;
 
    public:
-      LANGULUS_VERBS(Verbs::Do);
-
-      Value(const Descriptor&);
-
-      NOD() static Value Input (Node*, const Trait& = {}, Rate = Rate::Auto, const GLSL& name = {});
-      NOD() static Value Output(Node*, const Trait& = {}, Rate = Rate::Auto, const GLSL& name = {});
-      NOD() static Value Local (Node*, const Trait& = {}, Rate = Rate::Auto, const GLSL& name = {});
+      Value(Node*);
 
       const Symbol& Generate();
-
-      void Do(Verb&);
-
-      NOD() GLSL SelectMember(TMeta, Trait&);
-      NOD() GLSL GetDeclaration() const;
-      NOD() TMeta GetTrait() const noexcept;
-
-      void BindTo(const Trait&, const Node*);
-      bool IsValid() const;
-
-      NOD() operator Debug() const;
-
-   private:
-      void AutoCompleteTrait();
    };
 
 } // namespace Nodes
