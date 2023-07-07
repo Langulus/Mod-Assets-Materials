@@ -21,7 +21,7 @@ private:
    Nodes::Root mRoot;
 
    // Default material rate                                             
-   Rate mDefaultRate = Rate::Auto;
+   Rate mDefaultRate = PerPixel;
 
    // Consumed bindings                                                 
    Count mConsumedSamplers {};

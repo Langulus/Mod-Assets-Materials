@@ -17,7 +17,8 @@
 ///   @param material - the parent material                                   
 ///   @param descriptor - the node descriptor                                 
 Node::Node(DMeta classid, Material* material, const Descriptor& descriptor)
-   : Unit {classid, descriptor}
+   : Unit {classid, {}} // The descriptor might contain Thing's owner,  
+                        // so we don't forward it to the unit           
    , mDescriptor {descriptor}
    , mMaterial {material} {
    // Satisfy the rest of the descriptor                                
@@ -29,7 +30,8 @@ Node::Node(DMeta classid, Material* material, const Descriptor& descriptor)
 ///   @param parent - the parent node                                         
 ///   @param descriptor - the node descriptor                                 
 Node::Node(DMeta classid, Node* parent, const Descriptor& descriptor)
-   : Unit {classid, descriptor}
+   : Unit {classid, {}} // The descriptor might contain Thing's owner,  
+                        // so we don't forward it to the unit           
    , mDescriptor {descriptor}
    , mMaterial {parent->GetMaterial()}
    , mParent {parent} {
@@ -42,9 +44,11 @@ Node::Node(DMeta classid, Node* parent, const Descriptor& descriptor)
 ///   @param classid - the node type                                          
 ///   @param descriptor - the node descriptor                                 
 Node::Node(DMeta classid, const Descriptor& descriptor)
-   : Unit {classid, descriptor}
+   : Unit {classid, {}} // The descriptor might contain Thing's owner,  
+                        // but we don't forward it to the unit          
    , mDescriptor {descriptor} {
    // Account for any Traits::Parent that is Node                       
+   // We handle those here, because they get omitted on normalization   
    descriptor.ForEachDeep(
       [this](const Trait& trait) {
          if (trait.TraitIs<Traits::Parent>()) {
@@ -67,16 +71,17 @@ Node::Node(DMeta classid, const Descriptor& descriptor)
 /// Parse the normalized descriptor and create subnodes, apply traits         
 /// This is a common parser used in all nodes' constructors                   
 void Node::InnerCreate() {
+   const auto scope = Logger::Verbose(Self(),
+      "Creating node...", Logger::Tabs {});
+
    // Save the rate                                                     
+   mRate = GetMaterial()->GetDefaultRate();
    auto rates = mDescriptor.GetTraits<Traits::Rate>();
    if (rates)
       mRate = rates->Last().AsCast<Rate>();
 
-   if (mRate == Rate::Auto)
-      mRate = GetMaterial()->GetDefaultRate();
-
    // Create all sub constructs                                         
-   for (auto pair : mDescriptor.mConstructs) {
+   for (const auto pair : mDescriptor.mConstructs) {
       if (!pair.mKey->template CastsTo<Node>() &&
           !pair.mKey->template CastsTo<A::Geometry>() &&
           !pair.mKey->template CastsTo<A::Texture>() &&
@@ -87,6 +92,23 @@ void Node::InnerCreate() {
 
       for (auto& construct : pair.mValue)
          NodeFromConstruct(construct);
+   }
+   
+   // Consider all provided data                                        
+   for (const auto pair : mDescriptor.mAnythingElse) {
+      if (pair.mKey->template CastsTo<Code>()) {
+         // Execute each code snippet                                   
+         for (auto& snippet : pair.mValue)
+            Run(snippet.Get<Code>());
+      }
+      else if (pair.mKey->template CastsTo<Rate>()) {
+         // Set rate through data only                                  
+         mRate = pair.mValue.Last().Get<Rate>();
+      }
+      else {
+         Logger::Warning(Self(), "Ignored data of type ", pair.mKey);
+         continue;
+      }
    }
 }
 

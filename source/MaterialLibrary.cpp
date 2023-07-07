@@ -6,11 +6,31 @@
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
 #include "MaterialLibrary.hpp"
+#include "nodes/Root.hpp"
+#include "nodes/Camera.hpp"
+#include "nodes/FBM.hpp"
+#include "nodes/Light.hpp"
+#include "nodes/Raster.hpp"
+#include "nodes/Raymarch.hpp"
+#include "nodes/Raytrace.hpp"
+#include "nodes/Scene.hpp"
+#include "nodes/Texture.hpp"
+#include "nodes/Value.hpp"
 
 LANGULUS_DEFINE_MODULE(
    MaterialLibrary, 9, "AssetsMaterials",
    "Module for reading, writing, and generating GLSL/HLSL shaders for visualizing materials", "",
-   MaterialLibrary, Material
+   MaterialLibrary, Material, GLSL,
+   Nodes::Camera,
+   Nodes::FBM,
+   Nodes::Light,
+   Nodes::Raster,
+   Nodes::Raymarch,
+   Nodes::Raytrace,
+   Nodes::Root,
+   Nodes::Scene,
+   Nodes::Texture,
+   Nodes::Value
 )
 
 
