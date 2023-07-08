@@ -16,6 +16,7 @@
 #include "nodes/Scene.hpp"
 #include "nodes/Texture.hpp"
 #include "nodes/Value.hpp"
+#include <Math/Primitives/TBox.hpp> //TODO move this to geometry mod
 
 LANGULUS_DEFINE_MODULE(
    MaterialLibrary, 9, "AssetsMaterials",
@@ -28,7 +29,7 @@ LANGULUS_DEFINE_MODULE(
    Nodes::Raymarch,
    Nodes::Raytrace,
    Nodes::Root,
-   Nodes::Scene,
+   Nodes::Scene, Math::Normal3, Math::Box2, Math::Box3, Traits::Bilateral, //TODO move these to geometry mod
    Nodes::Texture,
    Nodes::Value
 )
