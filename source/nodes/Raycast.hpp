@@ -16,8 +16,8 @@ namespace Nodes
    ///   Raycast material node                                                
    ///                                                                        
    struct Raycast final : Node {
+      LANGULUS(ABSTRACT) false;
       Raycast(const Descriptor&);
-
       const Symbol& Generate();
    };
 

@@ -16,6 +16,7 @@ namespace Nodes
    ///   Rasterizer material node                                             
    ///                                                                        
    struct Raster final : Node {
+      LANGULUS(ABSTRACT) false;
    private:
       // Code for the rasterizer                                        
       Code mCode;
@@ -30,7 +31,6 @@ namespace Nodes
 
    public:
       Raster(const Descriptor&);
-
       const Symbol& Generate();
 
    private:

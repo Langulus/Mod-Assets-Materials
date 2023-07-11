@@ -19,11 +19,12 @@ namespace Nodes
    /// by adding signed distance field functions, or triangles/lines          
    ///                                                                        
    struct Scene final : Node {
+      LANGULUS(ABSTRACT) false;
+
       Scene(Node*, const Descriptor&);
       Scene(const Descriptor&);
 
       const Symbol& Generate();
-
       const Symbol& GenerateSDF();
       const Symbol& GenerateLines();
       const Symbol& GenerateTriangles();

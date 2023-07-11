@@ -19,12 +19,12 @@ namespace Nodes
    /// of verbs in a temporary context. Also supports keyframes via the verb  
    /// interface - you can execute verbs with time/frequency charge           
    struct Value final : Node {
+      LANGULUS(ABSTRACT) false;
    private:
       Temporal mKeyframes;
 
    public:
       Value(Node*);
-
       const Symbol& Generate();
    };
 

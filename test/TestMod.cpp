@@ -38,7 +38,7 @@ constexpr auto MaterialCode = R"code(
    // it will seek an available Nodes::Scene in the node hierarchy
    Nodes::Raster(Bilateral),
 
-   // Texturize the scene. Since no node was provided as argument, 
+   // Texturize the scene. Since no node was provided as argument,
    // it will seek an available Nodes::Raster in the node hierarchy
    Nodes::Texture(Front, File(`pebbles.png`)),
    Nodes::Texture(Back,  File(`border2.png`)),

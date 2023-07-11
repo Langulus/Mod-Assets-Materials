@@ -59,6 +59,7 @@ protected:
    static inline const Symbol NoSymbol {};
 
 public:
+   LANGULUS(PRODUCER) Node;
    LANGULUS_VERBS(
       Verbs::Create,
       Verbs::Select,

@@ -16,6 +16,7 @@ namespace Nodes
    ///   Fractal Brownian Motion node                                         
    ///                                                                        
    struct FBM final : Node {
+      LANGULUS(ABSTRACT) false;
    private:
       // Code used to generate octaves                                  
       Code mCode;
@@ -26,9 +27,7 @@ namespace Nodes
 
    public:
       FBM(const Descriptor&);
-
       const Symbol& Generate();
-
       NOD() operator Debug() const;
    };
 

@@ -15,6 +15,7 @@ namespace Nodes
    ///   Raymarch material node                                               
    ///                                                                        
    struct Raymarch final : Node {
+      LANGULUS(ABSTRACT) false;
    private:
       // Raymarcher precision                                           
       float mPrecision {0.008f};
@@ -37,7 +38,6 @@ namespace Nodes
 
    public:
       Raymarch(const Descriptor&);
-
       const Symbol& Generate();
    };
 

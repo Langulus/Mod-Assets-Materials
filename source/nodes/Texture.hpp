@@ -21,15 +21,14 @@ namespace Nodes
    /// of all kinds, solid colors, etc.                                       
    ///                                                                        
    struct Texture final : Node {
+      LANGULUS(ABSTRACT) false;
    private:
       Temporal mKeyframes;
       Offset mTextureId {};
 
    public:
       Texture(const Descriptor&);
-
       const Symbol& Generate();
-
       NOD() operator Debug() const;
 
    private:
