@@ -22,6 +22,8 @@ namespace Nodes
    ///                                                                        
    struct Texture final : Node {
       LANGULUS(ABSTRACT) false;
+      LANGULUS_BASES(Node);
+
    private:
       Temporal mKeyframes;
       Offset mTextureId {};

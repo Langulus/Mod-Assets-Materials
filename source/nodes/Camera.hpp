@@ -17,6 +17,8 @@ namespace Nodes
    ///                                                                        
    struct Camera final : Node {
       LANGULUS(ABSTRACT) false;
+      LANGULUS_BASES(Node);
+
       Camera(const Descriptor&);
       const Symbol& Generate();
    };

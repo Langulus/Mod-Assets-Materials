@@ -17,6 +17,8 @@ namespace Nodes
    ///                                                                        
    struct Raytrace final : Node {
       LANGULUS(ABSTRACT) false;
+      LANGULUS_BASES(Node);
+
       Raytrace(const Descriptor&);
       const Symbol& Generate();
    };

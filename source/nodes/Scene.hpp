@@ -20,6 +20,7 @@ namespace Nodes
    ///                                                                        
    struct Scene final : Node {
       LANGULUS(ABSTRACT) false;
+      LANGULUS_BASES(Node);
 
       Scene(Node*, const Descriptor&);
       Scene(const Descriptor&);

@@ -17,6 +17,8 @@ namespace Nodes
    ///                                                                        
    struct Light final : Node {
       LANGULUS(ABSTRACT) false;
+      LANGULUS_BASES(Node);
+
       Light(const Descriptor&);
       const Symbol& Generate();
    };

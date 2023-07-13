@@ -20,6 +20,8 @@ namespace Nodes
    /// interface - you can execute verbs with time/frequency charge           
    struct Value final : Node {
       LANGULUS(ABSTRACT) false;
+      LANGULUS_BASES(Node);
+
    private:
       Temporal mKeyframes;
 

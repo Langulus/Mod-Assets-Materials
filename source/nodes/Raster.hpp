@@ -17,6 +17,8 @@ namespace Nodes
    ///                                                                        
    struct Raster final : Node {
       LANGULUS(ABSTRACT) false;
+      LANGULUS_BASES(Node);
+
    private:
       // Code for the rasterizer                                        
       Code mCode;

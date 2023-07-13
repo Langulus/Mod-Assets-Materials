@@ -17,6 +17,8 @@ namespace Nodes
    ///                                                                        
    struct FBM final : Node {
       LANGULUS(ABSTRACT) false;
+      LANGULUS_BASES(Node);
+
    private:
       // Code used to generate octaves                                  
       Code mCode;

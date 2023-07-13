@@ -17,6 +17,8 @@ namespace Nodes
    ///                                                                        
    struct Root final : Node {
       LANGULUS(ABSTRACT) false;
+      LANGULUS_BASES(Node);
+
       Root(Material*, const Descriptor&);
       const Symbol& Generate();
    };

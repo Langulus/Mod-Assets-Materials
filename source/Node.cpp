@@ -10,6 +10,7 @@
 #include "MaterialLibrary.hpp"
 #include "nodes/Value.hpp"
 #include <Math/Randomness/SimplexNoise.hpp>
+#include <Math/Verbs.hpp>
 
 
 /// Material node construction for Nodes::Root                                
@@ -98,6 +99,9 @@ void Node::InnerCreate() {
    for (const auto pair : mDescriptor.mAnythingElse) {
       if (pair.mKey->template CastsTo<Code>()) {
          // Execute each code snippet                                   
+         Math::RegisterTraits();
+         Math::RegisterVerbs();
+
          for (auto& snippet : pair.mValue)
             Run(snippet.Get<Code>());
       }
@@ -123,7 +127,7 @@ Node* Node::NodeFromConstruct(const Construct& construct) {
       local << Traits::Parent {this};
 
       auto newInstance = Any::FromMeta(construct.GetType());
-      newInstance.Emplace(construct.GetArgument());
+      newInstance.Emplace(local.GetArgument());
       mChildren << newInstance.As<Node*>();
       return mChildren.Last();
    }

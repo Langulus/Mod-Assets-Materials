@@ -16,6 +16,8 @@ namespace Nodes
    ///                                                                        
    struct Raymarch final : Node {
       LANGULUS(ABSTRACT) false;
+      LANGULUS_BASES(Node);
+
    private:
       // Raymarcher precision                                           
       float mPrecision {0.008f};
