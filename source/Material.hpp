@@ -17,11 +17,8 @@
 ///                                                                           
 struct Material final : A::Material {
 private:
-   // Root node                                                         
-   Nodes::Root mRoot;
-
    // Default material rate                                             
-   Rate mDefaultRate = PerPixel;
+   Rate mDefaultRate {PerPixel};
 
    // Consumed bindings                                                 
    Count mConsumedSamplers {};
@@ -32,6 +29,12 @@ private:
 
    // Defined symbols for each shader stage                             
    TUnorderedMap<GLSL, TAny<GLSL>> mDefinitions[ShaderStage::Counter];
+
+   // Root node                                                         
+   // It is of utmost importance this node is the last member, because  
+   // it might use other members inside the Material, and those need to 
+   // be initialized first                                              
+   Nodes::Root mRoot;
 
 public:
    LANGULUS(ABSTRACT) false;

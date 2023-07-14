@@ -23,15 +23,6 @@ Scene::Scene(Node* parent, const Descriptor& desc)
 Scene::Scene(const Descriptor& desc)
    : Node {MetaOf<Scene>(), desc} {}
 
-/// For logging                                                               
-Scene::operator Debug() const {
-   Code result;
-   result += Node::DebugBegin();
-      //result += pcSerialize<Debug>(mGeometry);
-   result += Node::DebugEnd();
-   return result;
-}
-
 /// Generate scene code                                                       
 ///   @return the SDF scene function template symbol                          
 const Symbol& Scene::Generate() {

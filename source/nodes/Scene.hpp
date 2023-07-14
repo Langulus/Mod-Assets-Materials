@@ -29,8 +29,6 @@ namespace Nodes
       const Symbol& GenerateSDF();
       const Symbol& GenerateLines();
       const Symbol& GenerateTriangles();
-
-      NOD() operator Debug() const;
    };
 
 } // namespace Nodes

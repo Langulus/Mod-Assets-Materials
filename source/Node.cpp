@@ -379,7 +379,7 @@ Debug Node::DebugBegin() const {
    Code result;
    result += GetToken();
    result += Code::OpenScope;
-   result += Serialize<Code>(Traits::Rate {mRate});
+   result += Serialize<Code>(mRate);
    return result;
 }
 
@@ -388,14 +388,6 @@ Debug Node::DebugBegin() const {
 Debug Node::DebugEnd() const {
    Code result;
    result += Code::CloseScope;
-   return result;
-}
-
-/// For logging                                                               
-Node::operator Debug() const {
-   Flow::Code result;
-   result += DebugBegin();
-   result += DebugEnd();
    return result;
 }
 

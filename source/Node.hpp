@@ -82,7 +82,6 @@ public:
    void Exponent(Verb&);
    void Randomize(Verb&);
 
-   NOD() operator Debug() const;
    void Dump() const;
 
    virtual const Symbol& Generate() = 0;

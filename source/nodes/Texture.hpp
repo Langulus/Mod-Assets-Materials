@@ -31,7 +31,6 @@ namespace Nodes
    public:
       Texture(const Descriptor&);
       const Symbol& Generate();
-      NOD() operator Debug() const;
 
    private:
       GLSL GenerateKeyframe(const Temporal&);

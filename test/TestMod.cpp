@@ -25,12 +25,12 @@ constexpr auto MaterialCode = R"code(
    Nodes::Scene(
       // Create an animated rectangle, that rotates/scales/moves with time
       Box2, [
-         Interpolator(Cerp), Time(.Time % 5), 
+         Interpolator(Cerp), Time(.Time % 5),
          Move @0   (Yaw(180), Scale(275.5, 381), Point(400, 400)),
          Move @1   (Roll(3),  Scale(551, 762),   .MousePosition),
          Move @1.5 (Roll(3),  Scale(551, 762),   .MousePosition),
          Move @3   (          Scale(551, 762),   .MousePosition),
-         Move @4   (Yaw(180), Scale(275.5, 381), Point(400, 400)
+         Move @4   (Yaw(180), Scale(275.5, 381), Point(400, 400))
       ]
    ),
 

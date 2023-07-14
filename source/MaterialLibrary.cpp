@@ -16,7 +16,8 @@
 #include "nodes/Scene.hpp"
 #include "nodes/Texture.hpp"
 #include "nodes/Value.hpp"
-#include <Math/Primitives/TBox.hpp> //TODO move this to geometry mod
+#include <Math/Primitives.hpp> //TODO move this to geometry mod
+#include <Math/Angles.hpp> //TODO move this to geometry mod
 
 LANGULUS_DEFINE_MODULE(
    MaterialLibrary, 9, "AssetsMaterials",
@@ -29,7 +30,7 @@ LANGULUS_DEFINE_MODULE(
    Nodes::Raymarch,
    Nodes::Raytrace,
    Nodes::Root,
-   Nodes::Scene, Math::Normal3, Math::Box2, Math::Box3, Traits::Bilateral, //TODO move these to geometry mod
+   Nodes::Scene,
    Nodes::Texture,
    Nodes::Value
 )
@@ -43,6 +44,11 @@ MaterialLibrary::MaterialLibrary(Runtime* runtime, const Descriptor&)
    , mMaterials {this} {
    Logger::Verbose(Self(), "Initializing...");
    Logger::Verbose(Self(), "Initialized");
+   //TODO move these to geometry mod
+   (void)MetaOf<Math::Normal3>();
+   (void)MetaOf<Traits::Bilateral>();
+   Math::RegisterPrimitives();
+   Math::RegisterAngles();
 }
 
 /// Module update routine                                                     

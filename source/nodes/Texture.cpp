@@ -23,15 +23,6 @@ Texture::Texture(const Descriptor& desc)
    mKeyframes.Push(mDescriptor.mVerbs);
 }
 
-/// For logging                                                               
-Texture::operator Debug() const {
-   Code result;
-   result += Node::DebugBegin();
-      //result += mKeyframes;
-   result += Node::DebugEnd();
-   return result;
-}
-
 /// Retrieves sampler coordinates from the node environment                   
 /// May either return a local 'uv' symbol, or a uniform/varying               
 ///   @return the texture coordinate symbol                                   
