@@ -18,6 +18,8 @@
 #include "nodes/Value.hpp"
 #include <Math/Primitives.hpp> //TODO move this to geometry mod
 #include <Math/Angles.hpp> //TODO move this to geometry mod
+#include <Math/Randomness/SimplexNoise.hpp>  //TODO move this to geometry mod
+#include <Math/Verbs.hpp>  //TODO move this to geometry mod
 
 LANGULUS_DEFINE_MODULE(
    MaterialLibrary, 9, "AssetsMaterials",
@@ -44,11 +46,14 @@ MaterialLibrary::MaterialLibrary(Runtime* runtime, const Descriptor&)
    , mMaterials {this} {
    Logger::Verbose(Self(), "Initializing...");
    Logger::Verbose(Self(), "Initialized");
+
    //TODO move these to geometry mod
    (void)MetaOf<Math::Normal3>();
    (void)MetaOf<Traits::Bilateral>();
    Math::RegisterPrimitives();
    Math::RegisterAngles();
+   Math::RegisterTraits();
+   Math::RegisterVerbs();
 }
 
 /// Module update routine                                                     

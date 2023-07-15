@@ -22,7 +22,7 @@ namespace Nodes
       LANGULUS(ABSTRACT) false;
       LANGULUS_BASES(Node);
 
-      Scene(Node*, const Descriptor&);
+      //Scene(Node*, const Descriptor&);
       Scene(const Descriptor&);
 
       const Symbol& Generate();

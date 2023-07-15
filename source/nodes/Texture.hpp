@@ -26,13 +26,15 @@ namespace Nodes
 
    private:
       Temporal mKeyframes;
-      Offset mTextureId {};
+      Index mTextureId {IndexNone};
+      Ptr<A::Texture> mTexture;
 
    public:
       Texture(const Descriptor&);
       const Symbol& Generate();
 
    private:
+      Ptr<A::Texture> CreateTexture(const Any&);
       GLSL GenerateKeyframe(const Temporal&);
    };
 

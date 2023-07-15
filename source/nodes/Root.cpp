@@ -14,7 +14,11 @@ using namespace Nodes;
 ///   @param producer - the producer material                                 
 ///   @param desc - the node descriptor                                       
 Root::Root(Material* producer, const Descriptor& desc)
-   : Node {MetaOf<Root>(), producer, desc} { }
+   : Node {MetaOf<Root>(), producer, desc} {
+   // Satisfy the rest of the descriptor                                
+   // This is just a root node, so we can safely create anything in it  
+   InnerCreate();
+}
 
 /// Generate the shader stages                                                
 const Symbol& Root::Generate() {

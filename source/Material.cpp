@@ -24,7 +24,7 @@ Material::Material(A::AssetModule* producer, const Descriptor& descriptor)
 /// Create nodes inside the material                                          
 ///   @param verb - creation verb                                             
 void Material::Create(Verb& verb) {
-   TODO();
+   mRoot.Create(verb);
 }
 
 /// Get material adapter for lower or higher level of detail                  

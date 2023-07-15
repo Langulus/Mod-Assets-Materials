@@ -38,6 +38,7 @@ FBM::FBM(const Descriptor& desc)
 FBM::operator Debug() const {
    Code result;
    result += Node::DebugBegin();
+      result += ", ";
       result += mOctaveCount;
       result += " octaves of ";
       result += mCode;

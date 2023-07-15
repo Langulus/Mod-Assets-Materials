@@ -40,13 +40,13 @@ constexpr auto MaterialCode = R"code(
 
    // Texturize the scene. Since no node was provided as argument,
    // it will seek an available Nodes::Raster in the node hierarchy
-   Nodes::Texture(Front, File(`pebbles.png`)),
-   Nodes::Texture(Back,  File(`border2.png`)),
-   Nodes::Texture(
+   Nodes::Texture(Front, `pebbles.png`),
+   Nodes::Texture(Back,  `border2.png`),
+   Nodes::Texture([
       Nodes::FBM(4, [vec2(.Sampler.x, -(.Time * 8.75 - .Sampler.y ^ 2)) rand real])
-   ),
+   ]),
 
-   // Illuminate directionally. Since no node was provided as argument, 
+   // Illuminate directionally. Since no node was provided as argument,
    // it will seek an available Nodes::Raster in the node hierarchy
    Nodes::Light(Normal3(0.5))
 )code";
@@ -71,13 +71,13 @@ SCENARIO("Shader generation", "[materials]") {
             auto producedWindow   = root.CreateUnitToken("Window", Traits::Size(640, 480));
             auto producedRenderer = root.CreateUnitToken("Renderer");
             auto producedMaterial = root.CreateUnitToken("Material", Code(MaterialCode));
-
+            
             // Update once                                              
             root.Update(Time::zero());
 
             THEN("Various traits change") {
                root.DumpHierarchy();
-
+               
                REQUIRE(producedWindow.GetCount() == 1);
                REQUIRE(producedWindow.CastsTo<A::Window>(1));
                REQUIRE(producedWindow.IsSparse());

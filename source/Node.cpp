@@ -10,7 +10,6 @@
 #include "MaterialLibrary.hpp"
 #include "nodes/Value.hpp"
 #include <Math/Randomness/SimplexNoise.hpp>
-#include <Math/Verbs.hpp>
 
 
 /// Material node construction for Nodes::Root                                
@@ -21,10 +20,7 @@ Node::Node(DMeta classid, Material* material, const Descriptor& descriptor)
    : Unit {classid, {}} // The descriptor might contain Thing's owner,  
                         // so we don't forward it to the unit           
    , mDescriptor {descriptor}
-   , mMaterial {material} {
-   // Satisfy the rest of the descriptor                                
-   InnerCreate();
-}
+   , mMaterial {material} {}
 
 /// Material node construction for members/locals                             
 ///   @param classid - the node type                                          
@@ -37,8 +33,6 @@ Node::Node(DMeta classid, Node* parent, const Descriptor& descriptor)
    , mMaterial {parent->GetMaterial()}
    , mParent {parent} {
    parent->mChildren << this;
-   // Satisfy the rest of the descriptor                                
-   InnerCreate();
 }
 
 /// Material node construction used in the rest of the Nodes                  
@@ -46,47 +40,41 @@ Node::Node(DMeta classid, Node* parent, const Descriptor& descriptor)
 ///   @param descriptor - the node descriptor                                 
 Node::Node(DMeta classid, const Descriptor& descriptor)
    : Unit {classid, {}} // The descriptor might contain Thing's owner,  
-                        // but we don't forward it to the unit          
+                        // so we don't forward it to the unit           
    , mDescriptor {descriptor} {
    // Account for any Traits::Parent that is Node                       
    // We handle those here, because they get omitted on normalization   
-   descriptor.ForEachDeep(
-      [this](const Trait& trait) {
-         if (trait.TraitIs<Traits::Parent>()) {
-            return !trait.ForEach([this](const Node* owner) {
-               auto mutableOwner = const_cast<Node*>(owner);
-               mParent = mutableOwner;
-               mutableOwner->mChildren << this;
-               mMaterial = owner->GetMaterial();
-               return Flow::Break;
-            });
-         }
-         return Flow::Continue;
+   descriptor.ForEachDeep([this](const Trait& trait) {
+      if (trait.TraitIs<Traits::Parent>()) {
+         return !trait.ForEach([this](const Node* owner) {
+            // Incorporate this node into the hierarchy of nodes        
+            auto mutableOwner = const_cast<Node*>(owner);
+            mParent = mutableOwner;
+            mutableOwner->mChildren << this;
+            mMaterial = owner->GetMaterial();
+            return Flow::Break;
+         });
       }
-   );
-
-   // Satisfy the rest of the descriptor                                
-   InnerCreate();
+      return Flow::Continue;
+   });
 }
 
 /// Parse the normalized descriptor and create subnodes, apply traits         
 /// This is a common parser used in all nodes' constructors                   
 void Node::InnerCreate() {
-   const auto scope = Logger::Verbose(Self(),
-      "Creating node...", Logger::Tabs {});
+   VERBOSE_NODE_TAB("Creating node...");
 
    // Save the rate                                                     
    mRate = GetMaterial()->GetDefaultRate();
    auto rates = mDescriptor.GetTraits<Traits::Rate>();
-   if (rates)
+   if (rates) {
       mRate = rates->Last().AsCast<Rate>();
+      VERBOSE_NODE("Rate changed (via trait) to: ", mRate);
+   }
 
    // Create all sub constructs                                         
    for (const auto pair : mDescriptor.mConstructs) {
-      if (!pair.mKey->template CastsTo<Node>() &&
-          !pair.mKey->template CastsTo<A::Geometry>() &&
-          !pair.mKey->template CastsTo<A::Texture>() &&
-          !pair.mKey->template CastsTo<A::File>()) {
+      if (!pair.mKey->template CastsTo<Node>()) {
          Logger::Warning(Self(), "Ignored constructs of type ", pair.mKey);
          continue;
       }
@@ -99,15 +87,16 @@ void Node::InnerCreate() {
    for (const auto pair : mDescriptor.mAnythingElse) {
       if (pair.mKey->template CastsTo<Code>()) {
          // Execute each code snippet                                   
-         Math::RegisterTraits();
-         Math::RegisterVerbs();
-
-         for (auto& snippet : pair.mValue)
-            Run(snippet.Get<Code>());
+         for (auto& snippet : pair.mValue) {
+            const auto& subcode = snippet.Get<Code>();
+            VERBOSE_NODE_TAB("Executing subcode: ", subcode);
+            Run(subcode);
+         }
       }
       else if (pair.mKey->template CastsTo<Rate>()) {
          // Set rate through data only                                  
          mRate = pair.mValue.Last().Get<Rate>();
+         VERBOSE_NODE("Rate changed (via data) to: ", mRate);
       }
       else {
          Logger::Warning(Self(), "Ignored data of type ", pair.mKey);
@@ -122,7 +111,7 @@ void Node::InnerCreate() {
 Node* Node::NodeFromConstruct(const Construct& construct) {
    if (construct.CastsTo<Node>()) {
       // Create a child node                                            
-      VERBOSE_NODE("Adding node: ", construct);
+      VERBOSE_NODE_TAB("Adding node: ", construct);
       Construct local {construct};
       local << Traits::Parent {this};
 
@@ -131,22 +120,8 @@ Node* Node::NodeFromConstruct(const Construct& construct) {
       mChildren << newInstance.As<Node*>();
       return mChildren.Last();
    }
-   else if (construct.CastsTo<A::Geometry>()) {
-      // Wrap geometries in a Nodes::Scene                              
-      VERBOSE_NODE("Adding scene node: ", construct);
-      TODO();
-   }
-   else if (construct.CastsTo<A::Texture>()) {
-      // Wrap textures in a Nodes::Texture                              
-      VERBOSE_NODE("Adding texture node: ", construct);
-      TODO();
-   }
-   else if (construct.CastsTo<A::File>()) {
-      // Check file format and incorporate compatible data as nodes     
-      VERBOSE_NODE("Adding node from file: ", construct);
-      TODO();
-   }
-   else Logger::Warning(Self(), "Ignored construct: ", construct);
+   
+   Logger::Warning(Self(), "Ignored construct: ", construct);
    return {};
 }
 
@@ -348,7 +323,7 @@ Offset Node::GetStage() const {
 /// Also mark this node as generated                                          
 void Node::Descend() {
    mGenerated = true;
-   VERBOSE_NODE("Generating code...");
+   VERBOSE_NODE_TAB("Generating code...");
    for (auto child : mChildren)
       child->Generate();
 }
@@ -476,8 +451,7 @@ GLSL ConvertSymbol(const Trait& trait, const GLSL& symbol, DMeta as, Real filler
          return symbol;
    }
 
-   Logger::Error("Can't convert trait ", trait, " to ", as);
-   LANGULUS_THROW(Material, "Can't convert type");
+   LANGULUS_ASSERT(false, Material, "Can't convert symbol ", trait, " to ", as);
 }
 
 /// Get a default type of each of the standard traits                         
@@ -524,8 +498,7 @@ const Node::DefaultTrait& Node::GetDefaultTrait(TMeta trait) {
    if (found)
       return properties.GetValue(found);
 
-   Logger::Error("Undefined trait: ", trait);
-   LANGULUS_THROW(Material, "Undefined trait");
+   LANGULUS_ASSERT(false, Material, "Undefined default trait ", trait);
 }
 
 /// Decay a complex type to a fundamental GLSL type                           
@@ -550,7 +523,7 @@ DMeta Node::DecayToGLSLType(DMeta meta) {
    else if (meta->template CastsTo<Float>(1) || meta->template CastsTo<A::Number>(1))
       return MetaOf<Float>();
    else
-      LANGULUS_THROW(Material, "Can't decay type");
+      LANGULUS_ASSERT(false, Material, "Can't decay type ", meta);
 }
 
 /// Select a symbol from the node hierarchy                                   

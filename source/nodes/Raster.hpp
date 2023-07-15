@@ -21,7 +21,7 @@ namespace Nodes
 
    private:
       // Code for the rasterizer                                        
-      Code mCode;
+      //Code mCode;
       // Whether or not to rasterize both sides of triangles            
       bool mBilateral {};
       // Whether or not triangle faces are flipped                      

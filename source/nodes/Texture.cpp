@@ -6,6 +6,7 @@
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
 #include "Texture.hpp"
+#include "../Material.hpp"
 #include <Math/Colors.hpp>
 
 using namespace Nodes;
@@ -15,22 +16,73 @@ using namespace Nodes;
 ///   @param desc - the node descriptor                                       
 Texture::Texture(const Descriptor& desc)
    : Node {MetaOf<Texture>(), desc} {
-   // Extract texture id                                                
-   mDescriptor.ExtractTrait<Traits::Texture>(mTextureId);
-   mDescriptor.ExtractDataAs(mTextureId);
+   // Create any subnodes here, it is allowed                           
+   // This will also execute any encountered [subcode], and set rate    
+   InnerCreate();
 
-   // Extract animation keyframes                                       
-   mKeyframes.Push(mDescriptor.mVerbs);
+   // Extract texture id, decides to which texture slot to bind         
+   if (mDescriptor.ExtractTrait<Traits::Texture>(mTextureId))
+      VERBOSE_NODE("Texture id changed to: ", mTextureId);
+
+   // Extract Traits::File, if any                                      
+   Any file;
+   mDescriptor.ExtractTrait<Traits::File>(file);
+   if (!file.IsEmpty()) {
+      mTexture = CreateTexture(file);
+      VERBOSE_NODE("Texture generator changed to: ", mTexture);
+   }
+   
+   for (const auto pair : mDescriptor.mConstructs) {
+      // Create texture generators from sub-constructs                  
+      if (!pair.mKey->template CastsTo<A::Texture>() &&
+          !pair.mKey->template CastsTo<A::File>()) {
+         Logger::Warning(Self(), "Ignored constructs of type ", pair.mKey);
+         continue;
+      }
+
+      for (auto& construct : pair.mValue) {
+         mTexture = CreateTexture(construct);
+         VERBOSE_NODE("Texture generator changed to: ", mTexture);
+      }
+   }
+   
+   // Consider all provided data                                        
+   for (const auto pair : mDescriptor.mAnythingElse) {
+      if (pair.mKey->template CastsTo<A::Texture>()) {
+         // Reuse a texture generator directly                          
+         mTexture = pair.mValue.Last().As<A::Texture*>();
+         VERBOSE_NODE("Texture generator changed to: ", mTexture);
+      }
+      else if (pair.mKey->Is<Text>()) {
+         // Any other text is considered a texture filename             
+         for (auto& filename : pair.mValue) {
+            mTexture = CreateTexture(filename);
+            VERBOSE_NODE("Texture generator changed to: ", mTexture);
+         }
+      }
+      else if (pair.mKey->template CastsTo<A::Number>()) {
+         // Set texture id                                              
+         mTextureId = pair.mValue.Last().AsCast<Index>();
+         VERBOSE_NODE("Texture id changed to: ", mTextureId);
+      }
+      else {
+         Logger::Warning(Self(), "Ignored data of type ", pair.mKey);
+         continue;
+      }
+   }
 }
 
-/// Retrieves sampler coordinates from the node environment                   
-/// May either return a local 'uv' symbol, or a uniform/varying               
-///   @return the texture coordinate symbol                                   
-/*GLSL Texture::GetTextureCoordinates() {
-   auto sampler = GetValue(MetaTrait::Of<Traits::Sampler>(), nullptr, GetRate(), false);
-   LANGULUS_ASSERT(sampler.IsValid(), Material, "No texture coordinates available");
-   return sampler.GetOutputSymbolAs(MetaData::Of<Vec2f>(), 0);
-}*/
+/// A snippet that forward a descriptor to a creation verb in the hierarchy   
+///   @param descriptor - the descriptor for the texture                      
+///   @return the produced texture                                            
+Ptr<A::Texture> Texture::CreateTexture(const Any& descriptor) {
+   Verbs::Create creator {Construct::From<A::Texture>(descriptor)};
+   if (mMaterial->DoInHierarchy<Seek::Above>(creator))
+      return creator.GetOutput().As<A::Texture*>();
+
+   Logger::Error(Self(), "Couldn't create texture from: ", descriptor);
+   return {};
+}
 
 /// Assembles a GLSL texture(...) function                                    
 ///   @param sampler - sampler token                                          

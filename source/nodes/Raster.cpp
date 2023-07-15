@@ -24,8 +24,8 @@ Raster::Raster(const Descriptor& desc)
    mDescriptor.ExtractTrait<Traits::Max>(mDepth.mMax);
 
    // Extract rasterizer body                                           
-   mDescriptor.ExtractData(mCode);
-   LANGULUS_ASSERT(!mCode.IsEmpty(), Material, "No rasterizer code");
+   //mDescriptor.ExtractData(mCode);
+   //LANGULUS_ASSERT(!mCode.IsEmpty(), Material, "No rasterizer code");
 
    if (!mTopology) {
       // Rasterizing triangles by default                               
