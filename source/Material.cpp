@@ -16,9 +16,11 @@
 Material::Material(A::AssetModule* producer, const Descriptor& descriptor)
    : A::Material {MetaOf<Material>(), producer, descriptor}
    , mRoot {this, descriptor} {
+   Logger::Verbose(Self(), "Initializing...");
    // Extract default rate if any                                       
    if (!mDescriptor.ExtractTrait<Traits::Rate>(mDefaultRate))
       mDescriptor.ExtractData(mDefaultRate);
+   Logger::Verbose(Self(), "Initialized");
 }
 
 /// Create nodes inside the material                                          

@@ -452,12 +452,13 @@ GLSL ConvertSymbol(const Trait& trait, const GLSL& symbol, DMeta as, Real filler
    }
 
    LANGULUS_ASSERT(false, Material, "Can't convert symbol ", trait, " to ", as);
+   return {};
 }
 
 /// Get a default type of each of the standard traits                         
 ///   @param trait - the trait definition                                     
 ///   @return the default trait properties                                    
-const Node::DefaultTrait& Node::GetDefaultTrait(TMeta trait) {
+Node::DefaultTrait Node::GetDefaultTrait(TMeta trait) {
    static TUnorderedMap<TMeta, DefaultTrait> properties;
 
    if (properties.IsEmpty()) {
@@ -499,6 +500,7 @@ const Node::DefaultTrait& Node::GetDefaultTrait(TMeta trait) {
       return properties.GetValue(found);
 
    LANGULUS_ASSERT(false, Material, "Undefined default trait ", trait);
+   return {};
 }
 
 /// Decay a complex type to a fundamental GLSL type                           
@@ -522,8 +524,9 @@ DMeta Node::DecayToGLSLType(DMeta meta) {
       return MetaOf<Vec2f>();
    else if (meta->template CastsTo<Float>(1) || meta->template CastsTo<A::Number>(1))
       return MetaOf<Float>();
-   else
-      LANGULUS_ASSERT(false, Material, "Can't decay type ", meta);
+
+   LANGULUS_ASSERT(false, Material, "Can't decay type ", meta);
+   return nullptr;
 }
 
 /// Select a symbol from the node hierarchy                                   

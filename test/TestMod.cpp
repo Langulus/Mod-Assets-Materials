@@ -67,7 +67,7 @@ SCENARIO("Shader generation", "[materials]") {
          root.LoadMod("Vulkan");
          root.LoadMod("AssetsMaterials");
 
-         WHEN("The system is created via tokens") {
+         WHEN("The material is created via tokens") {
             auto producedWindow   = root.CreateUnitToken("Window", Traits::Size(640, 480));
             auto producedRenderer = root.CreateUnitToken("Renderer");
             auto producedMaterial = root.CreateUnitToken("Material", Code(MaterialCode));
@@ -91,8 +91,8 @@ SCENARIO("Shader generation", "[materials]") {
                REQUIRE(producedMaterial.IsSparse());
             }
          }
-                  
-         WHEN("The GUI system is created via abstractions") {
+
+         WHEN("The material is created via abstractions") {
             auto producedWindow = root.CreateUnit<A::Window>(Traits::Size(640, 480));
             auto producedRenderer = root.CreateUnit<A::Renderer>();
             auto producedMaterial = root.CreateUnit<A::Material>(Code(MaterialCode));

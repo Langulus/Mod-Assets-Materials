@@ -90,7 +90,7 @@ public:
    NOD() Offset GetStage() const;
    NOD() Material* GetMaterial() const noexcept;
    NOD() MaterialLibrary* GetLibrary() const noexcept;
-   NOD() static const DefaultTrait& GetDefaultTrait(TMeta);
+   NOD() static DefaultTrait GetDefaultTrait(TMeta);
    NOD() static DMeta DecayToGLSLType(DMeta);
 
    void AddChild(Node*);
