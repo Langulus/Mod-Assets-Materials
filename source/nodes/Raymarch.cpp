@@ -53,8 +53,7 @@ const Symbol& Raymarch::Generate() {
       scenes << scene.GenerateSDF();
    });
 
-   LANGULUS_ASSERT(!scenes.IsEmpty(), Material,
-      "No scenes available for raymarcher");
+   LANGULUS_ASSERT(scenes, Material, "No scenes available for raymarcher");
 
    if (scenes.GetCount() > 1)
       TODO(); // another SDFUnion indirection required here

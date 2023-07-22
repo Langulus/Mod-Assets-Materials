@@ -73,14 +73,14 @@ const Symbol& Scene::GenerateLines() {
          for (Count i = 0; i < count; ++i) {
             // Extract each line, and convert it to shader code         
             auto position = geometry->GetLineTrait<Traits::Place>(i);
-            LANGULUS_ASSERT(!position.IsEmpty(), Material,
+            LANGULUS_ASSERT(position, Material,
                "Can't rasterize a line without Traits::Place");
 
             if (!position.template CastsTo<Vec3>(1))
                TODO();
 
             auto color = geometry->GetLineTrait<Traits::Color>(i);
-            LANGULUS_ASSERT(!color.IsEmpty(), Material,
+            LANGULUS_ASSERT(color, Material,
                "Can't rasterize a line without Traits::Color");
 
             if (!color.template CastsTo<Vec4>(1))
@@ -134,7 +134,7 @@ const Symbol& Scene::GenerateSDF() {
 
       for (auto& construct : pair.mValue) {
          auto element = InterpretAsSDF(construct, *mMaterial);
-         if (scene.IsEmpty()) {
+         if (!scene) {
             // This was the first element                               
             scene = element;
             continue;
@@ -149,7 +149,7 @@ const Symbol& Scene::GenerateSDF() {
       }
    }
 
-   LANGULUS_ASSERT(!scene.IsEmpty(), Material, "SDF scene is empty");
+   LANGULUS_ASSERT(scene, Material, "SDF scene is empty");
 
    // Define the scene function                                         
    AddDefine("Scene", Text::TemplateRt(SceneFunction, scene));
@@ -188,21 +188,21 @@ const Symbol& Scene::GenerateTriangles() {
          const auto count = geometry->GetTriangleCount();
          for (Count i = 0; i < count; ++i) {
             auto position = geometry->template GetTriangleTrait<Traits::Place>(i);
-            LANGULUS_ASSERT(!position.IsEmpty(), Material,
+            LANGULUS_ASSERT(position, Material,
                "Can't rasterize a triangle without Traits::Place");
 
             if (!position.template CastsTo<Vec3>(1))
                TODO();
 
             auto normal = geometry->template GetTriangleTrait<Traits::Aim>(i);
-            LANGULUS_ASSERT(!normal.IsEmpty(), Material,
+            LANGULUS_ASSERT(normal, Material,
                "Can't rasterize a triangle without Traits::Aim");
 
             if (!normal.template CastsTo<Vec3>(1))
                TODO();
 
             auto texture = geometry->GetTriangleTrait<Traits::Sampler>(i);
-            LANGULUS_ASSERT(!texture.IsEmpty(), Material,
+            LANGULUS_ASSERT(texture, Material,
                "Can't rasterize a triangle without Traits::Sampler");
 
             if (!texture.template CastsTo<Vec2>(1))

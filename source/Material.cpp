@@ -49,7 +49,7 @@ const Rate& Material::GetDefaultRate() const noexcept {
 void Material::Commit(Rate rate, const Token& place, const Token& addition) {
    const auto stage = rate.GetStageIndex();
    auto& code = GetStage(stage);
-   if (code.IsEmpty()) {
+   if (!code) {
       code += GLSL::Template(stage);
       VERBOSE_NODE("Added default template for ", ShaderStage::Names[stage]);
    }
@@ -205,7 +205,7 @@ void Material::GenerateUniforms() {
    for (Offset i = 0; i < Rate::UniformCount; ++i) {
       const Rate rate {i + Rate::UniformBegin};
       auto& traits = GetInputs(i);
-      if (traits.IsEmpty())
+      if (!traits)
          continue;
 
       // Define the rate-dedicated uniform buffer, if there's at least  
@@ -246,7 +246,7 @@ void Material::GenerateUniforms() {
          names << name;
       }
 
-      if (names.IsEmpty())
+      if (!names)
          continue;
 
       GLSL ubo;

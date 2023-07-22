@@ -27,7 +27,7 @@ Texture::Texture(const Descriptor& desc)
    // Extract Traits::File, if any                                      
    Any file;
    mDescriptor.ExtractTrait<Traits::File>(file);
-   if (!file.IsEmpty()) {
+   if (file) {
       mTexture = CreateTexture(file);
       VERBOSE_NODE("Texture generator changed to: ", mTexture);
    }
@@ -170,7 +170,7 @@ GLSL Texture::GenerateKeyframe(const Temporal& keyframe) {
       );
    }*/
 
-   LANGULUS_ASSERT(!symbol.IsEmpty(), Material, "Bad keyframe symbol");
+   LANGULUS_ASSERT(symbol, Material, "Bad keyframe symbol");
    return symbol;
 }
 

@@ -46,8 +46,7 @@ const Symbol& Raster::GeneratePerPixel() {
       scenes << scene.GenerateTriangles();
    });
 
-   LANGULUS_ASSERT(!scenes.IsEmpty(), Material,
-      "No scenes available for rasterizer");
+   LANGULUS_ASSERT(scenes, Material, "No scenes available for rasterizer");
 
    if (scenes.GetCount() > 1)
       TODO(); // multiple triangle lists

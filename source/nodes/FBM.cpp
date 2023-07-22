@@ -30,8 +30,7 @@ FBM::FBM(const Descriptor& desc)
    // That code also contains all required variables in the form of     
    // selection verbs                                                   
    mDescriptor.ExtractData(mCode);
-   LANGULUS_ASSERT(!mCode.IsEmpty(), Material,
-      "No FBM octave code");
+   LANGULUS_ASSERT(mCode, Material, "No FBM octave code");
 }
 
 /// For logging                                                               

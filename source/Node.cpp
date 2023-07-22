@@ -194,7 +194,7 @@ void Node::ArithmeticVerb(Verb& verb, const Token& pos, const Token& neg, const 
 
    const bool inverse = verb.GetMass() < 0;
    bool success {};
-   if (verb.IsEmpty() && inverse && unary.size()) {
+   if (!verb && inverse && unary.size()) {
       // No argument, so an unary minus sign                            
       ForEachOutput([&success,&unary](Symbol& symbol) {
          symbol.mCode = Text::TemplateRt(unary, symbol.mCode);
@@ -213,7 +213,7 @@ void Node::ArithmeticVerb(Verb& verb, const Token& pos, const Token& neg, const 
       group.ForEachElement([&](const Block& element) {
          try {
             const auto code = element.AsCast<GLSL>();
-            if (code.IsEmpty())
+            if (!code)
                return;
 
             if (neg.empty() || !inverse) {
@@ -337,7 +337,7 @@ void Node::AddDefine(const Token& name, const GLSL& code) {
 
 /// Log the material node hierarchy                                           
 void Node::Dump() const {
-   if (mChildren.IsEmpty()) {
+   if (!mChildren) {
       Logger::Verbose(Self(), " {}");
       return;
    }
@@ -461,7 +461,7 @@ GLSL ConvertSymbol(const Trait& trait, const GLSL& symbol, DMeta as, Real filler
 Node::DefaultTrait Node::GetDefaultTrait(TMeta trait) {
    static TUnorderedMap<TMeta, DefaultTrait> properties;
 
-   if (properties.IsEmpty()) {
+   if (!properties) {
       properties[MetaOf<Traits::Time>()] =
          {MetaOf<Real>(), PerTick};
       properties[MetaOf<Traits::MousePosition>()] =
