@@ -495,7 +495,7 @@ Node::DefaultTrait Node::GetDefaultTrait(TMeta trait) {
          {MetaOf<Vec4>(), PerVertex};
    }
 
-   auto found = properties.FindKeyIndex(trait);
+   auto found = properties.Find(trait);
    if (found)
       return properties.GetValue(found);
 
@@ -542,7 +542,7 @@ Symbol* Node::GetSymbol(TMeta t, DMeta d, Rate r, Index i) {
 
    if (t) {
       // Filter by traits                                               
-      const auto foundt = mLocalsT.FindKeyIndex(t);
+      const auto foundt = mLocalsT.Find(t);
       if (foundt) {
          auto& candidates = mLocalsT.GetValue(foundt);
          if (i && i.IsSpecial()) {
