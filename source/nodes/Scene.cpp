@@ -47,7 +47,7 @@ const Symbol& Scene::Generate() {
 ///   @return the array of lines symbol                                       
 const Symbol& Scene::GenerateLines() {
    GLSL lines;
-   Count countCombined;
+   Count countCombined = 0;
 
    // Get the lines of each geometry construct                          
    for (auto pair : mDescriptor.mConstructs) {
@@ -162,7 +162,7 @@ const Symbol& Scene::GenerateSDF() {
 ///   @return the array of triangles symbol                                   
 const Symbol& Scene::GenerateTriangles() {
    GLSL triangles;
-   Count countCombined;
+   Count countCombined = 0;
 
    // Get the triangles of each geometry construct                      
    for (auto pair : mDescriptor.mConstructs) {

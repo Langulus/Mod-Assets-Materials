@@ -26,7 +26,7 @@ Texture::Texture(const Descriptor& desc)
 
    // Extract Traits::File, if any                                      
    Any file;
-   mDescriptor.ExtractTrait<Traits::File>(file);
+   mDescriptor.ExtractTrait<Traits::Path>(file);
    if (file) {
       mTexture = CreateTexture(file);
       VERBOSE_NODE("Texture generator changed to: ", mTexture);
