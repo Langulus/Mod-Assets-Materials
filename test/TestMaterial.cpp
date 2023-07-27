@@ -57,34 +57,22 @@ SCENARIO("Shader generation", "[materials]") {
       GIVEN(std::string("Init and shutdown cycle #") + std::to_string(repeat)) {
          // Create root entity                                          
          Thing root;
-         root.SetName("ROOT"_text);
+         root.SetName("ROOT");
 
          // Create runtime at the root                                  
          root.CreateRuntime();
 
          // Load modules                                                
-         root.LoadMod("GLFW");
-         root.LoadMod("Vulkan");
          root.LoadMod("AssetsMaterials");
 
          WHEN("The material is created via tokens") {
-            auto producedWindow   = root.CreateUnitToken("Window", Traits::Size(640, 480));
-            auto producedRenderer = root.CreateUnitToken("Renderer");
             auto producedMaterial = root.CreateUnitToken("Material", Code(MaterialCode));
             
             // Update once                                              
             root.Update(Time::zero());
-
+            
             THEN("Various traits change") {
                root.DumpHierarchy();
-               
-               REQUIRE(producedWindow.GetCount() == 1);
-               REQUIRE(producedWindow.CastsTo<A::Window>(1));
-               REQUIRE(producedWindow.IsSparse());
-
-               REQUIRE(producedRenderer.GetCount() == 1);
-               REQUIRE(producedRenderer.CastsTo<A::Renderer>(1));
-               REQUIRE(producedRenderer.IsSparse());
 
                REQUIRE(producedMaterial.GetCount() == 1);
                REQUIRE(producedMaterial.CastsTo<A::Material>(1));
@@ -93,8 +81,6 @@ SCENARIO("Shader generation", "[materials]") {
          }
 
          WHEN("The material is created via abstractions") {
-            auto producedWindow = root.CreateUnit<A::Window>(Traits::Size(640, 480));
-            auto producedRenderer = root.CreateUnit<A::Renderer>();
             auto producedMaterial = root.CreateUnit<A::Material>(Code(MaterialCode));
 
             // Update once                                              
@@ -102,14 +88,6 @@ SCENARIO("Shader generation", "[materials]") {
 
             THEN("Various traits change") {
                root.DumpHierarchy();
-
-               REQUIRE(producedWindow.GetCount() == 1);
-               REQUIRE(producedWindow.CastsTo<A::Window>(1));
-               REQUIRE(producedWindow.IsSparse());
-
-               REQUIRE(producedRenderer.GetCount() == 1);
-               REQUIRE(producedRenderer.CastsTo<A::Renderer>(1));
-               REQUIRE(producedRenderer.IsSparse());
 
                REQUIRE(producedMaterial.GetCount() == 1);
                REQUIRE(producedMaterial.CastsTo<A::Material>(1));

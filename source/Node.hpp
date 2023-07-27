@@ -35,7 +35,7 @@ protected:
    // The parents that lead to this node                                
    Ref<Node> mParent;
    // The children that this node leads to                              
-   TAny<Node*> mChildren;
+   TAny<Ref<Node>> mChildren;
 
    // Local variables, usually used by selection verbs, when executing  
    // Code in the context of the Node                                   
@@ -73,6 +73,8 @@ public:
    Node(DMeta, Material*, const Descriptor&);
    Node(DMeta, Node*, const Descriptor&);
    Node(DMeta, const Descriptor&);
+   Node(Node&&) = delete;
+   virtual ~Node();
 
    void Create(Verb&);
    void Select(Verb&);
@@ -93,8 +95,11 @@ public:
    NOD() static DefaultTrait GetDefaultTrait(TMeta);
    NOD() static DMeta DecayToGLSLType(DMeta);
 
-   void AddChild(Node*);
-   void RemoveChild(Node*);
+   template<bool TWOSIDED = true>
+   Count AddChild(Node*);
+   template<bool TWOSIDED = true>
+   Count RemoveChild(Node*);
+
    void Descend();
 
    template<class F>
@@ -114,6 +119,8 @@ public:
    Count ForEachOutput(F&&);
    
 protected:
+   void IsolateFromHierarchy();
+
    void InnerCreate();
    Node* NodeFromConstruct(const Construct&);
 

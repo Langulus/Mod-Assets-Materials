@@ -29,10 +29,9 @@ Node::Node(DMeta classid, Material* material, const Descriptor& descriptor)
 Node::Node(DMeta classid, Node* parent, const Descriptor& descriptor)
    : Unit {classid, {}} // The descriptor might contain Thing's owner,  
                         // so we don't forward it to the unit           
-   , mDescriptor {descriptor}
-   , mMaterial {parent->GetMaterial()}
-   , mParent {parent} {
-   parent->mChildren << this;
+   , mDescriptor {descriptor} {
+   if (parent)
+      parent->AddChild(this);
 }
 
 /// Material node construction used in the rest of the Nodes                  
@@ -49,14 +48,36 @@ Node::Node(DMeta classid, const Descriptor& descriptor)
          return !trait.ForEach([this](const Node* owner) {
             // Incorporate this node into the hierarchy of nodes        
             auto mutableOwner = const_cast<Node*>(owner);
-            mParent = mutableOwner;
-            mutableOwner->mChildren << this;
-            mMaterial = owner->GetMaterial();
+            mutableOwner->AddChild(this);
             return Flow::Break;
          });
       }
       return Flow::Continue;
    });
+}
+
+/// Node destructor                                                           
+Node::~Node() {
+   IsolateFromHierarchy();
+}
+
+/// Pluck the node and all of its children from the hierarchy                 
+void Node::IsolateFromHierarchy() {
+   VERBOSE_NODE_TAB("Isolating (", GetReferences(), " uses)");
+
+   // Node might be on the stack, make sure we decouple it from         
+   // its parent, if that's the case                                    
+   if (mParent && GetReferences() > 1)
+      mParent->RemoveChild<false>(this);
+
+   // Decouple all children from this parent, so that the above         
+   // condition skips for all children, so that we don't erase          
+   // children while iterating them in this destructor                  
+   for (auto& child : mChildren) {
+      child->mParent.Reset();
+      child->IsolateFromHierarchy();
+      VERBOSE_NODE("Decoupling ", *child, " (", child->GetReferences(), " uses)");
+   }
 }
 
 /// Parse the normalized descriptor and create subnodes, apply traits         
@@ -117,8 +138,7 @@ Node* Node::NodeFromConstruct(const Construct& construct) {
 
       auto newInstance = Any::FromMeta(construct.GetType());
       newInstance.Emplace(local.GetArgument());
-      mChildren << newInstance.As<Node*>();
-      return mChildren.Last();
+      return newInstance.As<Node*>();
    }
    
    Logger::Warning(Self(), "Ignored construct: ", construct);
@@ -338,14 +358,13 @@ void Node::AddDefine(const Token& name, const GLSL& code) {
 /// Log the material node hierarchy                                           
 void Node::Dump() const {
    if (!mChildren) {
-      Logger::Verbose(Self(), " {}");
+      Logger::Verbose(Self());
       return;
    }
 
-   const auto scope = Logger::Verbose(Self(), " {", Logger::Tabs {});
+   const auto scope = Logger::Verbose(Self(), Logger::Tabs{});
    for (auto child : mChildren)
       child->Dump();
-   Logger::Verbose('}');
 }
 
 /// Opens node debugging scope                                                

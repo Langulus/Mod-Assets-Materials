@@ -2,7 +2,7 @@ project(LangulusModAssetsMaterialsTest)
 
 add_executable(LangulusModAssetsMaterialsTest
 	Main.cpp
-	TestMod.cpp
+	TestMaterial.cpp
 )
 
 target_link_libraries(LangulusModAssetsMaterialsTest
@@ -18,7 +18,5 @@ add_test(
 langulus_copy_dlls(LangulusModAssetsMaterialsTest ON LangulusModAssetsMaterialsTest)
 langulus_copy_dlls_advanced(LangulusModAssetsMaterialsTest
 	TO			LangulusModAssetsMaterialsTest
-	FROM		LangulusModGLFW
-				LangulusModVulkan
-				LangulusModAssetsMaterials
+	FROM		LangulusModAssetsMaterials
 )

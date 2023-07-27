@@ -30,6 +30,7 @@ namespace Nodes
 
    public:
       FBM(const Descriptor&);
+
       const Symbol& Generate();
       NOD() operator Debug() const;
    };

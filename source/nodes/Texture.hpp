@@ -31,6 +31,7 @@ namespace Nodes
 
    public:
       Texture(const Descriptor&);
+
       const Symbol& Generate();
 
    private:

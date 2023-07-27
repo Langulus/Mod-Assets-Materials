@@ -20,7 +20,14 @@ Material::Material(A::AssetModule* producer, const Descriptor& descriptor)
    // Extract default rate if any                                       
    if (!mDescriptor.ExtractTrait<Traits::Rate>(mDefaultRate))
       mDescriptor.ExtractData(mDefaultRate);
+   mRoot.Dump();
    Logger::Verbose(Self(), "Initialized");
+}
+
+/// Create nodes inside the material                                          
+///   @param verb - creation verb                                             
+Material::~Material() {
+   Logger::Verbose(Self(), "Destroying...");
 }
 
 /// Create nodes inside the material                                          

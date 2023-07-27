@@ -16,6 +16,58 @@ Material* Node::GetMaterial() const noexcept {
    return mMaterial;
 }
 
+/// Add a child                                                               
+///   @attention assumes node is a valid pointer                              
+///   @tparam TWOSIDED - true to also set the node's parent;                  
+///                      used mainly internally to avoid endless loops        
+///   @param node - node instance to add as child                             
+///   @return the number of added children                                    
+template<bool TWOSIDED>
+Count Node::AddChild(Node* node) {
+   LANGULUS_ASSUME(UserAssumes, node, "Bad node pointer");
+
+   VERBOSE_NODE("Adding child ", node, " (", node->GetReferences(), " uses)");
+   const auto added = mChildren.Merge(node);
+   if constexpr (TWOSIDED) {
+      if (added) {
+         if (node->mParent != this) {
+            if (node->mParent)
+               node->mParent->RemoveChild<false>(node);
+
+            node->mParent = this;
+            node->mMaterial = GetMaterial();
+            VERBOSE_NODE("Now parent of ", node, " (", node->GetReferences(), " uses)");
+         }
+      }
+   }
+
+   return added;
+}
+
+/// Remove a child that matches pointer                                       
+///   @attention assumes node is a valid pointer                              
+///   @tparam TWOSIDED - true to also remove node's owner;                    
+///                      used mainly internally to avoid endless loops        
+///   @param node - node instance to remove from children                     
+///   @return the number of removed children                                  
+template<bool TWOSIDED>
+Count Node::RemoveChild(Node* node) {
+   LANGULUS_ASSUME(UserAssumes, node, "Bad node pointer");
+
+   VERBOSE_NODE("Removing child ", node, " (", node->GetReferences(), " uses)");
+   const auto removed = mChildren.Remove(node);
+   if constexpr (TWOSIDED) {
+      if (removed) {
+         if (node->mParent == this) {
+            node->mParent = nullptr;
+            node->mMaterial = nullptr;
+         }
+      }
+   }
+
+   return removed;
+}
+
 /// Execute a function in each child node                                     
 ///   @tparam F - function signature (deducible)                              
 ///   @param call - the function callback                                     
