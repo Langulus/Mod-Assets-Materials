@@ -14,7 +14,7 @@
 ///   @param producer - the producer                                          
 ///   @param descriptor - instructions for configuring the material           
 Material::Material(A::AssetModule* producer, const Descriptor& descriptor)
-   : A::Material {MetaOf<Material>(), producer, descriptor}
+   : A::Material {MetaOf<::Material>(), producer, descriptor}
    , mRoot {this, descriptor} {
    Logger::Verbose(Self(), "Initializing...");
    // Extract default rate if any                                       
@@ -39,7 +39,7 @@ void Material::Create(Verb& verb) {
 /// Get material adapter for lower or higher level of detail                  
 ///   @param lod - the level-of-detail state                                  
 ///   @return a pointer to the material generator                             
-const A::Material* Material::GetLOD(const LOD& lod) const {
+Ref<A::Material> Material::GetLOD(const LOD& lod) const {
    TODO();
 }
 
@@ -133,7 +133,7 @@ GLSL Material::AddInput(Rate rate, const Trait& traitOriginal, bool allowDuplica
 
    inputs << trait;
    const auto symbol = GenerateInputName(rate, trait);
-   if (trait.TraitIs<Traits::Texture>())
+   if (trait.TraitIs<Traits::Image>())
       ++mConsumedSamplers;
 
    VERBOSE_NODE("Added input ", Logger::Cyan, trait, " as `", symbol, "` @ ", rate);
@@ -182,7 +182,7 @@ void Material::AddDefine(Rate rate, const Token& name, const GLSL& code) {
 ///   @param trait - the trait tag for the input                              
 ///   @return the variable name to access the input                           
 GLSL Material::GenerateInputName(Rate rate, const Trait& trait) const {
-   if (trait.TraitIs<Traits::Texture>()) {
+   if (trait.TraitIs<Traits::Image>()) {
       // Samplers are handled differently                               
       return GLSL {trait.GetTrait()} + mConsumedSamplers;
    }
@@ -237,7 +237,7 @@ void Material::GenerateUniforms() {
       TAny<GLSL> names;
       for (auto& trait : traits) {
          // Skip textures for now                                       
-         if (trait.TraitIs<Traits::Texture>())
+         if (trait.TraitIs<Traits::Image>())
             continue;
 
          LANGULUS_ASSERT(trait.IsTyped(),  Material,
@@ -288,7 +288,7 @@ void Material::GenerateUniforms() {
    auto& traits = GetInputs(PerRenderable);
    for (auto& trait : traits) {
       // Skip anything BUT textures                                     
-      if (!trait.TraitIs<Traits::Texture>())
+      if (!trait.TraitIs<Traits::Image>())
          continue;
 
       // Define each sampler using this layout                          
@@ -427,7 +427,7 @@ void Material::InitializeFromShadertoy(const GLSL& code) {
    // Satisfy traits                                                    
    integrate(Traits::Time {}, "iTime");
    integrate(Traits::Size {}, "iResolution");
-   integrate(Traits::Texture {}, "iChannel0");
+   integrate(Traits::Image {}, "iChannel0");
    integrate(Traits::View {}, "iView");
 
    /*TODO

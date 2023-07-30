@@ -47,7 +47,7 @@ public:
    void Create(Verb&);
    void Refresh() {}
 
-   NOD() const A::Material* GetLOD(const LOD&) const;
+   NOD() Ref<A::Material> GetLOD(const LOD&) const;
 
    NOD() const Rate& GetDefaultRate() const noexcept;
    NOD()       GLSL& GetStage(Offset);

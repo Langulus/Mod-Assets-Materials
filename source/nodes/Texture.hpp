@@ -27,7 +27,7 @@ namespace Nodes
    private:
       Temporal mKeyframes;
       Index mTextureId {IndexNone};
-      Ptr<A::Texture> mTexture;
+      Ref<A::Image> mTexture;
 
    public:
       Texture(const Descriptor&);
@@ -35,7 +35,7 @@ namespace Nodes
       const Symbol& Generate();
 
    private:
-      Ptr<A::Texture> CreateTexture(const Any&);
+      Ref<A::Image> CreateTexture(const Any&);
       GLSL GenerateKeyframe(const Temporal&);
    };
 

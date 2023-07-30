@@ -228,7 +228,7 @@ inline GLSL GLSL::Type(DMeta meta) {
 
       return token;
    }
-   else if (meta->CastsTo<A::Texture>()) {
+   else if (meta->CastsTo<A::Image>()) {
       return "sampler2D";
       //TODO distinguish these:
       //gsampler1D   GL_TEXTURE_1D   1D texture

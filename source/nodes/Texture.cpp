@@ -21,7 +21,7 @@ Texture::Texture(const Descriptor& desc)
    InnerCreate();
 
    // Extract texture id, decides to which texture slot to bind         
-   if (mDescriptor.ExtractTrait<Traits::Texture>(mTextureId))
+   if (mDescriptor.ExtractTrait<Traits::Image>(mTextureId))
       VERBOSE_NODE("Texture id changed to: ", mTextureId);
 
    // Extract Traits::File, if any                                      
@@ -34,7 +34,7 @@ Texture::Texture(const Descriptor& desc)
    
    for (const auto pair : mDescriptor.mConstructs) {
       // Create texture generators from sub-constructs                  
-      if (!pair.mKey->template CastsTo<A::Texture>() &&
+      if (!pair.mKey->template CastsTo<A::Image>() &&
           !pair.mKey->template CastsTo<A::File>()) {
          Logger::Warning(Self(), "Ignored constructs of type ", pair.mKey);
          continue;
@@ -48,9 +48,9 @@ Texture::Texture(const Descriptor& desc)
    
    // Consider all provided data                                        
    for (const auto pair : mDescriptor.mAnythingElse) {
-      if (pair.mKey->template CastsTo<A::Texture>()) {
+      if (pair.mKey->template CastsTo<A::Image>()) {
          // Reuse a texture generator directly                          
-         mTexture = pair.mValue.Last().As<A::Texture*>();
+         mTexture = pair.mValue.Last().As<A::Image*>();
          VERBOSE_NODE("Texture generator changed to: ", mTexture);
       }
       else if (pair.mKey->Is<Text>()) {
@@ -75,13 +75,9 @@ Texture::Texture(const Descriptor& desc)
 /// A snippet that forward a descriptor to a creation verb in the hierarchy   
 ///   @param descriptor - the descriptor for the texture                      
 ///   @return the produced texture                                            
-Ptr<A::Texture> Texture::CreateTexture(const Any& descriptor) {
-   Verbs::Create creator {Construct::From<A::Texture>(descriptor)};
-   if (mMaterial->DoInHierarchy<Seek::Above>(creator))
-      return creator.GetOutput().As<A::Texture*>();
-
-   Logger::Error(Self(), "Couldn't create texture from: ", descriptor);
-   return {};
+Ref<A::Image> Texture::CreateTexture(const Any& descriptor) {
+   Verbs::Create creator {Construct::From<A::Image>(descriptor)};
+   return Run(creator).As<A::Image*>();
 }
 
 /// Assembles a GLSL texture(...) function                                    
@@ -138,7 +134,7 @@ GLSL Texture::GenerateKeyframe(const Temporal& keyframe) {
                Verbs::Create creator {&construct};
                Any environment = mProducer->GetOwners();
                Verb::ExecuteVerb(environment, creator);
-               creator.GetOutput().ForEachDeep([&](A::Texture* t) {
+               creator->ForEachDeep([&](A::Texture* t) {
                   t->Generate();
                   auto uniform = GetProducer()->AddInput(Rate::Auto, Trait::From<Traits::Texture>(t), true);
                   symbol = GetPixel(

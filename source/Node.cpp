@@ -498,8 +498,8 @@ Node::DefaultTrait Node::GetDefaultTrait(TMeta trait) {
       properties[MetaOf<Traits::View>()] =
          {MetaOf<Mat4>(), PerLevel};
 
-      properties[MetaOf<Traits::Texture>()] =
-         {MetaOf<A::Texture>(), PerRenderable};
+      properties[MetaOf<Traits::Image>()] =
+         {MetaOf<A::Image>(), PerRenderable};
 
       properties[MetaOf<Traits::Transform>()] =
          {MetaOf<Mat4>(), PerInstance};

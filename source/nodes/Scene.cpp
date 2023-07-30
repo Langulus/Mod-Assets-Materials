@@ -51,7 +51,7 @@ const Symbol& Scene::GenerateLines() {
 
    // Get the lines of each geometry construct                          
    for (auto pair : mDescriptor.mConstructs) {
-      if (!pair.mKey->template CastsTo<A::Geometry>())
+      if (!pair.mKey->template CastsTo<A::Mesh>())
          continue;
 
       for (auto& construct : pair.mValue) {
@@ -63,12 +63,9 @@ const Symbol& Scene::GenerateLines() {
          geometryDescriptor <<= MetaOf<Point3>();
          geometryDescriptor <<= MetaOf<RGBA>();
 
-         Verbs::Create creator {geometryDescriptor};
-         if (!mMaterial->DoInHierarchy(creator))
-            continue;
-
          // Get the generated geometry asset                            
-         auto geometry = creator.GetOutput().As<const A::Geometry*>();
+         Verbs::Create creator {geometryDescriptor};
+         const auto geometry = mMaterial->RunIn(creator).As<A::Mesh*>();
          const auto count = geometry->GetLineCount();
          for (Count i = 0; i < count; ++i) {
             // Extract each line, and convert it to shader code         
@@ -129,7 +126,7 @@ const Symbol& Scene::GenerateSDF() {
 
    // Get the SDF code for each geometry construct                      
    for (auto pair : mDescriptor.mConstructs) {
-      if (!pair.mKey->template CastsTo<A::Geometry>())
+      if (!pair.mKey->template CastsTo<A::Mesh>())
          continue;
 
       for (auto& construct : pair.mValue) {
@@ -166,7 +163,7 @@ const Symbol& Scene::GenerateTriangles() {
 
    // Get the triangles of each geometry construct                      
    for (auto pair : mDescriptor.mConstructs) {
-      if (!pair.mKey->template CastsTo<A::Geometry>())
+      if (!pair.mKey->template CastsTo<A::Mesh>())
          continue;
 
       for (auto& construct : pair.mValue) {
@@ -179,12 +176,9 @@ const Symbol& Scene::GenerateTriangles() {
          geometryDescriptor <<= MetaOf<Normal>();
          geometryDescriptor <<= MetaOf<Sampler2>();
 
-         Verbs::Create creator {geometryDescriptor};
-         if (!mMaterial->DoInHierarchy(creator))
-            continue;
-
          // Get the generated geometry asset                            
-         auto geometry = creator.GetOutput().template As<const A::Geometry*>();
+         Verbs::Create creator {geometryDescriptor};
+         const auto geometry = mMaterial->RunIn(creator).As<A::Mesh*>();
          const auto count = geometry->GetTriangleCount();
          for (Count i = 0; i < count; ++i) {
             auto position = geometry->template GetTriangleTrait<Traits::Place>(i);
