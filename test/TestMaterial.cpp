@@ -9,11 +9,6 @@
 #include <Entity/Thing.hpp>
 #include <catch2/catch.hpp>
 
-#if LANGULUS_FEATURE(MEMORY_STATISTICS)
-static bool statistics_provided = false;
-static Anyness::Allocator::Statistics memory_statistics;
-#endif
-
 /// See https://github.com/catchorg/Catch2/blob/devel/docs/tostring.md        
 CATCH_TRANSLATE_EXCEPTION(::Langulus::Exception const& ex) {
    const Text serialized {ex};
@@ -53,6 +48,8 @@ constexpr auto MaterialCode = R"code(
 
 
 SCENARIO("Shader generation", "[materials]") {
+   Allocator::State memoryState;
+
    for (int repeat = 0; repeat != 10; ++repeat) {
       GIVEN(std::string("Init and shutdown cycle #") + std::to_string(repeat)) {
          // Create root entity                                          
@@ -95,21 +92,8 @@ SCENARIO("Shader generation", "[materials]") {
             }
          }
 
-         #if LANGULUS_FEATURE(MEMORY_STATISTICS)
-            Fractalloc.CollectGarbage();
-
-            // Detect memory leaks                                      
-            if (statistics_provided) {
-               if (memory_statistics != Fractalloc.GetStatistics()) {
-                  Fractalloc.DumpPools();
-                  memory_statistics = Fractalloc.GetStatistics();
-                  FAIL("Memory leak detected");
-               }
-            }
-
-            memory_statistics = Fractalloc.GetStatistics();
-            statistics_provided = true;
-         #endif
+         // Check for memory leaks after each cycle                     
+         REQUIRE(memoryState.Assert());
       }
    }
 }
