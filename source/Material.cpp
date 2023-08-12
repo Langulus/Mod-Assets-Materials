@@ -36,6 +36,14 @@ void Material::Create(Verb& verb) {
    mRoot.Create(verb);
 }
 
+/// Generate shaders                                                          
+///   @param trait - the trait to generate                                    
+///   @param index - trait group to generate                                  
+///   @return true if data was generated                                      
+bool Material::Generate(TMeta trait, Offset index) {
+   TODO();
+}
+
 /// Get material adapter for lower or higher level of detail                  
 ///   @param lod - the level-of-detail state                                  
 ///   @return a pointer to the material generator                             

@@ -22,7 +22,7 @@ struct MaterialLibrary final : A::AssetModule {
 
 private:
    // Material factory                                                  
-   TFactoryUnique<Material> mMaterials;
+   TFactoryUnique<::Material> mMaterials;
    // Data folder, where materials will be saved or loaded from         
    Ptr<A::Folder> mFolder;
 

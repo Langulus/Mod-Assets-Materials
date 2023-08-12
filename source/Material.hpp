@@ -47,6 +47,8 @@ public:
    void Create(Verb&);
    void Refresh() {}
 
+   bool Generate(TMeta, Offset = 0);
+
    NOD() Ref<A::Material> GetLOD(const LOD&) const;
 
    NOD() const Rate& GetDefaultRate() const noexcept;
