@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 3.24)
-project(LangulusModAssetsMaterials)
+project(LangulusModAssetsMaterials
+    VERSION         1.0.0
+    DESCRIPTION     "Langulus plug-in module for generating and managing materials and shaders"
+    HOMEPAGE_URL    https://langulus.com
+    LANGUAGES       CXX
+)
 
-# Build the module                                                          
+# Build the module                                                              
 add_library(LangulusModAssetsMaterials SHARED
     source/MaterialLibrary.cpp
     source/Material.cpp

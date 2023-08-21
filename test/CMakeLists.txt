@@ -1,5 +1,3 @@
-project(LangulusModAssetsMaterialsTest)
-
 add_executable(LangulusModAssetsMaterialsTest
 	Main.cpp
 	TestMaterial.cpp
