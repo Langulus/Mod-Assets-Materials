@@ -62,6 +62,7 @@ SCENARIO("Shader generation", "[materials]") {
          // Load modules                                                
          root.LoadMod("AssetsMaterials");
 
+      #if LANGULUS_FEATURE(MANAGED_REFLECTION)
          WHEN("The material is created via tokens") {
             auto producedMaterial = root.CreateUnitToken("Material", Code(MaterialCode));
             
@@ -76,6 +77,7 @@ SCENARIO("Shader generation", "[materials]") {
                REQUIRE(producedMaterial.IsSparse());
             }
          }
+      #endif
 
          WHEN("The material is created via abstractions") {
             auto producedMaterial = root.CreateUnit<A::Material>(Code(MaterialCode));

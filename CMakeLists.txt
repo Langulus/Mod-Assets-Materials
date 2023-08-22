@@ -3,7 +3,6 @@ project(LangulusModAssetsMaterials
     VERSION         1.0.0
     DESCRIPTION     "Langulus plug-in module for generating and managing materials and shaders"
     HOMEPAGE_URL    https://langulus.com
-    LANGUAGES       CXX
 )
 
 # Build the module                                                              
