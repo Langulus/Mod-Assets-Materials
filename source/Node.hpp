@@ -26,7 +26,7 @@ protected:
    friend struct Nodes::FBM;
 
    // The normalized descriptor                                         
-   Normalized mDescriptor;
+   Neat mDescriptor;
    // The material this node belongs to                                 
    Material* mMaterial {};
 
