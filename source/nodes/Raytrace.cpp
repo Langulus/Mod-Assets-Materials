@@ -12,7 +12,7 @@ using namespace Nodes;
 
 /// Raytracer node descriptor-constructor                                     
 ///   @param desc - raytrace descriptor                                       
-Raytrace::Raytrace(const Descriptor& desc)
+Raytrace::Raytrace(const Neat& desc)
    : Node {MetaOf<Raytrace>(), desc} { }
 
 /// Generate raytracer code                                                   

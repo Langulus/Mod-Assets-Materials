@@ -16,7 +16,7 @@
 ///   @param classid - the node type                                          
 ///   @param material - the parent material                                   
 ///   @param descriptor - the node descriptor                                 
-Node::Node(DMeta classid, Material* material, const Descriptor& descriptor)
+Node::Node(DMeta classid, Material* material, const Neat& descriptor)
    : Unit {classid, {}} // The descriptor might contain Thing's owner,  
                         // so we don't forward it to the unit           
    , mDescriptor {descriptor}
@@ -26,7 +26,7 @@ Node::Node(DMeta classid, Material* material, const Descriptor& descriptor)
 ///   @param classid - the node type                                          
 ///   @param parent - the parent node                                         
 ///   @param descriptor - the node descriptor                                 
-Node::Node(DMeta classid, Node* parent, const Descriptor& descriptor)
+Node::Node(DMeta classid, Node* parent, const Neat& descriptor)
    : Unit {classid, {}} // The descriptor might contain Thing's owner,  
                         // so we don't forward it to the unit           
    , mDescriptor {descriptor} {
@@ -37,23 +37,17 @@ Node::Node(DMeta classid, Node* parent, const Descriptor& descriptor)
 /// Material node construction used in the rest of the Nodes                  
 ///   @param classid - the node type                                          
 ///   @param descriptor - the node descriptor                                 
-Node::Node(DMeta classid, const Descriptor& descriptor)
+Node::Node(DMeta classid, const Neat& descriptor)
    : Unit {classid, {}} // The descriptor might contain Thing's owner,  
                         // so we don't forward it to the unit           
    , mDescriptor {descriptor} {
    // Account for any Traits::Parent that is Node                       
-   // We handle those here, because they get omitted on normalization   
-   descriptor.ForEachDeep([this](const Trait& trait) {
-      if (trait.TraitIs<Traits::Parent>()) {
-         return !trait.ForEach([this](const Node* owner) {
-            // Incorporate this node into the hierarchy of nodes        
-            auto mutableOwner = const_cast<Node*>(owner);
-            mutableOwner->AddChild(this);
-            return Flow::Break;
-         });
-      }
-      return Flow::Continue;
-   });
+   const Node* owner = nullptr;
+   if (descriptor.ExtractTrait<Traits::Parent>(owner)) {
+      // Incorporate this node into the hierarchy of nodes              
+      auto mutableOwner = const_cast<Node*>(owner);
+      mutableOwner->AddChild(this);
+   }
 }
 
 /// Node destructor                                                           
@@ -67,7 +61,7 @@ void Node::IsolateFromHierarchy() {
 
    // Node might be on the stack, make sure we decouple it from         
    // its parent, if that's the case                                    
-   if (mParent && GetReferences() > 1)
+   if (mParent and GetReferences() > 1)
       mParent->RemoveChild<false>(this);
 
    // Decouple all children from this parent, so that the above         
@@ -87,62 +81,48 @@ void Node::InnerCreate() {
 
    // Save the rate                                                     
    mRate = GetMaterial()->GetDefaultRate();
-   auto rates = mDescriptor.GetTraits<Traits::Rate>();
-   if (rates) {
-      mRate = rates->Last().AsCast<Rate>();
+   if (mDescriptor.ExtractTrait<Traits::Rate>(mRate))
       VERBOSE_NODE("Rate changed (via trait) to: ", mRate);
-   }
 
    // Create all sub constructs                                         
-   for (const auto pair : mDescriptor.mConstructs) {
-      if (!pair.mKey->template CastsTo<Node>()) {
-         Logger::Warning(Self(), "Ignored constructs of type ", pair.mKey);
-         continue;
-      }
-
-      for (auto& construct : pair.mValue)
-         NodeFromConstruct(construct);
-   }
+   mDescriptor.ForEachConstruct([&](const Construct& c) {
+      NodeFromConstruct(c);
+   });
    
    // Consider all provided data                                        
-   for (const auto pair : mDescriptor.mAnythingElse) {
-      if (pair.mKey->template CastsTo<Code>()) {
-         // Execute each code snippet                                   
-         for (auto& snippet : pair.mValue) {
-            const auto& subcode = snippet.Get<Code>();
-            VERBOSE_NODE_TAB("Executing subcode: ", subcode);
-            Run(subcode);
-         }
+   mDescriptor.ForEachTail([&](const Any& data) {
+      if (data.CastsTo<Code>()) {
+         // Execute code snippet                                        
+         const auto& subcode = data.Get<Code>();
+         VERBOSE_NODE_TAB("Executing subcode: ", subcode);
+         Run(subcode);
       }
-      else if (pair.mKey->template CastsTo<Rate>()) {
+      else if (data.CastsTo<Rate>()) {
          // Set rate through data only                                  
-         mRate = pair.mValue.Last().Get<Rate>();
+         mRate = data.Get<Rate>();
          VERBOSE_NODE("Rate changed (via data) to: ", mRate);
       }
-      else {
-         Logger::Warning(Self(), "Ignored data of type ", pair.mKey);
-         continue;
-      }
-   }
+      else Logger::Warning(Self(), "Ignored data: ", data);
+   });
 }
 
 /// Create a child node from a construct                                      
 ///   @param construct - the construct to satisfy                             
 ///   @return a pointer to the child node                                     
 Node* Node::NodeFromConstruct(const Construct& construct) {
-   if (construct.CastsTo<Node>()) {
-      // Create a child node                                            
-      VERBOSE_NODE_TAB("Adding node: ", construct);
-      Construct local {construct};
-      local << Traits::Parent {this};
-
-      auto newInstance = Any::FromMeta(construct.GetType());
-      newInstance.Emplace(local.GetArgument());
-      return newInstance.As<Node*>();
+   if (not construct.CastsTo<Node>()) {
+      Logger::Warning(Self(), "Ignored construct: ", construct);
+      return {};
    }
-   
-   Logger::Warning(Self(), "Ignored construct: ", construct);
-   return {};
+
+   // Create a child node                                               
+   VERBOSE_NODE_TAB("Adding node: ", construct);
+   Construct local {construct};
+   local << Traits::Parent {this};
+
+   auto newInstance = Any::FromMeta(construct.GetType());
+   newInstance.Emplace(local.GetArgument());
+   return newInstance.As<Node*>();
 }
 
 /// Get material library                                                      
@@ -193,7 +173,7 @@ void Node::Select(Verb& verb) {
       );
    });
 
-   if (rateFilter == Rate::Auto || !index || !traitFilter || !dataFilter)
+   if (rateFilter == Rate::Auto or not index or not traitFilter or not dataFilter)
       return;
 
    // Search for the symbol                                             
@@ -214,14 +194,14 @@ void Node::ArithmeticVerb(Verb& verb, const Token& pos, const Token& neg, const 
 
    const bool inverse = verb.GetMass() < 0;
    bool success {};
-   if (!verb && inverse && unary.size()) {
+   if (not verb and inverse and unary.size()) {
       // No argument, so an unary minus sign                            
       ForEachOutput([&success,&unary](Symbol& symbol) {
          symbol.mCode = Text::TemplateRt(unary, symbol.mCode);
          success = true;
       });
 
-      if (!success)
+      if (not success)
          Logger::Warning(Self(), "Unable to ", verb);
       verb << this;
       return;
@@ -233,10 +213,10 @@ void Node::ArithmeticVerb(Verb& verb, const Token& pos, const Token& neg, const 
       group.ForEachElement([&](const Block& element) {
          try {
             const auto code = element.AsCast<GLSL>();
-            if (!code)
+            if (not code)
                return;
 
-            if (neg.empty() || !inverse) {
+            if (neg.empty() or not inverse) {
                ForEachOutput([&](Symbol& symbol) {
                   symbol.mCode = Text::TemplateRt(pos, symbol.mCode, code);
                   success = true;
@@ -253,7 +233,7 @@ void Node::ArithmeticVerb(Verb& verb, const Token& pos, const Token& neg, const 
       });
    });
 
-   if (!success)
+   if (not success)
       Logger::Warning(Self(), "Unable to ", verb);
    verb << this;
 }
@@ -309,7 +289,8 @@ void Node::Randomize(Verb& verb) {
             AddDefine("SimplexNoise1", TSimplex<1, 2, float>::template Hash<true>());
          else if (itype->template CastsTo<A::Number>(3))
             AddDefine("SimplexNoise1", TSimplex<1, 3, float>::template Hash<true>());
-         else TODO();
+         else
+            TODO();
 
          symbol.mCode = Text::TemplateRt("SimplexNoise1({})", symbol.mCode);
          success = true;
@@ -317,8 +298,7 @@ void Node::Randomize(Verb& verb) {
       else TODO();
    });
 
-
-   if (!success)
+   if (not success)
       Logger::Warning(Self(), "Unable to ", verb);
    verb << this;
 }
@@ -357,7 +337,7 @@ void Node::AddDefine(const Token& name, const GLSL& code) {
 
 /// Log the material node hierarchy                                           
 void Node::Dump() const {
-   if (!mChildren) {
+   if (not mChildren) {
       Logger::Verbose(Self());
       return;
    }
@@ -480,7 +460,7 @@ GLSL ConvertSymbol(const Trait& trait, const GLSL& symbol, DMeta as, Real filler
 Node::DefaultTrait Node::GetDefaultTrait(TMeta trait) {
    static TUnorderedMap<TMeta, DefaultTrait> properties;
 
-   if (!properties) {
+   if (not properties) {
       properties[MetaOf<Traits::Time>()] =
          {MetaOf<Real>(), PerTick};
       properties[MetaOf<Traits::MousePosition>()] =
@@ -564,7 +544,7 @@ Symbol* Node::GetSymbol(TMeta t, DMeta d, Rate r, Index i) {
       const auto foundt = mLocalsT.Find(t);
       if (foundt) {
          auto& candidates = mLocalsT.GetValue(foundt);
-         if (i && i.IsSpecial()) {
+         if (i and i.IsSpecial()) {
             // Pick a special index                                     
             auto& candidate = candidates[i];
             if (candidate.MatchesFilter(d, r))
@@ -585,11 +565,11 @@ Symbol* Node::GetSymbol(TMeta t, DMeta d, Rate r, Index i) {
    else if (d) {
       // Filter by data type                                            
       for (auto pair : mLocalsD) {
-         if (!pair.mKey->CastsTo(d))
+         if (not pair.mKey->CastsTo(d))
             continue;
 
          auto& candidates = pair.mValue;
-         if (i && i.IsSpecial()) {
+         if (i and i.IsSpecial()) {
             // Pick a special index                                     
             auto& candidate = candidates[i];
             if (candidate.MatchesFilter(d, r))

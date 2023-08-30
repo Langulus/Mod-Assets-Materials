@@ -14,7 +14,7 @@ using namespace Nodes;
 
 /// Texture node descriptor-constructor                                       
 ///   @param desc - the node descriptor                                       
-Texture::Texture(const Descriptor& desc)
+Texture::Texture(const Neat& desc)
    : Node {MetaOf<Texture>(), desc} {
    // Create any subnodes here, it is allowed                           
    // This will also execute any encountered [subcode], and set rate    
@@ -25,57 +25,46 @@ Texture::Texture(const Descriptor& desc)
       VERBOSE_NODE("Texture id changed to: ", mTextureId);
 
    // Extract Traits::File, if any                                      
-   Any file;
-   mDescriptor.ExtractTrait<Traits::Path>(file);
+   Any file; mDescriptor.ExtractTrait<Traits::Path>(file);
    if (file) {
       mTexture = CreateTexture(file);
       VERBOSE_NODE("Texture generator changed to: ", mTexture);
    }
    
-   for (const auto pair : mDescriptor.mConstructs) {
-      // Create texture generators from sub-constructs                  
-      if (!pair.mKey->template CastsTo<A::Image>() &&
-          !pair.mKey->template CastsTo<A::File>()) {
-         Logger::Warning(Self(), "Ignored constructs of type ", pair.mKey);
-         continue;
-      }
-
-      for (auto& construct : pair.mValue) {
-         mTexture = CreateTexture(construct);
+   // Create texture generators from sub-constructs                     
+   mDescriptor.ForEachConstruct([&](const Construct& c) {
+      if (c.CastsTo<A::Image>() or c.CastsTo<A::File>()) {
+         mTexture = CreateTexture(c);
          VERBOSE_NODE("Texture generator changed to: ", mTexture);
       }
-   }
+      else Logger::Warning(Self(), "Ignored construct: ", c);
+   });
    
-   // Consider all provided data                                        
-   for (const auto pair : mDescriptor.mAnythingElse) {
-      if (pair.mKey->template CastsTo<A::Image>()) {
+   // Consider all other provided data                                  
+   mDescriptor.ForEachTail([&](const Any& data) {
+      if (data.CastsTo<A::Image>()) {
          // Reuse a texture generator directly                          
-         mTexture = pair.mValue.Last().As<A::Image*>();
+         mTexture = data.As<A::Image*>();
          VERBOSE_NODE("Texture generator changed to: ", mTexture);
       }
-      else if (pair.mKey->Is<Text>()) {
+      else if (data.CastsTo<Text>()) {
          // Any other text is considered a texture filename             
-         for (auto& filename : pair.mValue) {
-            mTexture = CreateTexture(filename);
-            VERBOSE_NODE("Texture generator changed to: ", mTexture);
-         }
+         mTexture = CreateTexture(data.As<Text>());
+         VERBOSE_NODE("Texture generator changed to: ", mTexture);
       }
-      else if (pair.mKey->template CastsTo<A::Number>()) {
+      else if (data.CastsTo<A::Number>()) {
          // Set texture id                                              
-         mTextureId = pair.mValue.Last().AsCast<Index>();
+         mTextureId = data.AsCast<Index>();
          VERBOSE_NODE("Texture id changed to: ", mTextureId);
       }
-      else {
-         Logger::Warning(Self(), "Ignored data of type ", pair.mKey);
-         continue;
-      }
-   }
+      else Logger::Warning(Self(), "Ignored data: ", data);
+   });
 }
 
 /// A snippet that forward a descriptor to a creation verb in the hierarchy   
 ///   @param descriptor - the descriptor for the texture                      
 ///   @return the produced texture                                            
-Ref<A::Image> Texture::CreateTexture(const Any& descriptor) {
+Ref<A::Image> Texture::CreateTexture(const Neat& descriptor) {
    Verbs::Create creator {Construct::From<A::Image>(descriptor)};
    return Run(creator).As<A::Image*>();
 }

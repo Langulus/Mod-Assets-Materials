@@ -27,7 +27,7 @@ private:
    Ptr<A::Folder> mFolder;
 
 public:
-   MaterialLibrary(Runtime*, const Descriptor&);
+   MaterialLibrary(Runtime*, const Neat&);
 
    void Update(Time);
    void Create(Verb&);

@@ -14,7 +14,7 @@ using namespace Nodes;
 
 /// Rasterizer node creation                                                  
 ///   @param desc - the rasterizer descriptor                                 
-Raster::Raster(const Descriptor& desc)
+Raster::Raster(const Neat& desc)
    : Node {MetaOf<Raster>(), desc} {
    // Extract settings                                                  
    mDescriptor.ExtractTrait<Traits::Bilateral>(mBilateral);
@@ -27,7 +27,7 @@ Raster::Raster(const Descriptor& desc)
    //mDescriptor.ExtractData(mCode);
    //LANGULUS_ASSERT(!mCode.IsEmpty(), Material, "No rasterizer code");
 
-   if (!mTopology) {
+   if (not mTopology) {
       // Rasterizing triangles by default                               
       mTopology = MetaOf<A::Triangle>();
    }
@@ -100,7 +100,7 @@ const Symbol& Raster::GeneratePerVertex() {
 const Symbol& Raster::Generate() {
    Descend();
 
-   if (mRate == PerVertex || mRate == PerPrimitive)
+   if (mRate == PerVertex or mRate == PerPrimitive)
       return GeneratePerVertex();
    else if (mRate == PerPixel)
       return GeneratePerPixel();

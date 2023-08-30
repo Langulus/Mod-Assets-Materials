@@ -32,7 +32,7 @@ namespace Nodes
       Range1 mDepth {0, 1000};
 
    public:
-      Raster(const Descriptor&);
+      Raster(const Neat&);
       const Symbol& Generate();
 
    private:

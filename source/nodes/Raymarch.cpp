@@ -14,7 +14,7 @@ using namespace Nodes;
 
 /// Raymarcher node descriptor-constructor                                    
 ///   @param desc - raymarch descriptor                                       
-Raymarch::Raymarch(const Descriptor& desc)
+Raymarch::Raymarch(const Neat& desc)
    : Node {MetaOf<Raymarch>(), desc} {
    // Extract RaymarchConfig.mDetail                                    
    mDescriptor.ExtractTrait<Traits::Count>(mDetail);

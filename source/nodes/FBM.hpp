@@ -29,7 +29,7 @@ namespace Nodes
       Count mOctaveCount {2};
 
    public:
-      FBM(const Descriptor&);
+      FBM(const Neat&);
 
       const Symbol& Generate();
       NOD() operator Debug() const;

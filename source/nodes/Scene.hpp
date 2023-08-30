@@ -23,7 +23,7 @@ namespace Nodes
       LANGULUS_BASES(Node);
 
       //Scene(Node*, const Descriptor&);
-      Scene(const Descriptor&);
+      Scene(const Neat&);
 
       const Symbol& Generate();
       const Symbol& GenerateSDF();

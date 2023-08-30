@@ -39,7 +39,7 @@ namespace Nodes
       int mDetail {60};
 
    public:
-      Raymarch(const Descriptor&);
+      Raymarch(const Neat&);
       const Symbol& Generate();
    };
 

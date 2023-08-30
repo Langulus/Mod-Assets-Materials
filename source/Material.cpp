@@ -13,12 +13,12 @@
 /// Material construction                                                     
 ///   @param producer - the producer                                          
 ///   @param descriptor - instructions for configuring the material           
-Material::Material(A::AssetModule* producer, const Descriptor& descriptor)
+Material::Material(A::AssetModule* producer, const Neat& descriptor)
    : A::Material {MetaOf<::Material>(), producer, descriptor}
    , mRoot {this, descriptor} {
    Logger::Verbose(Self(), "Initializing...");
    // Extract default rate if any                                       
-   if (!mDescriptor.ExtractTrait<Traits::Rate>(mDefaultRate))
+   if (not mDescriptor.ExtractTrait<Traits::Rate>(mDefaultRate))
       mDescriptor.ExtractData(mDefaultRate);
    mRoot.Dump();
    Logger::Verbose(Self(), "Initialized");
@@ -64,7 +64,7 @@ const Rate& Material::GetDefaultRate() const noexcept {
 void Material::Commit(Rate rate, const Token& place, const Token& addition) {
    const auto stage = rate.GetStageIndex();
    auto& code = GetStage(stage);
-   if (!code) {
+   if (not code) {
       code += GLSL::Template(stage);
       VERBOSE_NODE("Added default template for ", ShaderStage::Names[stage]);
    }
@@ -128,9 +128,9 @@ GLSL Material::AddInput(Rate rate, const Trait& traitOriginal, bool allowDuplica
 
    // Find any matching available inputs                                
    auto& inputs = const_cast<TraitList&>(GetInputs(rate));
-   if (!allowDuplicates) {
+   if (not allowDuplicates) {
       auto found = inputs.Find(traitOriginal);
-      if (!found.IsSpecial())
+      if (not found.IsSpecial())
          return GenerateInputName(rate, inputs[found]);
    }
    
@@ -159,9 +159,9 @@ GLSL Material::AddOutput(Rate rate, const Trait& traitOriginal, bool allowDuplic
       "that don't correspond to shader stages");
 
    auto& outputs = const_cast<TraitList&>(GetOutputs(rate));
-   if (!allowDuplicates) {
+   if (not allowDuplicates) {
       auto found = outputs.Find(traitOriginal);
-      if (!found.IsSpecial())
+      if (not found.IsSpecial())
          return GenerateOutputName(rate, outputs[found]);
    }
 
@@ -194,7 +194,7 @@ GLSL Material::GenerateInputName(Rate rate, const Trait& trait) const {
       // Samplers are handled differently                               
       return GLSL {trait.GetTrait()} + mConsumedSamplers;
    }
-   else if (!rate.IsUniform()) {
+   else if (not rate.IsUniform()) {
       // Name is for a vertex attribute or varying                      
       return "in"_glsl + trait.GetToken();
    }
@@ -220,7 +220,7 @@ void Material::GenerateUniforms() {
    for (Offset i = 0; i < Rate::UniformCount; ++i) {
       const Rate rate {i + Rate::UniformBegin};
       auto& traits = GetInputs(i);
-      if (!traits)
+      if (not traits)
          continue;
 
       // Define the rate-dedicated uniform buffer, if there's at least  
@@ -261,7 +261,7 @@ void Material::GenerateUniforms() {
          names << name;
       }
 
-      if (!names)
+      if (not names)
          continue;
 
       GLSL ubo;
@@ -296,7 +296,7 @@ void Material::GenerateUniforms() {
    auto& traits = GetInputs(PerRenderable);
    for (auto& trait : traits) {
       // Skip anything BUT textures                                     
-      if (!trait.TraitIs<Traits::Image>())
+      if (not trait.TraitIs<Traits::Image>())
          continue;
 
       // Define each sampler using this layout                          
@@ -315,7 +315,7 @@ void Material::GenerateUniforms() {
 
       // Add texture to each stage it is used in                        
       for (auto& code : GetStages()) {
-         if (!code.Find(name + textureNumber))
+         if (not code.Find(name + textureNumber))
             continue;
 
          Edit(code).Select(ShaderToken::Uniform) << ubo;
@@ -336,7 +336,7 @@ void Material::GenerateInputs() {
       //it depends on the value size: 1 location <= 4 floats
       for (auto& input : inputs) {
          auto vkt = Node::DecayToGLSLType(input.GetType());
-         if (!vkt) {
+         if (not vkt) {
             Logger::Error("Unsupported base for shader attribute ", 
                input.GetTrait(), ": ", vkt, " (decayed from ", 
                input.GetType(), ")"
@@ -420,7 +420,7 @@ void Material::InitializeFromShadertoy(const GLSL& code) {
 
    // Maps a code token to an input trait by using a macro              
    auto integrate = [&](const Trait& trait, const Token& keyword) {
-      if (!code.FindKeyword(keyword))
+      if (not code.FindKeyword(keyword))
          return;
 
       const auto input = AddInput(PerPixel, trait, false);

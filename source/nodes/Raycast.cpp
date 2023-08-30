@@ -12,7 +12,7 @@ using namespace Nodes;
 
 /// Raycaster node descriptor-constructor                                     
 ///   @param desc - raycast descriptor                                        
-Raycast::Raycast(const Descriptor& desc)
+Raycast::Raycast(const Neat& desc)
    : Node {MetaOf<Raycast>(), desc} { }
 
 /// Generate the raycaster code                                               

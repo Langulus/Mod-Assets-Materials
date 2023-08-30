@@ -30,12 +30,12 @@ namespace Nodes
       Ref<A::Image> mTexture;
 
    public:
-      Texture(const Descriptor&);
+      Texture(const Neat&);
 
       const Symbol& Generate();
 
    private:
-      Ref<A::Image> CreateTexture(const Any&);
+      Ref<A::Image> CreateTexture(const Neat&);
       GLSL GenerateKeyframe(const Temporal&);
    };
 

@@ -12,7 +12,7 @@ using namespace Nodes;
 
 /// Light node creation                                                       
 ///   @param desc - descriptor for the node                                   
-Light::Light(const Descriptor& desc)
+Light::Light(const Neat& desc)
    : Node {MetaOf<Light>(), desc} { }
 
 /// Generate the light functionality                                          

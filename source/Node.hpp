@@ -70,9 +70,9 @@ public:
       Verbs::Randomize
    );
 
-   Node(DMeta, Material*, const Descriptor&);
-   Node(DMeta, Node*, const Descriptor&);
-   Node(DMeta, const Descriptor&);
+   Node(DMeta, Material*, const Neat&);
+   Node(DMeta, Node*, const Neat&);
+   Node(DMeta, const Neat&);
    Node(Node&&) = delete;
    virtual ~Node();
 
