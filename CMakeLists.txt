@@ -29,7 +29,7 @@ target_link_libraries(LangulusModAssetsMaterials
     PRIVATE     Langulus
 )
 
-if(LANGULUS_ENABLE_TESTING)
+if(LANGULUS_TESTING)
     enable_testing()
 	add_subdirectory(test)
 endif()

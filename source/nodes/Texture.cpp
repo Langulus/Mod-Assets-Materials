@@ -27,7 +27,7 @@ Texture::Texture(const Neat& desc)
    // Extract Traits::File, if any                                      
    Any file; mDescriptor.ExtractTrait<Traits::Path>(file);
    if (file) {
-      mTexture = CreateTexture(file);
+      mTexture = CreateTexture(Neat {file});
       VERBOSE_NODE("Texture generator changed to: ", mTexture);
    }
    
@@ -49,7 +49,7 @@ Texture::Texture(const Neat& desc)
       }
       else if (data.CastsTo<Text>()) {
          // Any other text is considered a texture filename             
-         mTexture = CreateTexture(data.As<Text>());
+         mTexture = CreateTexture(Neat {data.As<Text>()});
          VERBOSE_NODE("Texture generator changed to: ", mTexture);
       }
       else if (data.CastsTo<A::Number>()) {
