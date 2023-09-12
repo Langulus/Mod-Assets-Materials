@@ -450,7 +450,7 @@ GLSL ConvertSymbol(const Trait& trait, const GLSL& symbol, DMeta as, Real filler
          return symbol;
    }
 
-   LANGULUS_ASSERT(false, Material, "Can't convert symbol ", trait, " to ", as);
+   LANGULUS_OOPS(Material, "Can't convert symbol `", trait, "` to `", as, '`');
    return {};
 }
 
@@ -498,7 +498,7 @@ Node::DefaultTrait Node::GetDefaultTrait(TMeta trait) {
    if (found)
       return properties.GetValue(found);
 
-   LANGULUS_ASSERT(false, Material, "Undefined default trait ", trait);
+   LANGULUS_OOPS(Material, "Undefined default trait: ", trait);
    return {};
 }
 
@@ -524,7 +524,7 @@ DMeta Node::DecayToGLSLType(DMeta meta) {
    else if (meta->template CastsTo<Float>(1) || meta->template CastsTo<A::Number>(1))
       return MetaOf<Float>();
 
-   LANGULUS_ASSERT(false, Material, "Can't decay type ", meta);
+   LANGULUS_OOPS(Material, "Can't decay type: ", meta);
    return nullptr;
 }
 
