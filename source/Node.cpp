@@ -9,7 +9,7 @@
 #include "Material.hpp"
 #include "MaterialLibrary.hpp"
 #include "nodes/Value.hpp"
-#include <Math/Randomness/SimplexNoise.hpp>
+#include <Math/SimplexNoise.hpp>
 
 
 /// Material node construction for Nodes::Root                                

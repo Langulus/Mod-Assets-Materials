@@ -6,7 +6,7 @@
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
 #include "Camera.hpp"
-#include <Math/Matrices.hpp>
+#include <Math/Matrix.hpp>
 
 using namespace Nodes;
 

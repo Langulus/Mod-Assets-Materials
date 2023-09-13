@@ -16,10 +16,12 @@
 #include "nodes/Scene.hpp"
 #include "nodes/Texture.hpp"
 #include "nodes/Value.hpp"
-#include <Math/Primitives.hpp> //TODO move this to geometry mod
-#include <Math/Angles.hpp> //TODO move this to geometry mod
-#include <Math/Randomness/SimplexNoise.hpp>  //TODO move this to geometry mod
-#include <Math/Verbs.hpp>  //TODO move this to geometry mod
+
+#include <Math/Normal.hpp>       //TODO move this to geometry mod
+#include <Math/Primitive.hpp>    //TODO move this to geometry mod
+#include <Math/Angle.hpp>        //TODO move this to geometry mod
+#include <Math/SimplexNoise.hpp> //TODO move this to geometry mod
+#include <Math/Config.hpp>       //TODO move this to geometry mod
 
 LANGULUS_DEFINE_MODULE(
    MaterialLibrary, 9, "AssetsMaterials",
@@ -48,8 +50,7 @@ MaterialLibrary::MaterialLibrary(Runtime* runtime, const Neat&)
    Logger::Verbose(Self(), "Initialized");
 
    //TODO move these to geometry mod
-   (void)MetaOf<Math::Normal3>();
-   (void)MetaOf<Traits::Bilateral>();
+   Math::RegisterNormals();
    Math::RegisterPrimitives();
    Math::RegisterAngles();
    Math::RegisterTraits();

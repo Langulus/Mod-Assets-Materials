@@ -7,7 +7,7 @@
 ///                                                                           
 #include "Texture.hpp"
 #include "../Material.hpp"
-#include <Math/Colors.hpp>
+#include <Math/Color.hpp>
 
 using namespace Nodes;
 
