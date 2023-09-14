@@ -7,6 +7,7 @@
 ///                                                                           
 #pragma once
 #include "../Node.hpp"
+#include <Math/Range.hpp>
 
 
 namespace Nodes

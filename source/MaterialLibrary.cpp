@@ -18,7 +18,7 @@
 #include "nodes/Value.hpp"
 
 #include <Math/Normal.hpp>       //TODO move this to geometry mod
-#include <Math/Primitive.hpp>    //TODO move this to geometry mod
+#include <Math/Primitives.hpp>   //TODO move this to geometry mod
 #include <Math/Angle.hpp>        //TODO move this to geometry mod
 #include <Math/SimplexNoise.hpp> //TODO move this to geometry mod
 #include <Math/Config.hpp>       //TODO move this to geometry mod
