@@ -537,7 +537,7 @@ DMeta Node::DecayToGLSLType(DMeta meta) {
 ///   @param i - index filter                                                 
 ///   @return a pointer to the symbol, or nullptr if not found                
 Symbol* Node::GetSymbol(TMeta t, DMeta d, Rate r, Index i) {
-   Offset nth = i.IsSpecial() ? 0 : i.GetOffset();
+   Offset nth = i.IsSpecial() ? 0 : i.GetOffsetUnsafe();
 
    if (t) {
       // Filter by traits                                               
