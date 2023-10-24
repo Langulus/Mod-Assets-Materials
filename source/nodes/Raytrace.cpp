@@ -20,4 +20,5 @@ Raytrace::Raytrace(const Neat& desc)
 const Symbol& Raytrace::Generate() {
    Descend();
    TODO();
+   return NoSymbol;
 }

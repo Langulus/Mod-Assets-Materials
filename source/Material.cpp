@@ -42,6 +42,7 @@ void Material::Create(Verb& verb) {
 ///   @return true if data was generated                                      
 bool Material::Generate(TMeta trait, Offset index) {
    TODO();
+   return false;
 }
 
 /// Get material adapter for lower or higher level of detail                  
@@ -49,6 +50,7 @@ bool Material::Generate(TMeta trait, Offset index) {
 ///   @return a pointer to the material generator                             
 Ref<A::Material> Material::GetLOD(const LOD& lod) const {
    TODO();
+   return {};
 }
 
 /// Get default material rate                                                 

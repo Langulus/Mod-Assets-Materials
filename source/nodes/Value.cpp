@@ -21,4 +21,5 @@ Value::Value(Node* parent)
 const Symbol& Value::Generate() {
    Descend();
    TODO();
+   return NoSymbol;
 }

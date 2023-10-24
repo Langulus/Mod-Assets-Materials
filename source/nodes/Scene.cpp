@@ -117,6 +117,7 @@ const Symbol& Scene::GenerateLines() {
 ///   @return the generated scene function call                               
 GLSL InterpretAsSDF(const Construct& what, Material& global) {
    TODO();
+   return {};
 }
 
 /// Generate scene code                                                       

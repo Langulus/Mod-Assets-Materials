@@ -25,4 +25,5 @@ const Symbol& Root::Generate() {
    // Just generate children                                            
    Descend();
    TODO();
+   return NoSymbol;
 }

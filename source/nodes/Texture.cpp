@@ -299,4 +299,5 @@ const Symbol& Texture::Generate() {
    Commit(ShaderToken::Texturize, define);
    Expose<Traits::Color, Vec4>("texturized");*/
    TODO();
+   return NoSymbol;
 }

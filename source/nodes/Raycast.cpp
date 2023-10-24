@@ -20,4 +20,5 @@ Raycast::Raycast(const Neat& desc)
 const Symbol& Raycast::Generate() {
    Descend();
    TODO();
+   return NoSymbol;
 }

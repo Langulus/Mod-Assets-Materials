@@ -21,4 +21,5 @@ const Symbol& Light::Generate() {
    // Generate children first, if any                                   
    Descend();
    TODO();
+   return NoSymbol;
 }
