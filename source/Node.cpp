@@ -121,7 +121,7 @@ Node* Node::NodeFromConstruct(const Construct& construct) {
    local << Traits::Parent {this};
 
    auto newInstance = Any::FromMeta(construct.GetType());
-   newInstance.Emplace(local.GetArgument());
+   newInstance.Emplace(local.GetDescriptor());
    return newInstance.As<Node*>();
 }
 
