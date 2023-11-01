@@ -57,12 +57,6 @@ MaterialLibrary::MaterialLibrary(Runtime* runtime, const Neat&)
    Math::RegisterVerbs();
 }
 
-/// Module update routine                                                     
-///   @param dt - time from last update                                       
-void MaterialLibrary::Update(Time) {
-
-}
-
 /// Create/Destroy materials                                                  
 ///   @param verb - the creation/destruction verb                             
 void MaterialLibrary::Create(Verb& verb) {

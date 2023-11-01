@@ -29,7 +29,6 @@ private:
 public:
    MaterialLibrary(Runtime*, const Neat&);
 
-   void Update(Time);
    void Create(Verb&);
 };
 
