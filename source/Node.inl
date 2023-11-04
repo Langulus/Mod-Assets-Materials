@@ -73,7 +73,6 @@ Count Node::RemoveChild(Node* node) {
 ///   @param call - the function callback                                     
 ///   @return the number of successulf executions of the call                 
 template<class F>
-LANGULUS(INLINED)
 Count Node::ForEachChild(F&& call) {
    auto counter = mChildren.ForEach(Forward<F>(call));
    for (auto child : mChildren)

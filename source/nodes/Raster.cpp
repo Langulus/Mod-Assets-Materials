@@ -78,6 +78,7 @@ const Symbol& Raster::GeneratePerPixel() {
 ///   @return NoSymbol, as functionality is in the fixed-pipeline             
 const Symbol& Raster::GeneratePerVertex() {
    auto position = GetSymbol<Traits::Place>(PerVertex);
+   (void)position;
 
    AddDefine("gl_PerVertex",
       R"shader(

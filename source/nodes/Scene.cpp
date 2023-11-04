@@ -115,7 +115,7 @@ const Symbol& Scene::GenerateLines() {
 ///   @param what - the construct to reinterpret                              
 ///   @param global - place where global definitions go                       
 ///   @return the generated scene function call                               
-GLSL InterpretAsSDF(const Construct& what, Material& global) {
+GLSL InterpretAsSDF(const Construct&, Material&) {
    TODO();
    return {};
 }

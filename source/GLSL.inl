@@ -82,7 +82,7 @@ GLSL::GLSL(Rate rate) {
 /// Meta constant -> GLSL serializer                                          
 ///   @param trait - trait to serialize                                       
 LANGULUS(INLINED)
-GLSL::GLSL(CMeta meta) {
+GLSL::GLSL(CMeta) {
    TODO(); //expand the constant
 }
 

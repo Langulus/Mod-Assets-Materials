@@ -27,6 +27,8 @@ const Symbol& Camera::Generate() {
    // are creating                                                      
    bool explicitCamera = false;
    mDescriptor.ForEachTrait([&](const Traits::View& view) {
+      (void)view;
+
       // Projection based on camera view transformation                 
       if (mRate == PerPixel) {
          auto symView = GetSymbol<Traits::View, Mat4>(PerLevel);

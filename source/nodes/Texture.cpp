@@ -90,7 +90,7 @@ GLSL GetPixel(const GLSL& sampler, const GLSL& uv, DMeta result) {
 ///   @param keyIdx - the index of the keyframe                               
 ///   @param uv - the texture coordinate symbol                               
 ///   @return the generated GLSL code                                         
-GLSL Texture::GenerateKeyframe(const Temporal& keyframe) {
+GLSL Texture::GenerateKeyframe(const Temporal&) {
    GLSL symbol;
 
    // Scan the keyframe verb                                            
