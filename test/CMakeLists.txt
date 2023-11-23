@@ -11,4 +11,5 @@ target_link_libraries(LangulusModAssetsMaterialsTest
 add_test(
 	NAME		LangulusModAssetsMaterialsTest
 	COMMAND		LangulusModAssetsMaterialsTest
+	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 )
