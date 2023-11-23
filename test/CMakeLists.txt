@@ -12,9 +12,3 @@ add_test(
 	NAME		LangulusModAssetsMaterialsTest
 	COMMAND		LangulusModAssetsMaterialsTest
 )
-
-langulus_copy_dlls(LangulusModAssetsMaterialsTest ON LangulusModAssetsMaterialsTest)
-langulus_copy_dlls_advanced(LangulusModAssetsMaterialsTest
-	TO			LangulusModAssetsMaterialsTest
-	FROM		LangulusModAssetsMaterials
-)
