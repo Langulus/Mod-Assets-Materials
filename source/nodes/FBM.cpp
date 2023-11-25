@@ -14,8 +14,8 @@ using namespace Nodes;
 
 /// FBM node descriptor-constructor                                           
 ///   @param desc - node descriptor                                           
-FBM::FBM(const Neat& desc)
-   : Node {MetaOf<FBM>(), desc} {
+FBM::FBM(Describe&& descriptor)
+   : Node {MetaOf<FBM>(), *descriptor} {
    // Extract number of octaves                                         
    mDescriptor.ExtractTrait<Traits::Count>(mOctaveCount);
    LANGULUS_ASSERT(mOctaveCount >= 1, Material,

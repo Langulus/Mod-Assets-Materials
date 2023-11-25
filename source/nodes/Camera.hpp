@@ -19,7 +19,7 @@ namespace Nodes
       LANGULUS(ABSTRACT) false;
       LANGULUS_BASES(Node);
 
-      Camera(const Neat&);
+      Camera(Describe&&);
       const Symbol& Generate();
    };
 

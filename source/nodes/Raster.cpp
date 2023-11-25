@@ -15,8 +15,8 @@ using namespace Nodes;
 
 /// Rasterizer node creation                                                  
 ///   @param desc - the rasterizer descriptor                                 
-Raster::Raster(const Neat& desc)
-   : Node {MetaOf<Raster>(), desc} {
+Raster::Raster(Describe&& descriptor)
+   : Node {MetaOf<Raster>(), *descriptor} {
    // Extract settings                                                  
    mDescriptor.ExtractTrait<Traits::Bilateral>(mBilateral);
    mDescriptor.ExtractTrait<Traits::Signed>(mSigned);

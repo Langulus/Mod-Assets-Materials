@@ -14,8 +14,8 @@ using namespace Nodes;
 
 /// Raymarcher node descriptor-constructor                                    
 ///   @param desc - raymarch descriptor                                       
-Raymarch::Raymarch(const Neat& desc)
-   : Node {MetaOf<Raymarch>(), desc} {
+Raymarch::Raymarch(Describe&& descriptor)
+   : Node {MetaOf<Raymarch>(), *descriptor} {
    // Extract RaymarchConfig.mDetail                                    
    mDescriptor.ExtractTrait<Traits::Count>(mDetail);
    LANGULUS_ASSERT(mDetail > 0, Material,

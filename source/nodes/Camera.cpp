@@ -13,8 +13,8 @@ using namespace Nodes;
 
 /// Camera node descriptor-constructor                                        
 ///   @param desc - the camera node descriptor                                
-Camera::Camera(const Neat& desc)
-   : Node {MetaOf<Camera>(), desc} { }
+Camera::Camera(Describe&& descriptor)
+   : Node {MetaOf<Camera>(), *descriptor} { }
 
 /// Generate the camera code                                                  
 ///   @return the output symbol                                               

@@ -19,7 +19,7 @@ namespace Nodes
       LANGULUS(ABSTRACT) false;
       LANGULUS_BASES(Node);
 
-      Light(const Neat&);
+      Light(Describe&&);
       const Symbol& Generate();
    };
 

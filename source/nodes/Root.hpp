@@ -20,6 +20,7 @@ namespace Nodes
       LANGULUS_BASES(Node);
 
       Root(Material*, const Neat&);
+
       const Symbol& Generate();
    };
 

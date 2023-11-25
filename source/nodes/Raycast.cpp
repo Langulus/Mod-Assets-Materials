@@ -12,8 +12,8 @@ using namespace Nodes;
 
 /// Raycaster node descriptor-constructor                                     
 ///   @param desc - raycast descriptor                                        
-Raycast::Raycast(const Neat& desc)
-   : Node {MetaOf<Raycast>(), desc} { }
+Raycast::Raycast(Describe&& descriptor)
+   : Node {MetaOf<Raycast>(), *descriptor} { }
 
 /// Generate the raycaster code                                               
 ///   @return the raycaster function template                                 

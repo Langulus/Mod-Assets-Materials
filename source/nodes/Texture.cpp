@@ -7,15 +7,16 @@
 ///                                                                           
 #include "Texture.hpp"
 #include "../Material.hpp"
+#include "../MaterialLibrary.hpp"
 #include <Math/Color.hpp>
 
 using namespace Nodes;
 
 
 /// Texture node descriptor-constructor                                       
-///   @param desc - the node descriptor                                       
-Texture::Texture(const Neat& desc)
-   : Node {MetaOf<Texture>(), desc} {
+///   @param describe - the node descriptor                                   
+Texture::Texture(Describe&& describe)
+   : Node {MetaOf<Texture>(), *describe} {
    // Create any subnodes here, it is allowed                           
    // This will also execute any encountered [subcode], and set rate    
    InnerCreate();
@@ -47,9 +48,9 @@ Texture::Texture(const Neat& desc)
          mTexture = data.As<A::Image*>();
          VERBOSE_NODE("Texture generator changed to: ", mTexture);
       }
-      else if (data.CastsTo<Text>()) {
+      else if (data.CastsTo<Text>() and not data.CastsTo<Code>()) {
          // Any other text is considered a texture filename             
-         mTexture = CreateTexture(Neat {data.As<Text>()});
+         mTexture = CreateTexture(data.As<Text>());
          VERBOSE_NODE("Texture generator changed to: ", mTexture);
       }
       else if (data.CastsTo<A::Number>()) {
@@ -61,12 +62,14 @@ Texture::Texture(const Neat& desc)
    });
 }
 
-/// A snippet that forward a descriptor to a creation verb in the hierarchy   
+/// Create a texture from the provided descriptor                             
 ///   @param descriptor - the descriptor for the texture                      
 ///   @return the produced texture                                            
 Ref<A::Image> Texture::CreateTexture(const Neat& descriptor) {
-   Verbs::Create creator {Construct::From<A::Image>(descriptor)};
-   return Run(creator).As<A::Image*>();
+   auto local = Construct::From<A::Image>(descriptor);
+   local << Traits::Parent {this};
+   Verbs::Create creator {&local};
+   return GetMaterial()->RunIn(creator).As<A::Image*>();
 }
 
 /// Assembles a GLSL texture(...) function                                    

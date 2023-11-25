@@ -12,8 +12,8 @@ using namespace Nodes;
 
 /// Light node creation                                                       
 ///   @param desc - descriptor for the node                                   
-Light::Light(const Neat& desc)
-   : Node {MetaOf<Light>(), desc} { }
+Light::Light(Describe&& descriptor)
+   : Node {MetaOf<Light>(), *descriptor} { }
 
 /// Generate the light functionality                                          
 ///   @return the light function template                                     

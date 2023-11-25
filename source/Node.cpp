@@ -17,61 +17,66 @@
 ///   @param material - the parent material                                   
 ///   @param descriptor - the node descriptor                                 
 Node::Node(DMeta classid, Material* material, const Neat& descriptor)
-   : Unit {classid, {}} // The descriptor might contain Thing's owner,  
-                        // so we don't forward it to the unit           
-   , mDescriptor {descriptor}
-   , mMaterial {material} {}
+   : Node {classid, descriptor} {
+   mMaterial = material;
+}
 
 /// Material node construction for members/locals                             
 ///   @param classid - the node type                                          
 ///   @param parent - the parent node                                         
 ///   @param descriptor - the node descriptor                                 
 Node::Node(DMeta classid, Node* parent, const Neat& descriptor)
-   : Unit {classid, {}} // The descriptor might contain Thing's owner,  
-                        // so we don't forward it to the unit           
+   : Unit {classid, descriptor}
    , mDescriptor {descriptor} {
+   // Add the Node to the hierarchy                                     
    if (parent)
       parent->AddChild(this);
+
+   // Remove parents, as they're ignored on hashing and comparison      
+   // - they can create circular dependencies, that we best avoid       
+   mDescriptor.RemoveTrait<Traits::Parent, true>();
 }
 
 /// Material node construction used in the rest of the Nodes                  
 ///   @param classid - the node type                                          
 ///   @param descriptor - the node descriptor                                 
 Node::Node(DMeta classid, const Neat& descriptor)
-   : Unit {classid, {}} // The descriptor might contain Thing's owner,  
-                        // so we don't forward it to the unit           
+   : Unit {classid, descriptor}
    , mDescriptor {descriptor} {
-   // Account for any Traits::Parent that is Node                       
-   const Node* owner = nullptr;
-   if (descriptor.ExtractTrait<Traits::Parent>(owner)) {
-      // Incorporate this node into the hierarchy of nodes              
-      auto mutableOwner = const_cast<Node*>(owner);
-      mutableOwner->AddChild(this);
+   // Add the Node to the hierarchy                                     
+   Node* owner {};
+   if (descriptor.ExtractTrait<Traits::Parent>(owner) and owner)
+      owner->AddChild(this);
+
+   // Remove parents, as they're ignored on hashing and comparison      
+   // - they can create circular dependencies, that we best avoid       
+   mDescriptor.RemoveTrait<Traits::Parent, true>();
+}
+
+void Node::IsolateNodes() {
+   // The thing might be on the stack, make sure we decouple it from    
+   // its owner, if that's the case                                     
+   if (mParent and GetReferences() > 1)
+      mParent->RemoveChild<false>(this);
+
+   // Decouple all children from their parent                           
+   for (auto& child : mChildren) {
+      child->mParent.Reset();
+      child->IsolateNodes();
    }
 }
 
 /// Node destructor                                                           
 Node::~Node() {
-   IsolateFromHierarchy();
-}
-
-/// Pluck the node and all of its children from the hierarchy                 
-void Node::IsolateFromHierarchy() {
-   VERBOSE_NODE_TAB("Isolating (", GetReferences(), " uses)");
-
-   // Node might be on the stack, make sure we decouple it from         
-   // its parent, if that's the case                                    
-   if (mParent and GetReferences() > 1)
+   IsolateNodes();
+   // The thing might be on the stack, make sure we decouple it from    
+   // its owner, if that's the case                                     
+   /*if (mParent and GetReferences() > 1)
       mParent->RemoveChild<false>(this);
 
-   // Decouple all children from this parent, so that the above         
-   // condition skips for all children, so that we don't erase          
-   // children while iterating them in this destructor                  
-   for (auto& child : mChildren) {
-      child->mParent.Reset();
-      child->IsolateFromHierarchy();
-      VERBOSE_NODE("Decoupling ", *child, " (", child->GetReferences(), " uses)");
-   }
+   // Decouple all children from their parent                           
+   for (auto& child : mChildren)
+      child->mParent.Reset();*/
 }
 
 /// Parse the normalized descriptor and create subnodes, apply traits         

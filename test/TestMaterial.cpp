@@ -36,7 +36,7 @@ constexpr auto MaterialCode = R"code(
    // Texturize the scene. Since no node was provided as argument,
    // it will seek an available Nodes::Raster in the node hierarchy
    Nodes::Texture(Front, `pebbles.png`),
-   Nodes::Texture(Back,  `border2.png`),
+   Nodes::Texture(Back,  `border.png`),
    Nodes::Texture([
       Nodes::FBM(4, [vec2(.Sampler.x, -(.Time * 8.75 - .Sampler.y ^ 2)) rand real])
    ]),
@@ -60,6 +60,8 @@ SCENARIO("Shader generation", "[materials]") {
          root.CreateRuntime();
 
          // Load modules                                                
+         root.LoadMod("FileSystem");
+         root.LoadMod("AssetsImages");
          root.LoadMod("AssetsMaterials");
 
       #if LANGULUS_FEATURE(MANAGED_REFLECTION)

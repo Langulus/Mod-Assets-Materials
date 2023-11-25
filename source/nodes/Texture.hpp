@@ -29,7 +29,7 @@ namespace Nodes
       Ref<A::Image> mTexture;
 
    public:
-      Texture(const Neat&);
+      Texture(Describe&&);
 
       const Symbol& Generate();
 

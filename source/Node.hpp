@@ -25,17 +25,14 @@ protected:
    friend struct Material;
    friend struct Nodes::FBM;
 
-   // The normalized descriptor                                         
-   Neat mDescriptor;
+   // The children that this node leads to                              
+   TAny<Ref<Node>> mChildren;
+
    // The material this node belongs to                                 
    Material* mMaterial {};
 
    // The rate at which this node is refreshed                          
    Rate mRate {Rate::Auto};
-   // The parents that lead to this node                                
-   Ref<Node> mParent;
-   // The children that this node leads to                              
-   TAny<Ref<Node>> mChildren;
 
    // Local variables, usually used by selection verbs, when executing  
    // Code in the context of the Node                                   
@@ -50,6 +47,12 @@ protected:
    // Whether or not this node's code has already been generated        
    // Protects against infinite dependency loops                        
    bool mGenerated = false;
+
+   // The parents that lead to this node                                
+   Ref<Node> mParent;
+
+   // The normalized descriptor                                         
+   Neat mDescriptor;
 
    struct DefaultTrait {
       DMeta mType;
@@ -119,7 +122,7 @@ public:
    Count ForEachOutput(F&&);
    
 protected:
-   void IsolateFromHierarchy();
+   void IsolateNodes();
 
    void InnerCreate();
    Node* NodeFromConstruct(const Construct&);

@@ -14,21 +14,10 @@
 using namespace Nodes;
 
 
-/// Scene node as member constructor                                          
-///   @param parent - the owning node                                         
-///   @param desc - the node descriptor                                       
-/*Scene::Scene(Node* parent, const Descriptor& desc)
-   : Node {MetaOf<Scene>(), parent, desc} {
-   // Notice how we don't satisfy the rest of the descriptor            
-   // How the scene is generated depends on whether we're rasterizing,  
-   // raymarching, raytracing, etc.                                     
-   //InnerCreate();
-}*/
-
 /// Scene node descriptor-constructor                                         
 ///   @param desc - the node descriptor                                       
-Scene::Scene(const Neat& desc)
-   : Node {MetaOf<Scene>(), desc} {
+Scene::Scene(Describe&& descriptor)
+   : Node {MetaOf<Scene>(), *descriptor} {
    // Notice how we don't satisfy the rest of the descriptor            
    // How the scene is generated depends on whether we're rasterizing,  
    // raymarching, raytracing, etc.                                     
