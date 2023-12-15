@@ -22,7 +22,7 @@ private:
 
    // Consumed bindings                                                 
    Count mConsumedSamplers {};
-   Count mConsumedLocations {};
+   //Count mConsumedLocations {};
 
    // Compiled flow                                                     
    Temporal mCompiled;
