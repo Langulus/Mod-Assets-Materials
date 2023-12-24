@@ -25,19 +25,16 @@ Material* Node::GetMaterial() const noexcept {
 template<bool TWOSIDED>
 Count Node::AddChild(Node* node) {
    LANGULUS_ASSUME(UserAssumes, node, "Bad node pointer");
-
    VERBOSE_NODE("Adding child ", node, " (", node->GetReferences(), " uses)");
-   const auto added = mChildren.Merge(node);
+   const auto added = mChildren.Merge(IndexBack, node);
    if constexpr (TWOSIDED) {
-      if (added) {
-         if (node->mParent != this) {
-            if (node->mParent)
-               node->mParent->RemoveChild<false>(node);
+      if (added and node->mParent != this) {
+         if (node->mParent)
+            node->mParent->RemoveChild<false>(node);
 
-            node->mParent = this;
-            node->mMaterial = GetMaterial();
-            VERBOSE_NODE("Now parent of ", node, " (", node->GetReferences(), " uses)");
-         }
+         node->mParent = this;
+         node->mMaterial = GetMaterial();
+         VERBOSE_NODE("Now parent of ", node, " (", node->GetReferences(), " uses)");
       }
    }
 
@@ -53,15 +50,12 @@ Count Node::AddChild(Node* node) {
 template<bool TWOSIDED>
 Count Node::RemoveChild(Node* node) {
    LANGULUS_ASSUME(UserAssumes, node, "Bad node pointer");
-
    VERBOSE_NODE("Removing child ", node, " (", node->GetReferences(), " uses)");
    const auto removed = mChildren.Remove(node);
    if constexpr (TWOSIDED) {
-      if (removed) {
-         if (node->mParent == this) {
-            node->mParent = nullptr;
-            node->mMaterial = nullptr;
-         }
+      if (removed and node->mParent == this) {
+         node->mParent = nullptr;
+         node->mMaterial = nullptr;
       }
    }
 
@@ -158,12 +152,11 @@ const Symbol* Node::GetSymbol(TMeta t, DMeta d, Rate r, Index i) const {
 ///   @param r - rate filter                                                  
 ///   @param i - index filter                                                 
 ///   @return a pointer to the symbol, or nullptr if not found                
-template<class T, class D>
-LANGULUS(INLINED)
+template<class T, class D> LANGULUS(INLINED)
 Symbol* Node::GetSymbol(Rate r, Index i) {
-   static_assert(CT::Void<T> || CT::Trait<T>,
+   static_assert(CT::Void<T> or CT::Trait<T>,
       "T must be either trait, or void");
-   static_assert(CT::Void<D> || CT::Data<D>,
+   static_assert(CT::Void<D> or CT::Data<D>,
       "D must be either data type, or void");
 
    return GetSymbol(MetaOf<T>(), MetaOf<D>(), r, i);
@@ -177,8 +170,7 @@ Symbol* Node::GetSymbol(Rate r, Index i) {
 ///   @param r - rate filter                                                  
 ///   @param i - index filter                                                 
 ///   @return a pointer to the symbol, or nullptr if not found                
-template<class T, class D>
-LANGULUS(INLINED)
+template<class T, class D> LANGULUS(INLINED)
 const Symbol* Node::GetSymbol(Rate r, Index i) const {
    return const_cast<Node*>(this)->template GetSymbol<T, D>(r, i);
 }
@@ -204,7 +196,7 @@ Count Node::ForEachInput(F&& call) {
    for (auto pair : mLocalsT) {
       for (auto& symbol : pair.mValue) {
          if constexpr (CT::Bool<R>) {
-            if (!call(symbol))
+            if (not call(symbol))
                return counter;
          }
          else call(symbol);
@@ -215,7 +207,7 @@ Count Node::ForEachInput(F&& call) {
    for (auto pair : mLocalsD) {
       for (auto& symbol : pair.mValue) {
          if constexpr (CT::Bool<R>) {
-            if (!call(symbol))
+            if (not call(symbol))
                return counter;
          }
          else call(symbol);
@@ -240,7 +232,7 @@ Count Node::ForEachOutput(F&& call) {
    for (auto pair : mOutputsT) {
       for (auto& symbol : pair.mValue) {
          if constexpr (CT::Bool<R>) {
-            if (!call(symbol))
+            if (not call(symbol))
                return counter;
          }
          else call(symbol);
@@ -251,7 +243,7 @@ Count Node::ForEachOutput(F&& call) {
    for (auto pair : mOutputsD) {
       for (auto& symbol : pair.mValue) {
          if constexpr (CT::Bool<R>) {
-            if (!call(symbol))
+            if (not call(symbol))
                return counter;
          }
          else call(symbol);

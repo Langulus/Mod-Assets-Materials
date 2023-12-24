@@ -69,14 +69,6 @@ void Node::IsolateNodes() {
 /// Node destructor                                                           
 Node::~Node() {
    IsolateNodes();
-   // The thing might be on the stack, make sure we decouple it from    
-   // its owner, if that's the case                                     
-   /*if (mParent and GetReferences() > 1)
-      mParent->RemoveChild<false>(this);
-
-   // Decouple all children from their parent                           
-   for (auto& child : mChildren)
-      child->mParent.Reset();*/
 }
 
 /// Parse the normalized descriptor and create subnodes, apply traits         
@@ -126,7 +118,7 @@ Node* Node::NodeFromConstruct(const Construct& construct) {
    local << Traits::Parent {this};
 
    auto newInstance = Any::FromMeta(construct.GetType());
-   newInstance.Emplace(local.GetDescriptor());
+   newInstance.Emplace(IndexBack, local.GetDescriptor());
    return newInstance.As<Node*>();
 }
 
