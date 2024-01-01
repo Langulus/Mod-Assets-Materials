@@ -413,7 +413,7 @@ GLSL ConvertSymbol(const Trait& trait, const GLSL& symbol, DMeta as, Real filler
          return symbol + ".xyz";
       else if (as->template CastsTo<AV2>())
          return symbol + ".xy";
-      else if (as->template CastsTo<AV1>() || as->template CastsTo<A::Number>())
+      else if (as->template CastsTo<AV1>() or as->template CastsTo<A::Number>())
          return symbol + ".x";
    }
    else if (from->template CastsTo<AV3>()) {
@@ -423,7 +423,7 @@ GLSL ConvertSymbol(const Trait& trait, const GLSL& symbol, DMeta as, Real filler
          return symbol;
       else if (as->template CastsTo<AV2>())
          return symbol + ".xy";
-      else if (as->template CastsTo<AV1>() || as->template CastsTo<A::Number>())
+      else if (as->template CastsTo<AV1>() or as->template CastsTo<A::Number>())
          return symbol + ".x";
    }
    else if (from->template CastsTo<AV2>()) {
@@ -433,17 +433,17 @@ GLSL ConvertSymbol(const Trait& trait, const GLSL& symbol, DMeta as, Real filler
          return "vec3(" + symbol + ", " + filler + ")";
       else if (as->template CastsTo<AV2>())
          return symbol;
-      else if (as->template CastsTo<AV1>() || as->template CastsTo<A::Number>())
+      else if (as->template CastsTo<AV1>() or as->template CastsTo<A::Number>())
          return symbol + ".x";
    }
-   else if (from->template CastsTo<AV1>() || from->template CastsTo<A::Number>()) {
+   else if (from->template CastsTo<AV1>() or from->template CastsTo<A::Number>()) {
       if (as->template CastsTo<AV4>())
          return "vec4(vec3(" + symbol + "), 1.0)";
       else if (as->template CastsTo<AV3>())
          return Text::TemplateRt(TypeX, "vec3", symbol);
       else if (as->template CastsTo<AV2>())
          return Text::TemplateRt(TypeX, "vec2", symbol);
-      else if (as->template CastsTo<AV1>() || as->template CastsTo<A::Number>())
+      else if (as->template CastsTo<AV1>() or as->template CastsTo<A::Number>())
          return symbol;
    }
 
@@ -512,13 +512,13 @@ DMeta Node::DecayToGLSLType(DMeta meta) {
    else if (meta->template CastsTo<Double>(1))
       return MetaOf<Double>();
 
-   else if (meta->template CastsTo<Float>(4) || meta->template CastsTo<A::Number>(4))
+   else if (meta->template CastsTo<Float>(4) or meta->template CastsTo<A::Number>(4))
       return MetaOf<Vec4f>();
-   else if (meta->template CastsTo<Float>(3) || meta->template CastsTo<A::Number>(3))
+   else if (meta->template CastsTo<Float>(3) or meta->template CastsTo<A::Number>(3))
       return MetaOf<Vec3f>();
-   else if (meta->template CastsTo<Float>(2) || meta->template CastsTo<A::Number>(2))
+   else if (meta->template CastsTo<Float>(2) or meta->template CastsTo<A::Number>(2))
       return MetaOf<Vec2f>();
-   else if (meta->template CastsTo<Float>(1) || meta->template CastsTo<A::Number>(1))
+   else if (meta->template CastsTo<Float>(1) or meta->template CastsTo<A::Number>(1))
       return MetaOf<Float>();
 
    LANGULUS_OOPS(Material, "Can't decay type: ", meta);
