@@ -32,18 +32,18 @@ bool GLSL::IsOperator(char c) {
 ///   @param symbol - the definition to search for                            
 ///   @return true if definition exists                                       
 bool GLSL::IsDefined(const Token& symbol) const {
-   return FindKeyword("#define "_text + symbol) != IndexNone;
+   return FindKeyword(Text {"#define ", symbol}) != IndexNone;
 }
 
 /// Find an isolated token                                                    
 ///   @param symbol - the definition to search for                            
 ///   @return the index of the first match, or IndexNone if not found         
-Index GLSL::FindKeyword(const Token& symbol) const {
-   if (symbol.size() == 0)
+Index GLSL::FindKeyword(const Text& symbol) const {
+   if (not symbol)
       return IndexNone;
 
-   Offset progress {};
-   while (FindOffset(symbol, progress)) {
+   Index progress;
+   while ((progress = FindBlock(symbol, progress))) {
       // Match found                                                    
       // For it to be keyword, its left side must be either the start,  
       // isspace, an operator, or:                                      
@@ -52,35 +52,35 @@ Index GLSL::FindKeyword(const Token& symbol) const {
          // LHS is valid, lets check RHS                                
          // For it to be keyword, its right must be either the end,     
          // isspace, or an operator                                     
-         if (symbol.size() >= GetCount()) {
+         if (symbol.GetCount() >= GetCount()) {
             // Found                                                    
             return progress;
          }
          else {
-            const char rhs = (*this)[symbol.size()];
-            if (IsSpace(rhs) || IsOperator(rhs))
+            const char rhs = (*this)[symbol.GetCount()];
+            if (IsSpace(rhs) or IsOperator(rhs))
                return progress;
          }
       }
       else {
          const char lhs = (*this)[progress - 1];
-         if (IsSpace(lhs) || IsOperator(lhs) || (IsAlpha(symbol[0]) && IsDigit(lhs))) {
+         if (IsSpace(lhs) or IsOperator(lhs) or (IsAlpha(symbol[0]) and IsDigit(lhs))) {
             // LHS is valid, lets check RHS                             
             // For it to be keyword, its right must be either the end,  
             // isspace, or an operator                                  
-            if (progress + symbol.size() >= GetCount()) {
+            if (progress + symbol.GetCount() >= GetCount()) {
                // Found                                                 
                return progress;
             }
             else {
-               const char rhs = (*this)[progress + symbol.size()];
-               if (IsSpace(rhs) || IsOperator(rhs))
+               const char rhs = (*this)[progress + symbol.GetCount()];
+               if (IsSpace(rhs) or IsOperator(rhs))
                   return progress;
             }
          }
       }
 
-      progress += symbol.size();
+      progress += symbol.GetCount();
    }
 
    return IndexNone;
@@ -96,12 +96,12 @@ Text GLSL::Pretty() const {
    const auto linescount = GetLineCount();
    const auto linedigits = CountDigits(linescount);
    Text result {"\n"};
-   Count line {1};
-   Offset lstart {};
-   Offset lend {};
+   Count line = 1;
+   Offset lstart = 0;
+   Offset lend = 0;
 
    for (Offset i = 0; i <= mCount; ++i) {
-      if (i == mCount || (*this)[i] == '\n') {
+      if (i == mCount or (*this)[i] == '\n') {
          const auto size = lend - lstart;
 
          // Insert line number                                          
@@ -139,7 +139,7 @@ Text GLSL::Pretty() const {
 ///   @param definition - the definition to add                               
 ///   @return a reference to this code                                        
 GLSL& GLSL::Define(const Token& definition) {
-   const Text defined {"#define "_text + definition + '\n'};
+   const Text defined {"#define ", definition, '\n'};
    if (FindKeyword(defined))
       return *this;
 
@@ -151,7 +151,7 @@ GLSL& GLSL::Define(const Token& definition) {
 ///   @param version - the version string                                     
 ///   @return a reference to this code                                        
 GLSL& GLSL::SetVersion(const Token& version) {
-   const Text defined {"#version "_text + version + '\n'};
+   const Text defined {"#version ", version, '\n'};
    if (FindKeyword(defined))
       return *this;
 

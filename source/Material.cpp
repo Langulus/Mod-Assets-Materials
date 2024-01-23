@@ -435,10 +435,10 @@ void Material::InitializeFromShadertoy(const GLSL& code) {
    };
 
    // Satisfy traits                                                    
-   integrate(Traits::Time {}, "iTime");
-   integrate(Traits::Size {}, "iResolution");
+   integrate(Traits::Time  {}, "iTime");
+   integrate(Traits::Size  {}, "iResolution");
    integrate(Traits::Image {}, "iChannel0");
-   integrate(Traits::View {}, "iView");
+   integrate(Traits::View  {}, "iView");
 
    /*TODO
    for snippets that are not from shadertoy, search trait symbols

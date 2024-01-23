@@ -127,8 +127,8 @@ protected:
    void InnerCreate();
    Node* NodeFromConstruct(const Construct&);
 
-   NOD() Debug DebugBegin() const;
-   NOD() Debug DebugEnd() const;
+   NOD() Text DebugBegin() const;
+   NOD() Text DebugEnd() const;
 
    template<CT::Trait T, CT::Data D>
    const Symbol& AddLocal(D&&, const Token&);

@@ -346,17 +346,17 @@ void Node::Dump() const {
 
 /// Opens node debugging scope                                                
 ///   @return the openning string                                             
-Debug Node::DebugBegin() const {
+Text Node::DebugBegin() const {
    Code result;
    result += GetToken();
    result += Code::OpenScope;
-   result += Serialize<Code>(mRate);
+   result += mRate;
    return result;
 }
 
 /// Closes node debugging scope                                               
 ///   @return the closing string                                              
-Debug Node::DebugEnd() const {
+Text Node::DebugEnd() const {
    Code result;
    result += Code::CloseScope;
    return result;
@@ -383,8 +383,16 @@ GLSL ConvertSymbol(const Trait& trait, const GLSL& symbol, DMeta as, Real filler
    using AV1 = A::VectorOfSize<1>;
 
    constexpr Token TypeX = "{0}({1})";
-   constexpr Token MatXtoMatY = "{0}({1}[0], 0.0, {1}[1], 0.0, {1}[2], 0.0, {1}[3], {2})";
-   constexpr Token Mat2toMat4 = "mat4({1}[0], 0.0, 0.0, {1}[1], 0.0, 0.0, {1}[2], 0.0, 0.0, {1}[3], 0.0, {2})";
+   constexpr Token MatXtoMatY =
+       "{0}({1}[0], 0.0, "
+           "{1}[1], 0.0, "
+           "{1}[2], 0.0, "
+           "{1}[3], {2})";
+   constexpr Token Mat2toMat4 =
+      "mat4({1}[0], 0.0, 0.0, "
+           "{1}[1], 0.0, 0.0, "
+           "{1}[2], 0.0, 0.0, "
+           "{1}[3], 0.0, {2})";
 
    // Matrix types                                                      
    if (from->template CastsTo<AM4>()) {
@@ -410,35 +418,35 @@ GLSL ConvertSymbol(const Trait& trait, const GLSL& symbol, DMeta as, Real filler
       if (as->template CastsTo<AV4>())
          return symbol;
       else if (as->template CastsTo<AV3>())
-         return symbol + ".xyz";
+         return {symbol, ".xyz"};
       else if (as->template CastsTo<AV2>())
-         return symbol + ".xy";
+         return {symbol, ".xy"};
       else if (as->template CastsTo<AV1>() or as->template CastsTo<A::Number>())
-         return symbol + ".x";
+         return {symbol, ".x"};
    }
    else if (from->template CastsTo<AV3>()) {
       if (as->template CastsTo<AV4>())
-         return "vec4(" + symbol + ", 1.0)";
+         return {"vec4(", symbol, ", 1.0)"};
       else if (as->template CastsTo<AV3>())
          return symbol;
       else if (as->template CastsTo<AV2>())
-         return symbol + ".xy";
+         return {symbol, ".xy"};
       else if (as->template CastsTo<AV1>() or as->template CastsTo<A::Number>())
-         return symbol + ".x";
+         return {symbol, ".x"};
    }
    else if (from->template CastsTo<AV2>()) {
       if (as->template CastsTo<AV4>())
-         return "vec4(" + symbol + ", " + filler + ", 1.0)";
+         return {"vec4(", symbol, ", ", filler, ", 1.0)"};
       else if (as->template CastsTo<AV3>())
-         return "vec3(" + symbol + ", " + filler + ")";
+         return {"vec3(", symbol, ", ", filler, ")"};
       else if (as->template CastsTo<AV2>())
          return symbol;
       else if (as->template CastsTo<AV1>() or as->template CastsTo<A::Number>())
-         return symbol + ".x";
+         return {symbol, ".x"};
    }
    else if (from->template CastsTo<AV1>() or from->template CastsTo<A::Number>()) {
       if (as->template CastsTo<AV4>())
-         return "vec4(vec3(" + symbol + "), 1.0)";
+         return {"vec4(vec3(", symbol, "), 1.0)"};
       else if (as->template CastsTo<AV3>())
          return Text::TemplateRt(TypeX, "vec3", symbol);
       else if (as->template CastsTo<AV2>())

@@ -120,7 +120,7 @@ public:
    NOD() static GLSL Type();
 
    NOD() bool IsDefined(const Token&) const;
-   NOD() Index FindKeyword(const Token&) const;
+   NOD() Index FindKeyword(const Text&) const;
    NOD() Text Pretty() const;
    NOD() static GLSL Type(DMeta);
 
