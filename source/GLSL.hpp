@@ -4,6 +4,34 @@
 
 LANGULUS_EXCEPTION(GLSL);
 
+struct GLSL;
+
+namespace Langulus::CT
+{
+   namespace Inner
+   {
+   
+      /// Do types have an explicit or implicit cast operator to GLSL         
+      template<class...T>
+      concept ConvertibleToGLSLByOperator = requires (T&...a) {
+         ((a.operator GLSL()), ...); };
+
+      /// Does GLSL has an explicit/implicit constructor that accepts T       
+      template<class...T>
+      concept ConvertibleToGLSLByConstructor = requires (T&...a) {
+         ((GLSL {a}), ...); };
+
+   } // namespace Langulus::CT::Inner
+
+   /// A GLSL-convertible type is one that has either an implicit or explicit 
+   /// cast operator to GLSL type, or can be used to explicitly initialize a  
+   /// GLSL container                                                         
+   template<class...T>
+   concept ConvertibleToGLSL = ((Inner::ConvertibleToGLSLByOperator<T>
+        or Inner::ConvertibleToGLSLByConstructor<T>) and ...);
+
+} // namespace Langulus::CT
+
 
 ///                                                                           
 ///   GLSL code container & tools                                             
@@ -97,6 +125,7 @@ private:
 
 public:
    using Text::Text;
+   using Text::operator ==;
 
    GLSL(const Text&);
    GLSL(Text&&);
@@ -127,15 +156,26 @@ public:
    GLSL& Define(const Token&);
    GLSL& SetVersion(const Token&);
 
-   template<class ANYTHING>
-   GLSL& operator += (const ANYTHING&);
+   ///                                                                        
+   ///   Concatenation                                                        
+   ///                                                                        
+   template<class T> requires CT::ConvertibleToGLSL<Desem<T>>
+   NOD() GLSL operator + (T&&) const;
 
-   using Text::operator Token;
+   template<class T> requires CT::ConvertibleToGLSL<Desem<T>>
+   GLSL& operator += (T&&);
 };
 
-LANGULUS(INLINED)
-GLSL operator "" _glsl(const char* text, std::size_t size) {
-   return GLSL {text, size};
-}
+namespace Langulus
+{
+
+   /// Make a GLSL literal                                                    
+   LANGULUS(INLINED)
+   GLSL operator ""_glsl(const char* text, ::std::size_t size) {
+      return Anyness::Text::From(text, size);
+   }
+
+} // namespace Langulus
+
 
 #include "GLSL.inl"

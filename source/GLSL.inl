@@ -247,24 +247,18 @@ inline GLSL GLSL::Type(DMeta meta) {
    LANGULUS_THROW(GLSL, "Unsupported GLSL type");
 }
 
-/// Destructive concatenation of GLSL with anything                           
-/// Attempts to serialize right operand to GLSL, or GASM as an alternative    
-///   @param rhs - right operand                                              
-///   @return a reference to lhs                                              
-template<class T>
-LANGULUS(INLINED)
-GLSL& GLSL::operator += (const T& rhs) {
-   if constexpr (CT::Text<T>) {
-      Text::operator += (rhs);
-   }
-   else if constexpr (CT::Convertible<T, GLSL>) {
-      // First attempt conversion to GLSL                               
-      operator += (GLSL {rhs});
-   }
-   else if constexpr (CT::Convertible<T, Code>) {
-      // Otherwise rely on GASM converters                              
-      operator += (Code {rhs});
-   }
-   else LANGULUS_ERROR("GLSL converter not implemented");
-   return *this;
+/// Concatenate two text containers                                        
+///   @param rhs - right hand side                                         
+///   @return the concatenated text container                              
+template<class T> requires CT::ConvertibleToGLSL<Desem<T>> LANGULUS(INLINED)
+GLSL GLSL::operator + (T&& rhs) const {
+   return Text::ConcatInner<GLSL>(Forward<T>(rhs));
+}
+
+/// Concatenate (destructively) text containers                            
+///   @param rhs - right hand side                                         
+///   @return a reference to this container                                
+template<class T> requires CT::ConvertibleToGLSL<Desem<T>> LANGULUS(INLINED)
+GLSL& GLSL::operator += (T&& rhs) {
+   return Text::ConcatRelativeInner<GLSL>(Forward<T>(rhs));
 }
