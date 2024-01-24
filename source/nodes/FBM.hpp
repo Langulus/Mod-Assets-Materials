@@ -18,7 +18,7 @@ namespace Nodes
    struct FBM final : Node {
       LANGULUS(ABSTRACT) false;
       LANGULUS_BASES(Node);
-      LANGULUS_CONVERSIONS(Debug);
+      LANGULUS_CONVERSIONS(Text);
 
    private:
       // Code used to generate octaves                                  
@@ -32,7 +32,7 @@ namespace Nodes
       FBM(Describe&&);
 
       const Symbol& Generate();
-      NOD() operator Debug() const;
+      NOD() operator Text() const;
    };
 
 } // namespace Nodes

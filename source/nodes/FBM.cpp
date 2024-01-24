@@ -34,13 +34,10 @@ FBM::FBM(Describe&& descriptor)
 }
 
 /// For logging                                                               
-FBM::operator Debug() const {
+FBM::operator Text() const {
    Code result;
    result += Node::DebugBegin();
-      result += ", ";
-      result += mOctaveCount;
-      result += " octaves of ";
-      result += mCode;
+   result += Text {", ", mOctaveCount, " octaves of ", mCode};
    result += Node::DebugEnd();
    return result;
 }
