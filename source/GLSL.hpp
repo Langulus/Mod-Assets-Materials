@@ -27,7 +27,8 @@ namespace Langulus::CT
    /// cast operator to GLSL type, or can be used to explicitly initialize a  
    /// GLSL container                                                         
    template<class...T>
-   concept ConvertibleToGLSL = ((Inner::ConvertibleToGLSLByOperator<T>
+   concept ConvertibleToGLSL = ((
+           Inner::ConvertibleToGLSLByOperator<T>
         or Inner::ConvertibleToGLSLByConstructor<T>) and ...);
 
 } // namespace Langulus::CT
