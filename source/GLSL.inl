@@ -61,13 +61,11 @@ GLSL::GLSL(DMeta meta)
 ///   @param trait - trait to serialize                                       
 LANGULUS(INLINED)
 GLSL::GLSL(TMeta meta)
-   : Text {"trait"} {
-   operator += (meta->mToken);
-}
+   : Text {"trait", meta->mToken} {}
 
 /// Rate to GLSL                                                              
 ///   @param rate - rate to stringify                                         
-LANGULUS(INLINED)
+/*LANGULUS(INLINED)
 GLSL::GLSL(Rate rate) {
    for (auto& constant : Rate::CTTI_NamedValues) {
       if (Rate {constant.mValue} == rate) {
@@ -77,7 +75,7 @@ GLSL::GLSL(Rate rate) {
    }
 
    LANGULUS_THROW(Material, "Bad rate token");
-}
+}*/
 
 /// Meta constant -> GLSL serializer                                          
 ///   @param trait - trait to serialize                                       

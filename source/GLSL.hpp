@@ -135,7 +135,7 @@ public:
    explicit GLSL(DMeta);
    explicit GLSL(TMeta);
    explicit GLSL(CMeta);
-   explicit GLSL(Rate);
+   //explicit GLSL(Rate);
 
    template<CT::DenseNumber T, Count C>
    explicit GLSL(const TVector<T, C>&);

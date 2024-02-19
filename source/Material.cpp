@@ -143,7 +143,7 @@ GLSL Material::AddInput(Rate rate, const Trait& traitOriginal, bool allowDuplica
 
    inputs << trait;
    const auto symbol = GenerateInputName(rate, trait);
-   if (trait.TraitIs<Traits::Image>())
+   if (trait.IsTrait<Traits::Image>())
       ++mConsumedSamplers;
 
    VERBOSE_NODE("Added input ", Logger::Cyan, trait, " as `", symbol, "` @ ", rate);
@@ -192,17 +192,17 @@ void Material::AddDefine(Rate rate, const Token& name, const GLSL& code) {
 ///   @param trait - the trait tag for the input                              
 ///   @return the variable name to access the input                           
 GLSL Material::GenerateInputName(Rate rate, const Trait& trait) const {
-   if (trait.TraitIs<Traits::Image>()) {
+   if (trait.IsTrait<Traits::Image>()) {
       // Samplers are handled differently                               
-      return GLSL {trait.GetTrait()} + mConsumedSamplers;
+      return {trait.GetTrait(), mConsumedSamplers};
    }
    else if (not rate.IsUniform()) {
       // Name is for a vertex attribute or varying                      
-      return "in"_glsl + trait.GetToken();
+      return {"in", trait.GetToken()};
    }
 
    // Uniform name inside a uniform buffer                              
-   return Text::TemplateRt("{}.{}", GLSL {rate}, GLSL {trait.GetTrait()});
+   return Text::TemplateRt("{}.{}", rate, trait.GetTrait());
 }
 
 /// Generate output name                                                      
@@ -212,7 +212,7 @@ GLSL Material::GenerateInputName(Rate rate, const Trait& trait) const {
 GLSL Material::GenerateOutputName(Rate rate, const Trait& trait) const {
    LANGULUS_ASSERT(rate.IsShaderStage(), Material,
       "Can't have an output outside a shader stage rate");
-   return "out"_glsl + trait.GetToken();
+   return {"out", trait.GetToken()};
 }
 
 /// Generate uniform buffer descriptions for all shader stages                
@@ -247,7 +247,7 @@ void Material::GenerateUniforms() {
       TAny<GLSL> names;
       for (auto& trait : traits) {
          // Skip textures for now                                       
-         if (trait.TraitIs<Traits::Image>())
+         if (trait.IsTrait<Traits::Image>())
             continue;
 
          LANGULUS_ASSERT(trait.IsTyped(),  Material,
@@ -298,7 +298,7 @@ void Material::GenerateUniforms() {
    auto& traits = GetInputs(PerRenderable);
    for (auto& trait : traits) {
       // Skip anything BUT textures                                     
-      if (not trait.TraitIs<Traits::Image>())
+      if (not trait.IsTrait<Traits::Image>())
          continue;
 
       // Define each sampler using this layout                          

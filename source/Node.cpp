@@ -349,7 +349,7 @@ void Node::Dump() const {
 Text Node::DebugBegin() const {
    Code result;
    result += GetToken();
-   result += Code::OpenScope;
+   result += Code::Operator::OpenScope;
    result += mRate;
    return result;
 }
@@ -358,7 +358,7 @@ Text Node::DebugBegin() const {
 ///   @return the closing string                                              
 Text Node::DebugEnd() const {
    Code result;
-   result += Code::CloseScope;
+   result += Code::Operator::CloseScope;
    return result;
 }
 
