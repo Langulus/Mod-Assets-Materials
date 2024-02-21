@@ -18,7 +18,7 @@
 ///                                                                           
 struct Symbol {
    // The rate at which this symbol is recomputed                       
-   Rate mRate {Rate::Auto};
+   Rate mRate = Rate::Auto;
 
    // The trait (if any), the data type (if any), and the value (if     
    // the symbol is a constant/literal). If this symbol represents a    
@@ -30,7 +30,7 @@ struct Symbol {
    GLSL mCode;
 
    // Number of elements, if symbol is an array                         
-   Count mCount {1};
+   Count mCount = 1;
 
    // List of arguments, in case this symbol is a function call template
    // One must TemplateFill mCode with these traits to instantiate the  
@@ -40,9 +40,24 @@ struct Symbol {
    // Number of times a symbol is used                                  
    // If an expression with many uses, the symbol will be moved to a    
    // variable, that will be used instead                               
-   Count mUses {1};
+   Count mUses = 1;
 
-   template<CT::Data T, class... ARGS>
+public:
+   constexpr Symbol() = default;
+   Symbol(const Symbol& other)
+      : Symbol {Copy(other)} {}
+   Symbol(Symbol&& other) noexcept
+      : Symbol {Move(other)} {}
+
+   template<CT::Semantic S>
+   Symbol(S&& other) requires CT::Exact<TypeOf<S>, Symbol>
+      : mRate {other->mRate}
+      , mTrait {S::Nest(other->mTrait)}
+      , mCode {S::Nest(other->mCode)}
+      , mCount {other->mCount}
+      , mArguments {S::Nest(other->mArguments)} {}
+
+   template<CT::Data T, class...ARGS>
    NOD() static Symbol Function(Rate, const Token&, ARGS&&...);
 
    template<CT::Trait T, CT::Data D>
