@@ -45,7 +45,7 @@ struct Symbol {
 public:
    constexpr Symbol() = default;
    Symbol(const Symbol& other)
-      : Symbol {Copy(other)} {}
+      : Symbol {Refer(other)} {}
    Symbol(Symbol&& other) noexcept
       : Symbol {Move(other)} {}
 
