@@ -30,7 +30,7 @@ FBM::FBM(Describe&& descriptor)
    // That code also contains all required variables in the form of     
    // selection verbs                                                   
    mDescriptor.ExtractData(mCode);
-   LANGULUS_ASSERT(mCode, Material, "No FBM octave code");
+   //LANGULUS_ASSERT(mCode, Material, "No FBM octave code"); //TODO
 }
 
 /// For logging                                                               
