@@ -28,6 +28,7 @@ Material::Material(A::AssetModule* producer, const Neat& descriptor)
 ///   @param verb - creation verb                                             
 Material::~Material() {
    Logger::Verbose(Self(), "Destroying...");
+   mDescriptor.Reset();
 }
 
 /// Create nodes inside the material                                          

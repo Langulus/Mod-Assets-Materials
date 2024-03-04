@@ -24,7 +24,7 @@ private:
    // Material factory                                                  
    TFactoryUnique<::Material> mMaterials;
    // Data folder, where materials will be saved or loaded from         
-   Ptr<A::Folder> mFolder;
+   Ref<A::Folder> mFolder;
 
 public:
    MaterialLibrary(Runtime*, const Neat&);

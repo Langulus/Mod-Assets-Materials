@@ -62,14 +62,21 @@ Texture::Texture(Describe&& describe)
    });
 }
 
+/// Release all external resources to avoid circular dependencies             
+void Texture::Detach() {
+   mKeyframes.Reset();
+   mTexture.Reset();
+   Node::Detach();
+}
+
 /// Create a texture from the provided descriptor                             
 ///   @param descriptor - the descriptor for the texture                      
 ///   @return the produced texture                                            
 Ref<A::Image> Texture::CreateTexture(const Neat& descriptor) {
    auto local = Construct::From<A::Image>(descriptor);
-   local << Traits::Parent {this};
+   local << Traits::Parent {Ref {this}};
    Verbs::Create creator {&local};
-   return GetMaterial()->RunIn(creator).As<A::Image*>();
+   return GetMaterial()->RunIn(creator)->As<A::Image*>();
 }
 
 /// Assembles a GLSL texture(...) function                                    

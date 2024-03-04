@@ -55,7 +55,7 @@ const Symbol& Scene::GenerateLines() {
 
       // Get the generated geometry asset                               
       Verbs::Create creator {geometryDescriptor};
-      const auto geometry = mMaterial->RunIn(creator).As<A::Mesh*>();
+      const auto geometry = mMaterial->RunIn(creator)->As<A::Mesh*>();
       const auto count = geometry->GetLineCount();
       for (Count i = 0; i < count; ++i) {
          // Extract each line, and convert it to shader code            
@@ -165,7 +165,7 @@ const Symbol& Scene::GenerateTriangles() {
 
       // Get the generated geometry asset                               
       Verbs::Create creator {geometryDescriptor};
-      const auto geometry = mMaterial->RunIn(creator).As<A::Mesh*>();
+      const auto geometry = mMaterial->RunIn(creator)->As<A::Mesh*>();
       const auto count = geometry->GetTriangleCount();
       for (Count i = 0; i < count; ++i) {
          auto position = geometry->template GetTriangleTrait<Traits::Place>(i);

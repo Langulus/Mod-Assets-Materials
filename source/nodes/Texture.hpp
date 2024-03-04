@@ -31,6 +31,8 @@ namespace Nodes
    public:
       Texture(Describe&&);
 
+      void Detach();
+
       const Symbol& Generate();
 
    private:

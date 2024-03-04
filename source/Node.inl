@@ -25,7 +25,7 @@ Material* Node::GetMaterial() const noexcept {
 template<bool TWOSIDED>
 Count Node::AddChild(Node* node) {
    LANGULUS_ASSUME(UserAssumes, node, "Bad node pointer");
-   VERBOSE_NODE("Adding child ", node, " (", node->GetReferences(), " uses)");
+   VERBOSE_NODE("Adding child ", node, " (", node->Reference(0), " uses)");
    const auto added = mChildren.Merge(IndexBack, node);
    if constexpr (TWOSIDED) {
       if (added and node->mParent != this) {
@@ -34,7 +34,7 @@ Count Node::AddChild(Node* node) {
 
          node->mParent = this;
          node->mMaterial = GetMaterial();
-         VERBOSE_NODE("Now parent of ", node, " (", node->GetReferences(), " uses)");
+         VERBOSE_NODE("Now parent of ", node, " (", node->Reference(0), " uses)");
       }
    }
 
@@ -50,7 +50,7 @@ Count Node::AddChild(Node* node) {
 template<bool TWOSIDED>
 Count Node::RemoveChild(Node* node) {
    LANGULUS_ASSUME(UserAssumes, node, "Bad node pointer");
-   VERBOSE_NODE("Removing child ", node, " (", node->GetReferences(), " uses)");
+   VERBOSE_NODE("Removing child ", node, " (", node->Reference(0), " uses)");
    const auto removed = mChildren.Remove(node);
    if constexpr (TWOSIDED) {
       if (removed and node->mParent == this) {

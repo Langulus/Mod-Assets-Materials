@@ -77,7 +77,9 @@ public:
    Node(DMeta, Node*, const Neat&);
    Node(DMeta, const Neat&);
    Node(Node&&) = delete;
+
    virtual ~Node();
+   virtual void Detach();
 
    void Create(Verb&);
    void Select(Verb&);
@@ -122,8 +124,6 @@ public:
    Count ForEachOutput(F&&);
    
 protected:
-   void IsolateNodes();
-
    void InnerCreate();
    Node* NodeFromConstruct(const Construct&);
 

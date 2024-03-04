@@ -17,8 +17,10 @@
 ///   @param material - the parent material                                   
 ///   @param descriptor - the node descriptor                                 
 Node::Node(DMeta classid, Material* material, const Neat& descriptor)
-   : Node {classid, descriptor} {
+   : Node {classid, {/*don't set desriptor here, or Nodes::Root will couple with the entity*/}} {
    mMaterial = material;
+   mDescriptor = descriptor;
+   mDescriptor.RemoveTrait<Traits::Parent, true>();
 }
 
 /// Material node construction for members/locals                             
@@ -53,22 +55,32 @@ Node::Node(DMeta classid, const Neat& descriptor)
    mDescriptor.RemoveTrait<Traits::Parent, true>();
 }
 
-void Node::IsolateNodes() {
+/// Detach all nodes from the hierarchy, reducing references                  
+void Node::Detach() {
+   VERBOSE_NODE_TAB("Destroying (", Reference(0), " uses):");
+   mDescriptor.Reset();
+
    // The thing might be on the stack, make sure we decouple it from    
    // its owner, if that's the case                                     
-   if (mParent and GetReferences() > 1)
-      mParent->RemoveChild<false>(this);
+   //if (mParent and Reference(-1))
+   //   mParent->RemoveChild<false>(this);
 
    // Decouple all children from their parent                           
    for (auto& child : mChildren) {
+      VERBOSE_NODE("Decoupling child: ", child);
       child->mParent.Reset();
-      child->IsolateNodes();
+      VERBOSE_NODE("...", Reference(0), " uses remain");
+   }
+
+   for (auto& child : mChildren) {
+      child->Detach();
+      VERBOSE_NODE("...", Reference(0), " uses remain");
    }
 }
 
 /// Node destructor                                                           
 Node::~Node() {
-   IsolateNodes();
+   Detach();
 }
 
 /// Parse the normalized descriptor and create subnodes, apply traits         
@@ -78,8 +90,9 @@ void Node::InnerCreate() {
 
    // Save the rate                                                     
    mRate = GetMaterial()->GetDefaultRate();
-   if (mDescriptor.ExtractTrait<Traits::Rate>(mRate))
+   if (mDescriptor.ExtractTrait<Traits::Rate>(mRate)) {
       VERBOSE_NODE("Rate changed (via trait) to: ", mRate);
+   }
 
    // Create all sub constructs                                         
    mDescriptor.ForEachConstruct([&](const Construct& c) {
@@ -158,11 +171,11 @@ void Node::Select(Verb& verb) {
    // Collect filters from verb argument                                
    verb.ForEachDeep([&](const Block& group) {
       group.ForEach(
-         [&](const Rate& r)      noexcept { rateFilter = r; },
-         [&](const Index& i)     noexcept { index = i; },
-         [&](const Real& i)      noexcept { index = static_cast<Index>(i); },
-         [&](TMeta trait)        noexcept { traitFilter = trait; },
-         [&](DMeta type)         noexcept { dataFilter = type; },
+         [&](Rate  r) noexcept { rateFilter = r; },
+         [&](Index i) noexcept { index = i; },
+         [&](Real  i) noexcept { index = static_cast<Index>(i); },
+         [&](TMeta t) noexcept { traitFilter = t; },
+         [&](DMeta t) noexcept { dataFilter = t; },
          [&](const Trait& trait) noexcept {
             dataFilter  = trait.GetType();
             traitFilter = trait.GetTrait();

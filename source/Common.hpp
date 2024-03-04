@@ -16,7 +16,7 @@ struct Node;
 
 LANGULUS_EXCEPTION(Material);
 
-#define VERBOSE_NODE(...) Logger::Verbose(Self(), __VA_ARGS__)
+#define VERBOSE_NODE(...)     Logger::Verbose(Self(), __VA_ARGS__)
 #define VERBOSE_NODE_TAB(...) const auto tab = Logger::Verbose(Self(), __VA_ARGS__, Logger::Tabs {})
 
 namespace Nodes
