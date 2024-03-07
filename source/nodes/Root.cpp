@@ -6,6 +6,7 @@
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
 #include "Root.hpp"
+#include "../Material.hpp"
 
 using namespace Nodes;
 
@@ -17,6 +18,7 @@ Root::Root(Material* producer, const Neat& desc)
    : Node {MetaOf<Root>(), producer, desc} {
    // Satisfy the rest of the descriptor                                
    // This is just a root node, so we can safely create anything in it  
+   producer->Couple(desc); //TODO crappy solution
    InnerCreate();
 }
 

@@ -17,10 +17,10 @@
 ///   @param material - the parent material                                   
 ///   @param descriptor - the node descriptor                                 
 Node::Node(DMeta classid, Material* material, const Neat& descriptor)
-   : Node {classid, {/*don't set desriptor here, or Nodes::Root will couple with the entity*/}} {
+   : Node {classid, descriptor} {
    mMaterial = material;
    mDescriptor = descriptor;
-   mDescriptor.RemoveTrait<Traits::Parent, true>();
+   //mDescriptor.RemoveTrait<Traits::Parent, true>();
 }
 
 /// Material node construction for members/locals                             
@@ -36,7 +36,7 @@ Node::Node(DMeta classid, Node* parent, const Neat& descriptor)
 
    // Remove parents, as they're ignored on hashing and comparison      
    // - they can create circular dependencies, that we best avoid       
-   mDescriptor.RemoveTrait<Traits::Parent, true>();
+   //mDescriptor.RemoveTrait<Traits::Parent, true>();
 }
 
 /// Material node construction used in the rest of the Nodes                  
@@ -52,7 +52,7 @@ Node::Node(DMeta classid, const Neat& descriptor)
 
    // Remove parents, as they're ignored on hashing and comparison      
    // - they can create circular dependencies, that we best avoid       
-   mDescriptor.RemoveTrait<Traits::Parent, true>();
+   //mDescriptor.RemoveTrait<Traits::Parent, true>();
 }
 
 /// Detach all nodes from the hierarchy, reducing references                  

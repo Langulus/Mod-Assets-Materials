@@ -34,6 +34,7 @@ private:
    // It is of utmost importance this node is the last member, because  
    // it might use other members inside the Material, and those need to 
    // be initialized first                                              
+   friend struct Nodes::Root;
    Nodes::Root mRoot;
 
 public:
