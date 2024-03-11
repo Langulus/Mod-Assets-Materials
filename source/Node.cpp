@@ -20,7 +20,6 @@ Node::Node(DMeta classid, Material* material, const Neat& descriptor)
    : Node {classid, descriptor} {
    mMaterial = material;
    mDescriptor = descriptor;
-   //mDescriptor.RemoveTrait<Traits::Parent, true>();
 }
 
 /// Material node construction for members/locals                             
@@ -28,42 +27,29 @@ Node::Node(DMeta classid, Material* material, const Neat& descriptor)
 ///   @param parent - the parent node                                         
 ///   @param descriptor - the node descriptor                                 
 Node::Node(DMeta classid, Node* parent, const Neat& descriptor)
-   : Unit {classid, descriptor}
+   : Unit {classid}
    , mDescriptor {descriptor} {
    // Add the Node to the hierarchy                                     
    if (parent)
       parent->AddChild(this);
-
-   // Remove parents, as they're ignored on hashing and comparison      
-   // - they can create circular dependencies, that we best avoid       
-   //mDescriptor.RemoveTrait<Traits::Parent, true>();
 }
 
 /// Material node construction used in the rest of the Nodes                  
 ///   @param classid - the node type                                          
 ///   @param descriptor - the node descriptor                                 
 Node::Node(DMeta classid, const Neat& descriptor)
-   : Unit {classid, descriptor}
+   : Unit {classid}
    , mDescriptor {descriptor} {
    // Add the Node to the hierarchy                                     
    Node* owner {};
    if (descriptor.ExtractTrait<Traits::Parent>(owner) and owner)
       owner->AddChild(this);
-
-   // Remove parents, as they're ignored on hashing and comparison      
-   // - they can create circular dependencies, that we best avoid       
-   //mDescriptor.RemoveTrait<Traits::Parent, true>();
 }
 
 /// Detach all nodes from the hierarchy, reducing references                  
 void Node::Detach() {
    VERBOSE_NODE_TAB("Destroying (", Reference(0), " uses):");
    mDescriptor.Reset();
-
-   // The thing might be on the stack, make sure we decouple it from    
-   // its owner, if that's the case                                     
-   //if (mParent and Reference(-1))
-   //   mParent->RemoveChild<false>(this);
 
    // Decouple all children from their parent                           
    for (auto& child : mChildren) {
