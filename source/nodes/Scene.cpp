@@ -7,6 +7,7 @@
 ///                                                                           
 #include "Scene.hpp"
 #include "../Material.hpp"
+#include <Langulus/Mesh.hpp>
 #include <Math/Color.hpp>
 #include <Math/Normal.hpp>
 #include <Math/Sampler.hpp>

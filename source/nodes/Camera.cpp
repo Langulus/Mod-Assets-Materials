@@ -6,6 +6,7 @@
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
 #include "Camera.hpp"
+#include <Langulus/Graphics.hpp>
 #include <Math/Matrix.hpp>
 
 using namespace Nodes;

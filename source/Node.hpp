@@ -7,9 +7,6 @@
 ///                                                                           
 #pragma once
 #include "Symbol.hpp"
-#include <Flow/Verbs/Create.hpp>
-#include <Flow/Verbs/Select.hpp>
-
 #include <Math/Verbs/Add.hpp>
 #include <Math/Verbs/Multiply.hpp>
 #include <Math/Verbs/Modulate.hpp>
@@ -20,7 +17,7 @@
 ///                                                                           
 ///   Abstract material node                                                  
 ///                                                                           
-struct Node : Unit {
+struct Node : A::Unit {
 protected:
    friend struct Material;
    friend struct Nodes::FBM;

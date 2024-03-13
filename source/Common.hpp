@@ -6,18 +6,19 @@
 /// See LICENSE file, or https://www.gnu.org/licenses                         
 ///                                                                           
 #pragma once
-#include <Entity/External.hpp>
+#include <Langulus.hpp>
+#include <Langulus/Material.hpp>
 
 using namespace Langulus;
+using namespace Math;
 
 struct MaterialLibrary;
 struct Material;
 struct Node;
 
-LANGULUS_EXCEPTION(Material);
-
 #define VERBOSE_NODE(...)     Logger::Verbose(Self(), __VA_ARGS__)
 #define VERBOSE_NODE_TAB(...) const auto tab = Logger::Verbose(Self(), __VA_ARGS__, Logger::Tabs {})
+
 
 namespace Nodes
 {

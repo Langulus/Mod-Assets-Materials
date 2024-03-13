@@ -1,10 +1,10 @@
 #pragma once
 #include "Common.hpp"
-#include <Anyness/Text.hpp>
 
 LANGULUS_EXCEPTION(GLSL);
 
 struct GLSL;
+
 
 namespace Langulus::CT
 {
@@ -177,6 +177,5 @@ namespace Langulus
    }
 
 } // namespace Langulus
-
 
 #include "GLSL.inl"

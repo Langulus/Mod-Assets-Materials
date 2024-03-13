@@ -8,7 +8,7 @@
 #include "Raster.hpp"
 #include "Scene.hpp"
 #include "Camera.hpp"
-#include <Math/Primitives/Frustum.hpp>
+#include <Langulus/Mesh.hpp>
 
 using namespace Nodes;
 

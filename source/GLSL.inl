@@ -1,5 +1,6 @@
 #pragma once
 #include "GLSL.hpp"
+#include <Langulus/Image.hpp>
 
 
 /// Construct by copying text                                                 

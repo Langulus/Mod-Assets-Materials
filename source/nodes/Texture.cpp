@@ -8,7 +8,8 @@
 #include "Texture.hpp"
 #include "../Material.hpp"
 #include "../MaterialLibrary.hpp"
-#include <Math/Color.hpp>
+#include <Langulus/Image.hpp>
+#include <Langulus/IO.hpp>
 
 using namespace Nodes;
 

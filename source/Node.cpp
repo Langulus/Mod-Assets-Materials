@@ -10,6 +10,8 @@
 #include "MaterialLibrary.hpp"
 #include "nodes/Value.hpp"
 #include <Math/SimplexNoise.hpp>
+#include <Langulus/Graphics.hpp>
+#include <Langulus/Platform.hpp>
 
 
 /// Material node construction for Nodes::Root                                
@@ -27,7 +29,7 @@ Node::Node(DMeta classid, Material* material, const Neat& descriptor)
 ///   @param parent - the parent node                                         
 ///   @param descriptor - the node descriptor                                 
 Node::Node(DMeta classid, Node* parent, const Neat& descriptor)
-   : Unit {classid}
+   : A::Unit {classid}
    , mDescriptor {descriptor} {
    // Add the Node to the hierarchy                                     
    if (parent)
@@ -38,7 +40,7 @@ Node::Node(DMeta classid, Node* parent, const Neat& descriptor)
 ///   @param classid - the node type                                          
 ///   @param descriptor - the node descriptor                                 
 Node::Node(DMeta classid, const Neat& descriptor)
-   : Unit {classid}
+   : A::Unit {classid}
    , mDescriptor {descriptor} {
    // Add the Node to the hierarchy                                     
    Node* owner {};
