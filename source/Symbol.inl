@@ -17,7 +17,7 @@
 ///   @param ... arguments - the arguments for the pattern                    
 ///   @return the symbol instance                                             
 template<CT::Data T, class... ARGS>
-Symbol Symbol::Function(Rate rate, const Token& pattern, ARGS&&... arguments) {
+Symbol Symbol::Function(RefreshRate rate, const Token& pattern, ARGS&&... arguments) {
    LANGULUS_ASSUME(DevAssumes, rate != Rate::Auto, "Rate should be resolved");
    (void)Text::TemplateCheck(pattern, arguments...);
 
@@ -36,7 +36,7 @@ Symbol Symbol::Function(Rate rate, const Token& pattern, ARGS&&... arguments) {
 ///   @param value - the value of the literal                                 
 ///   @return the symbol instance                                             
 template<CT::Trait T, CT::Data D>
-Symbol Symbol::Literal(Rate rate, D&& value) {
+Symbol Symbol::Literal(RefreshRate rate, D&& value) {
    LANGULUS_ASSUME(DevAssumes, rate != Rate::Auto, "Rate should be resolved");
 
    Symbol s;
@@ -53,7 +53,7 @@ Symbol Symbol::Literal(Rate rate, D&& value) {
 ///   @param name - the variable token                                        
 ///   @return the symbol instance                                             
 template<CT::Trait T, CT::Data D>
-Symbol Symbol::Variable(Rate rate, D&& value, const Token& name) {
+Symbol Symbol::Variable(RefreshRate rate, D&& value, const Token& name) {
    LANGULUS_ASSUME(DevAssumes, rate != Rate::Auto, "Rate should be resolved");
 
    Symbol s;
@@ -69,7 +69,7 @@ Symbol Symbol::Variable(Rate rate, D&& value, const Token& name) {
 ///              use Rate::Auto for no filter                                 
 ///   @return true if this symbol matches the filter requirements             
 LANGULUS(INLINED)
-bool Symbol::MatchesFilter(DMeta d, Rate r) const noexcept {
+bool Symbol::MatchesFilter(DMeta d, RefreshRate r) const noexcept {
    LANGULUS_ASSUME(DevAssumes, mRate != Rate::Auto, "Rate should be resolved");
    return (!d || mTrait.CastsToMeta(d)) && (r == Rate::Auto || r <= mRate);
 }

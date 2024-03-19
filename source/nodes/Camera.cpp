@@ -28,14 +28,14 @@ const Symbol& Camera::Generate() {
    // are creating                                                      
    bool explicitCamera = false;
    mDescriptor.ForEachTrait([&](const Traits::View& view) {
-      (void)view;
+      (void) view;
 
       // Projection based on camera view transformation                 
-      if (mRate == PerPixel) {
-         auto symView = GetSymbol<Traits::View, Mat4>(PerLevel);
-         auto symFov  = GetSymbol<Traits::FOV, Real>(PerCamera);
-         auto symProj = GetSymbol<Traits::Projection, Mat4>(PerLevel);
-         auto symRes  = GetSymbol<Traits::Size, Vec2>(PerTick);
+      if (mRate == Rate::Pixel) {
+         auto symView = GetSymbol<Traits::View, Mat4>(Rate::Level);
+         auto symFov  = GetSymbol<Traits::FOV, Real>(Rate::Camera);
+         auto symProj = GetSymbol<Traits::Projection, Mat4>(Rate::Level);
+         auto symRes  = GetSymbol<Traits::Size, Vec2>(Rate::Tick);
 
          // Combine pixel position with the view matrix to from         
          // the projection per pixel. This allows for optically         
@@ -44,9 +44,9 @@ const Symbol& Camera::Generate() {
             Text::TemplateRt(CameraFuncPerPixel, *symRes, *symView, *symFov, *symProj));
          explicitCamera = true;
       }
-      else if (mRate == PerVertex) {
-         auto symView = GetSymbol<Traits::View, Mat4>(PerLevel);
-         auto symPos  = GetSymbol<Traits::Place, Vec4>(PerVertex);
+      else if (mRate == Rate::Vertex) {
+         auto symView = GetSymbol<Traits::View, Mat4>(Rate::Level);
+         auto symPos  = GetSymbol<Traits::Place, Vec4>(Rate::Vertex);
 
          // Combine vertex position with the view matrix to from        
          // the projection per vertex                                   
@@ -60,8 +60,8 @@ const Symbol& Camera::Generate() {
    if (not explicitCamera) {
       // By default it simply projects 2D based on the pixel position   
       Logger::Warning("No explicit camera defined - using default 2D screen projection");
-      mRate = PerPixel;
-      auto symRes = GetSymbol<Traits::Size, Vec2>(PerTick);
+      mRate = Rate::Pixel;
+      auto symRes = GetSymbol<Traits::Size, Vec2>(Rate::Tick);
       AddDefine("Camera", Text::TemplateRt(CameraFuncDefault, *symRes));
    }
 

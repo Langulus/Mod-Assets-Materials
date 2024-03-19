@@ -18,10 +18,10 @@
 struct Material final : A::Material {
 private:
    // Default material rate                                             
-   Rate mDefaultRate {PerPixel};
+   RefreshRate mDefaultRate = Rate::Pixel;
 
    // Consumed bindings                                                 
-   Count mConsumedSamplers {};
+   Count mConsumedSamplers = 0;
    //Count mConsumedLocations {};
 
    // Compiled flow                                                     
@@ -47,26 +47,23 @@ public:
 
    void Create(Verb&);
    void Refresh() {}
-
    bool Generate(TMeta, Offset = 0);
 
    NOD() Ref<A::Material> GetLOD(const LOD&) const;
+   NOD() RefreshRate GetDefaultRate() const noexcept;
+   NOD() GLSL& GetStage(Offset);
+   NOD() GLSL const& GetStage(Offset) const;
+   NOD() TAny<GLSL>& GetStages();
+   NOD() TAny<GLSL> const& GetStages() const;
 
-   NOD() const Rate& GetDefaultRate() const noexcept;
-   NOD()       GLSL& GetStage(Offset);
-   NOD() const GLSL& GetStage(Offset) const;
-   NOD()       TAny<GLSL>& GetStages();
-   NOD() const TAny<GLSL>& GetStages() const;
-
-   void Commit(Rate, const Token&, const Token&);
-
-   GLSL AddInput (Rate, const Trait&, bool allowDuplicates);
-   GLSL AddOutput(Rate, const Trait&, bool allowDuplicates);
-   void AddDefine(Rate, const Token&, const GLSL&);
+   void Commit   (RefreshRate, const Token&, const Token&);
+   GLSL AddInput (RefreshRate, const Trait&, bool allowDuplicates);
+   GLSL AddOutput(RefreshRate, const Trait&, bool allowDuplicates);
+   void AddDefine(RefreshRate, const Token&, const GLSL&);
 
 private:
-   NOD() GLSL GenerateInputName(Rate, const Trait&) const;
-   NOD() GLSL GenerateOutputName(Rate, const Trait&) const;
+   NOD() GLSL GenerateInputName (RefreshRate, const Trait&) const;
+   NOD() GLSL GenerateOutputName(RefreshRate, const Trait&) const;
    void GenerateUniforms();
    void GenerateInputs();
    void GenerateOutputs();

@@ -77,7 +77,7 @@ const Symbol& Raster::GeneratePerPixel() {
 /// the default hardware rasterizer. Exposes symbols PerPixel as a result     
 ///   @return NoSymbol, as functionality is in the fixed-pipeline             
 const Symbol& Raster::GeneratePerVertex() {
-   auto position = GetSymbol<Traits::Place>(PerVertex);
+   auto position = GetSymbol<Traits::Place>(Rate::Vertex);
    (void)position;
 
    AddDefine("gl_PerVertex",
@@ -102,9 +102,9 @@ const Symbol& Raster::GeneratePerVertex() {
 const Symbol& Raster::Generate() {
    Descend();
 
-   if (mRate == PerVertex or mRate == PerPrimitive)
+   if (mRate == Rate::Vertex or mRate == Rate::Primitive)
       return GeneratePerVertex();
-   else if (mRate == PerPixel)
+   else if (mRate == Rate::Pixel)
       return GeneratePerPixel();
    else
       LANGULUS_THROW(Material, "Bad rate for rasterizer");

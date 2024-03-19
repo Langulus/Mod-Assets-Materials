@@ -95,9 +95,9 @@ void Node::InnerCreate() {
          VERBOSE_NODE_TAB("Executing subcode: ", subcode);
          Run(subcode);
       }
-      else if (data.CastsTo<Rate>()) {
+      else if (data.CastsTo<RefreshRate>()) {
          // Set rate through data only                                  
-         mRate = data.Get<Rate>();
+         mRate = data.Get<RefreshRate>();
          VERBOSE_NODE("Rate changed (via data) to: ", mRate);
       }
       else Logger::Warning(Self(), "Ignored data: ", data);
@@ -151,7 +151,7 @@ void Node::Select(Verb& verb) {
    if (verb.GetMass() <= 0)
       return;
 
-   Rate rateFilter = Rate::Auto;
+   RefreshRate rateFilter = Rate::Auto;
    Index index = IndexNone;
    TMeta traitFilter = {};
    DMeta dataFilter = {};
@@ -159,7 +159,7 @@ void Node::Select(Verb& verb) {
    // Collect filters from verb argument                                
    verb.ForEachDeep([&](const Block& group) {
       group.ForEach(
-         [&](Rate  r) noexcept { rateFilter = r; },
+         [&](RefreshRate r) noexcept { rateFilter = r; },
          [&](Index i) noexcept { index = i; },
          [&](Real  i) noexcept { index = static_cast<Index>(i); },
          [&](TMeta t) noexcept { traitFilter = t; },
@@ -468,36 +468,36 @@ Node::DefaultTrait Node::GetDefaultTrait(TMeta trait) {
 
    if (not properties) {
       properties[MetaOf<Traits::Time>()] =
-         {MetaOf<Real>(), PerTick};
+         {MetaOf<Real>(), Rate::Tick};
       properties[MetaOf<Traits::MousePosition>()] =
-         {MetaOf<Vec2>(), PerTick};
+         {MetaOf<Vec2>(), Rate::Tick};
       properties[MetaOf<Traits::MouseScroll>()] =
-         {MetaOf<Vec2>(), PerTick};
+         {MetaOf<Vec2>(), Rate::Tick};
 
       properties[MetaOf<Traits::Size>()] =
-         {MetaOf<Vec2>(), PerCamera};
+         {MetaOf<Vec2>(), Rate::Camera};
       properties[MetaOf<Traits::Projection>()] =
-         {MetaOf<Mat4>(), PerCamera};
+         {MetaOf<Mat4>(), Rate::Camera};
       properties[MetaOf<Traits::FOV>()] =
-         {MetaOf<Real>(), PerCamera};
+         {MetaOf<Real>(), Rate::Camera};
 
       properties[MetaOf<Traits::View>()] =
-         {MetaOf<Mat4>(), PerLevel};
+         {MetaOf<Mat4>(), Rate::Level};
 
       properties[MetaOf<Traits::Image>()] =
-         {MetaOf<A::Image>(), PerRenderable};
+         {MetaOf<A::Image>(), Rate::Renderable};
 
       properties[MetaOf<Traits::Transform>()] =
-         {MetaOf<Mat4>(), PerInstance};
+         {MetaOf<Mat4>(), Rate::Instance};
 
       properties[MetaOf<Traits::Place>()] =
-         {MetaOf<Vec3>(), PerVertex};
+         {MetaOf<Vec3>(), Rate::Vertex};
       properties[MetaOf<Traits::Sampler>()] =
-         {MetaOf<Vec2>(), PerVertex};
+         {MetaOf<Vec2>(), Rate::Vertex};
       properties[MetaOf<Traits::Aim>()] =
-         {MetaOf<Vec3>(), PerVertex};
+         {MetaOf<Vec3>(), Rate::Vertex};
       properties[MetaOf<Traits::Color>()] =
-         {MetaOf<Vec4>(), PerVertex};
+         {MetaOf<Vec4>(), Rate::Vertex};
    }
 
    auto found = properties.Find(trait);
@@ -542,7 +542,7 @@ DMeta Node::DecayToGLSLType(DMeta meta) {
 ///   @param r - rate filter                                                  
 ///   @param i - index filter                                                 
 ///   @return a pointer to the symbol, or nullptr if not found                
-Symbol* Node::GetSymbol(TMeta t, DMeta d, Rate r, Index i) {
+Symbol* Node::GetSymbol(TMeta t, DMeta d, RefreshRate r, Index i) {
    Offset nth = i.IsSpecial() ? 0 : i.GetOffsetUnsafe();
 
    if (t) {

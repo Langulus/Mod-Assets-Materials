@@ -29,7 +29,7 @@ protected:
    Material* mMaterial {};
 
    // The rate at which this node is refreshed                          
-   Rate mRate {Rate::Auto};
+   RefreshRate mRate = Rate::Auto;
 
    // Local variables, usually used by selection verbs, when executing  
    // Code in the context of the Node                                   
@@ -53,7 +53,7 @@ protected:
 
    struct DefaultTrait {
       DMeta mType;
-      Rate  mRate;
+      RefreshRate mRate;
    };
 
    static inline const Symbol NoSymbol {};
@@ -90,7 +90,7 @@ public:
 
    virtual const Symbol& Generate() = 0;
 
-   NOD() Rate GetRate() const noexcept;
+   NOD() RefreshRate GetRate() const noexcept;
    NOD() Offset GetStage() const;
    NOD() Material* GetMaterial() const noexcept;
    NOD() MaterialLibrary* GetLibrary() const noexcept;
@@ -107,13 +107,13 @@ public:
    template<class F>
    Count ForEachChild(F&&);
 
-   NOD()       Symbol* GetSymbol(TMeta, DMeta = nullptr, Rate = Rate::Auto, Index = IndexLast);
-   NOD() const Symbol* GetSymbol(TMeta, DMeta = nullptr, Rate = Rate::Auto, Index = IndexLast) const;
+   NOD() Symbol*        GetSymbol(TMeta, DMeta = nullptr, RefreshRate = Rate::Auto, Index = IndexLast);
+   NOD() Symbol const*  GetSymbol(TMeta, DMeta = nullptr, RefreshRate = Rate::Auto, Index = IndexLast) const;
 
    template<class = void, class = void>
-   NOD()       Symbol* GetSymbol(Rate = Rate::Auto, Index = IndexLast);
+   NOD() Symbol*        GetSymbol(RefreshRate = Rate::Auto, Index = IndexLast);
    template<class = void, class = void>
-   NOD() const Symbol* GetSymbol(Rate = Rate::Auto, Index = IndexLast) const;
+   NOD() Symbol const*  GetSymbol(RefreshRate = Rate::Auto, Index = IndexLast) const;
 
    template<class F>
    Count ForEachInput(F&&);

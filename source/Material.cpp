@@ -56,7 +56,7 @@ Ref<A::Material> Material::GetLOD(const LOD&) const {
 
 /// Get default material rate                                                 
 ///   @return the rate                                                        
-const Rate& Material::GetDefaultRate() const noexcept {
+RefreshRate Material::GetDefaultRate() const noexcept {
    return mDefaultRate;
 }
 
@@ -64,7 +64,7 @@ const Rate& Material::GetDefaultRate() const noexcept {
 ///	@param stage - the shader stage to commit to                            
 ///   @param place - the shader token to commit changes at                    
 ///   @param addition - the code to commit                                    
-void Material::Commit(Rate rate, const Token& place, const Token& addition) {
+void Material::Commit(RefreshRate rate, const Token& place, const Token& addition) {
    const auto stage = rate.GetStageIndex();
    auto& code = GetStage(stage);
    if (not code) {
@@ -120,7 +120,7 @@ const TAny<GLSL>& Material::GetStages() const {
 ///   @param traitOriginal - the input to add                                 
 ///   @param allowDuplicates - whether multiple such traits are allowed       
 ///   @return the generated symbol name                                       
-GLSL Material::AddInput(Rate rate, const Trait& traitOriginal, bool allowDuplicates) {
+GLSL Material::AddInput(RefreshRate rate, const Trait& traitOriginal, bool allowDuplicates) {
    // An input must always be declared with a rate, and that rate       
    // must always be smaller or equal to the node's rate                
    // For example, you might want Time input PerPixel, but the          
@@ -156,7 +156,7 @@ GLSL Material::AddInput(Rate rate, const Trait& traitOriginal, bool allowDuplica
 ///   @param traitOriginal - the output to add                                
 ///   @param allowDuplicates - whether multiple such traits are allowed       
 ///   @return the generated symbol name                                       
-GLSL Material::AddOutput(Rate rate, const Trait& traitOriginal, bool allowDuplicates) {
+GLSL Material::AddOutput(RefreshRate rate, const Trait& traitOriginal, bool allowDuplicates) {
    LANGULUS_ASSERT(rate.IsShaderStage(), Material,
       "Can't add material outputs to rates, "
       "that don't correspond to shader stages");
@@ -183,7 +183,7 @@ GLSL Material::AddOutput(Rate rate, const Trait& traitOriginal, bool allowDuplic
 ///   @param rate - the shader stage to place code at                         
 ///   @param name - the name of the definition (to check for duplicated)      
 ///   @param code - the code to insert                                        
-void Material::AddDefine(Rate rate, const Token& name, const GLSL& code) {
+void Material::AddDefine(RefreshRate rate, const Token& name, const GLSL& code) {
    const auto stageIndex = rate.GetStageIndex();
    mDefinitions[stageIndex][name] << code;
 }
@@ -192,7 +192,7 @@ void Material::AddDefine(Rate rate, const Token& name, const GLSL& code) {
 ///   @param rate - the rate at which the input is declared                   
 ///   @param trait - the trait tag for the input                              
 ///   @return the variable name to access the input                           
-GLSL Material::GenerateInputName(Rate rate, const Trait& trait) const {
+GLSL Material::GenerateInputName(RefreshRate rate, const Trait& trait) const {
    if (trait.IsTrait<Traits::Image>()) {
       // Samplers are handled differently                               
       return {trait.GetTrait(), mConsumedSamplers};
@@ -210,7 +210,7 @@ GLSL Material::GenerateInputName(Rate rate, const Trait& trait) const {
 ///   @param rate - the rate at which the output is declared                  
 ///   @param trait - the trait tag for the output                             
 ///   @return the variable name to access the output                          
-GLSL Material::GenerateOutputName(Rate rate, const Trait& trait) const {
+GLSL Material::GenerateOutputName(RefreshRate rate, const Trait& trait) const {
    LANGULUS_ASSERT(rate.IsShaderStage(), Material,
       "Can't have an output outside a shader stage rate");
    return {"out", trait.GetToken()};
@@ -220,8 +220,8 @@ GLSL Material::GenerateOutputName(Rate rate, const Trait& trait) const {
 void Material::GenerateUniforms() {
    // Scan all uniform rates:                                           
    // Tick, Pass, Camera, Level, Renderable, Instance                   
-   for (Offset i = 0; i < Rate::UniformCount; ++i) {
-      const Rate rate {i + Rate::UniformBegin};
+   for (Offset i = 0; i < RefreshRate::UniformCount; ++i) {
+      const RefreshRate rate = i + RefreshRate::UniformBegin;
       auto& traits = GetInputs(i);
       if (not traits)
          continue;
@@ -296,7 +296,7 @@ void Material::GenerateUniforms() {
    // Textures are always updated per renderable for now                
    // Samplers always use layout set #2 for now                         
    Offset textureNumber = 0;
-   auto& traits = GetInputs(PerRenderable);
+   auto& traits = GetInputs(Rate::Renderable);
    for (auto& trait : traits) {
       // Skip anything BUT textures                                     
       if (not trait.IsTrait<Traits::Image>())
@@ -331,7 +331,7 @@ void Material::GenerateUniforms() {
 /// Generate vertex attributes (aka vertex shader inputs)                     
 void Material::GenerateInputs() {
    for (Offset i = 0; i < ShaderStage::Counter; ++i) {
-      const Rate rate {Rate::StagesBegin + i};
+      const RefreshRate rate = RefreshRate::StagesBegin + i;
       const auto& inputs = GetInputs(rate);
       Offset location = 0;
 
@@ -371,7 +371,7 @@ void Material::GenerateInputs() {
 /// Generate shader outputs                                                   
 void Material::GenerateOutputs() {
    for (Offset i = 0; i < ShaderStage::Counter; ++i) {
-      const Rate rate {Rate::StagesBegin + i};
+      const RefreshRate rate = RefreshRate::StagesBegin + i;
       const auto& outputs = GetOutputs(rate);
       Offset location = 0;
 
@@ -415,10 +415,10 @@ void Material::InitializeFromShadertoy(const GLSL& code) {
    Logger::Verbose(code.Pretty());
 
    // Add the code snippet to the pixel shader                          
-   Commit(PerPixel, ShaderToken::Functions, code);
+   Commit(Rate::Pixel, ShaderToken::Functions, code);
 
    // Shadertoy has the vertical flipped, so use this iFragment macro   
-   Commit(PerPixel, ShaderToken::Defines,
+   Commit(Rate::Pixel, ShaderToken::Defines,
       "#define iFragment vec2(gl_FragCoord.x, iResolution.y - gl_FragCoord.y)");
 
    // Maps a code token to an input trait by using a macro              
@@ -426,12 +426,12 @@ void Material::InitializeFromShadertoy(const GLSL& code) {
       if (not code.FindKeyword(keyword))
          return;
 
-      const auto input = AddInput(PerPixel, trait, false);
+      const auto input = AddInput(Rate::Pixel, trait, false);
       constexpr auto layout = R"shader(
          #define {1} {2}
       )shader";
 
-      Commit(PerPixel, ShaderToken::Defines,
+      Commit(Rate::Pixel, ShaderToken::Defines,
          Text::TemplateRt(layout, keyword, input));
    };
 
@@ -452,7 +452,7 @@ void Material::InitializeFromShadertoy(const GLSL& code) {
    integrate(Trait::From<Traits::FOV>());*/
 
    // Wrap the shadertoy's mainImage function in our own ShadertoyMain  
-   Commit(PerPixel, ShaderToken::Functions, R"shader(
+   Commit(Rate::Pixel, ShaderToken::Functions, R"shader(
       vec4 ShadertoyMain() {
          vec4 output;
          mainImage(output, iFragment);
@@ -461,6 +461,6 @@ void Material::InitializeFromShadertoy(const GLSL& code) {
    )shader");
 
    // Add output color per pixel                                        
-   auto output = AddOutput(PerPixel, Traits::Color::OfType<Vec4>(), false);
-   Commit(PerPixel, ShaderToken::Colorize, output + " = ShadertoyMain();");
+   auto output = AddOutput(Rate::Pixel, Traits::Color::OfType<Vec4>(), false);
+   Commit(Rate::Pixel, ShaderToken::Colorize, output + " = ShadertoyMain();");
 }

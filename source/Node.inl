@@ -140,7 +140,7 @@ Symbol& Node::ExposeTrait(const Token& pattern, ARGS&&... a) {
 ///   @param i - index filter                                                 
 ///   @return a pointer to the symbol, or nullptr if not found                
 LANGULUS(INLINED)
-const Symbol* Node::GetSymbol(TMeta t, DMeta d, Rate r, Index i) const {
+const Symbol* Node::GetSymbol(TMeta t, DMeta d, RefreshRate r, Index i) const {
    return const_cast<Node*>(this)->GetSymbol(t, d, r, i);
 }
 
@@ -153,7 +153,7 @@ const Symbol* Node::GetSymbol(TMeta t, DMeta d, Rate r, Index i) const {
 ///   @param i - index filter                                                 
 ///   @return a pointer to the symbol, or nullptr if not found                
 template<class T, class D> LANGULUS(INLINED)
-Symbol* Node::GetSymbol(Rate r, Index i) {
+Symbol* Node::GetSymbol(RefreshRate r, Index i) {
    static_assert(CT::Void<T> or CT::Trait<T>,
       "T must be either trait, or void");
    static_assert(CT::Void<D> or CT::Data<D>,
@@ -171,14 +171,14 @@ Symbol* Node::GetSymbol(Rate r, Index i) {
 ///   @param i - index filter                                                 
 ///   @return a pointer to the symbol, or nullptr if not found                
 template<class T, class D> LANGULUS(INLINED)
-const Symbol* Node::GetSymbol(Rate r, Index i) const {
+const Symbol* Node::GetSymbol(RefreshRate r, Index i) const {
    return const_cast<Node*>(this)->template GetSymbol<T, D>(r, i);
 }
 
 /// Get the refresh rate of the node                                          
 ///   @return the rate of this node                                           
 LANGULUS(INLINED)
-Rate Node::GetRate() const noexcept {
+RefreshRate Node::GetRate() const noexcept {
    return mRate;
 }
 

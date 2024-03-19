@@ -18,7 +18,7 @@
 ///                                                                           
 struct Symbol {
    // The rate at which this symbol is recomputed                       
-   Rate mRate = Rate::Auto;
+   RefreshRate mRate = Rate::Auto;
 
    // The trait (if any), the data type (if any), and the value (if     
    // the symbol is a constant/literal). If this symbol represents a    
@@ -58,15 +58,15 @@ public:
       , mArguments {S::Nest(other->mArguments)} {}
 
    template<CT::Data T, class...ARGS>
-   NOD() static Symbol Function(Rate, const Token&, ARGS&&...);
+   NOD() static Symbol Function(RefreshRate, const Token&, ARGS&&...);
 
    template<CT::Trait T, CT::Data D>
-   NOD() static Symbol Literal(Rate, D&&);
+   NOD() static Symbol Literal(RefreshRate, D&&);
 
    template<CT::Trait T, CT::Data D>
-   NOD() static Symbol Variable(Rate, D&&, const Token&);
+   NOD() static Symbol Variable(RefreshRate, D&&, const Token&);
 
-   NOD() bool MatchesFilter(DMeta, Rate) const noexcept;
+   NOD() bool MatchesFilter(DMeta, RefreshRate) const noexcept;
 
    NOD() GLSL Generate(const Node*) const;
 
