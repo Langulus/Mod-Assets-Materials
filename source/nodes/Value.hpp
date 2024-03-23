@@ -15,9 +15,10 @@ namespace Nodes
    ///                                                                        
    ///   Value node                                                           
    ///                                                                        
-   /// Just a node that allows modification of inputs/outputs and execution   
+   ///   Just a node that allows modification of inputs/outputs and execution 
    /// of verbs in a temporary context. Also supports keyframes via the verb  
    /// interface - you can execute verbs with time/frequency charge           
+   ///                                                                        
    struct Value final : Node {
       LANGULUS(ABSTRACT) false;
       LANGULUS_BASES(Node);
@@ -27,6 +28,7 @@ namespace Nodes
 
    public:
       Value(Node*);
+
       const Symbol& Generate();
    };
 

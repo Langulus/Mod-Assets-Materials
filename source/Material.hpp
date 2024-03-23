@@ -49,13 +49,17 @@ public:
    void Refresh() {}
    bool Generate(TMeta, Offset = 0);
 
-   NOD() Ref<A::Material> GetLOD(const LOD&) const;
-   NOD() RefreshRate GetDefaultRate() const noexcept;
-   NOD() GLSL& GetStage(Offset);
-   NOD() GLSL const& GetStage(Offset) const;
-   NOD() TAny<GLSL>& GetStages();
-   NOD() TAny<GLSL> const& GetStages() const;
+   NOD() Ref<A::Material>  GetLOD(const LOD&) const;
+   NOD() RefreshRate       GetDefaultRate() const noexcept;
+   NOD() GLSL&             GetStage(Offset);
+   NOD() GLSL const&       GetStage(Offset) const;
 
+   struct Stage {
+      ShaderStage::Enum id;
+      GLSL& code;
+   };
+
+   void ForEachStage(auto&&);
    void Commit   (RefreshRate, const Token&, const Token&);
    GLSL AddInput (RefreshRate, const Trait&, bool allowDuplicates);
    GLSL AddOutput(RefreshRate, const Trait&, bool allowDuplicates);

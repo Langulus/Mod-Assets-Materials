@@ -12,14 +12,36 @@
 
 /// Material construction                                                     
 ///   @param producer - the producer                                          
-///   @param descriptor - instructions for configuring the material           
-Material::Material(A::AssetModule* producer, const Neat& descriptor)
-   : A::Material {MetaOf<::Material>(), producer, descriptor}
-   , mRoot {this, descriptor} {
+///   @param desc - instructions for configuring the material                 
+Material::Material(A::AssetModule* producer, const Neat& desc)
+   : A::Material {MetaOf<::Material>(), producer, desc}
+   , mRoot {this, desc} {
    Logger::Verbose(Self(), "Initializing...");
+
    // Extract default rate if any                                       
-   if (not mDescriptor.ExtractTrait<Traits::Rate>(mDefaultRate))
-      mDescriptor.ExtractData(mDefaultRate);
+   if (not desc.ExtractTrait<Traits::Rate>(mDefaultRate))
+      desc.ExtractData(mDefaultRate);
+
+   // Scan descriptor for Traits::Input and Traits::Output              
+   desc.ForEachTrait([&](const Trait& trait) {
+      auto commonRate = Rate::Auto;
+
+      trait.ForEachDeep([&](const Any& part) {
+         part.ForEach(
+            [&](RefreshRate  i) noexcept { commonRate = i; },
+            [&](const Trait& i) noexcept {
+               // Add material input/output                             
+               if (trait.IsTrait<Traits::Input>())
+                  AddInput(commonRate, i, true);
+               else if (trait.IsTrait<Traits::Output>())
+                  AddOutput(commonRate, i, true);
+               else
+                  TODO(); // Add constants?
+            }
+         );
+      });
+   });
+
    mRoot.Dump();
    Logger::Verbose(Self(), "Initialized");
 }
@@ -41,9 +63,47 @@ void Material::Create(Verb& verb) {
 ///   @param trait - the trait to generate                                    
 ///   @param index - trait group to generate                                  
 ///   @return true if data was generated                                      
-bool Material::Generate(TMeta, Offset) {
-   TODO();
-   return false;
+bool Material::Generate(TMeta trait, Offset) {
+   const auto found = mDataListMap.FindIt(trait);
+   if (found)
+      return true;
+
+   // Reserve shader stages inside the Asset's data list map, in the    
+   // Traits::Shader bucket. This marks that this material has been     
+   // generated from now on, even if a specific stage doesn't exist.    
+   mDataListMap.Insert(trait);
+   mDataListMap[trait].New(ShaderStage::Counter, GLSL {});
+
+   // If a vertex shader is missing, add a default one                  
+   auto& stages = *found.mValue;
+   GLSL& vs = GetStage(ShaderStage::Vertex);
+   if (vs.IsEmpty()) {
+      // Default vertex stage - a rectangle filling the screen          
+      Commit(Rate::Vertex, ShaderToken::Transform,
+         "const vec2 outUV = vec2(gl_VertexIndex & 2, (gl_VertexIndex << 1) & 2);\n"
+         "gl_Position = vec4(outUV * 2.0f - 1.0f, 0.0f, 1.0f);\n"
+      );
+   }
+
+   // Generate inputs and outputs where needed                          
+   GenerateInputs();
+   GenerateOutputs();
+   GenerateUniforms();
+
+   // Finish all the stages, by writing shader versions to all of them, 
+   // and other final touches                                           
+   ForEachStage([&](Stage stage) {
+      if (stage.code.IsEmpty())
+         return;
+
+      // Write shader version to all relevant codes                     
+      stage.code.SetVersion("450");
+
+      Logger::Verbose(Self(), "Stage (", stage.id, "):\n");
+      Logger::Verbose(Self(), stage.code.Pretty());
+   });
+
+   return true;
 }
 
 /// Get material adapter for lower or higher level of detail                  
@@ -81,9 +141,19 @@ void Material::Commit(RefreshRate rate, const Token& place, const Token& additio
 ///   @param stage - the stage index                                          
 ///   @return the code associated with the stage                              
 GLSL& Material::GetStage(Offset stage) {
+   auto stages = GetDataList<Traits::Shader>();
+   LANGULUS_ASSUME(DevAssumes, stages,
+      "No data inside material");
    LANGULUS_ASSUME(DevAssumes, stage < ShaderStage::Counter,
       "Bad stage offset");
-   return const_cast<GLSL&>(GetStages()[stage]);
+   LANGULUS_ASSUME(DevAssumes, stages->GetCount() == ShaderStage::Counter,
+      "Bad material data count");
+   IF_SAFE(for (auto& s : *stages) {
+      LANGULUS_ASSUME(DevAssumes, s.IsExact<GLSL>() and s.GetCount() == 1,
+         "Bad stage commited");
+   })
+
+   return (*stages)[stage].Get<GLSL>();
 }
 
 /// Get a GLSL stage (const)                                                  
@@ -93,89 +163,100 @@ const GLSL& Material::GetStage(Offset stage) const {
    return const_cast<Material*>(this)->GetStage(stage);
 }
 
-/// Get the list of GLSL stages                                               
-///   @return the list                                                        
-TAny<GLSL>& Material::GetStages() {
-   auto stages = GetDataList<Traits::Data>();
-   LANGULUS_ASSUME(DevAssumes, stages,
-      "No data inside material");
-   LANGULUS_ASSUME(DevAssumes, stages->GetCount() == ShaderStage::Counter,
-      "Bad material data count");
-   LANGULUS_ASSUME(DevAssumes, stages->template IsExact<GLSL>(),
-      "Material data type mismatch");
+/// Execute a function for each stage                                         
+///   @param call - the lambda function to call (use GLSL for argument)       
+void Material::ForEachStage(auto&& call) {
+   using F = Deref<decltype(call)>;
+   using A = ArgumentOf<F>;
+   static_assert(CT::Same<A, GLSL> or CT::Exact<A, Stage>,
+      "Function argument must be of type GLSL");
 
-   return const_cast<TAny<GLSL>&>(
-      *reinterpret_cast<const TAny<GLSL>*>(stages)
-   );
-}
-
-/// Get the list of GLSL stages (const)                                       
-///   @return the list                                                        
-const TAny<GLSL>& Material::GetStages() const {
-   return const_cast<Material*>(this)->GetStages();
+   if constexpr (CT::Same<A, GLSL>) {
+      for (Offset i = 0; i < ShaderStage::Counter; ++i)
+         call(GetStage(i));
+   }
+   else {
+      for (Offset i = 0; i < ShaderStage::Counter; ++i)
+         call({ShaderStage::Enum(i), GetStage(i)});
+   }
 }
 
 /// Add an external input trait                                               
 ///   @param rate - the rate at which the input will be refreshed             
-///   @param traitOriginal - the input to add                                 
+///   @param t - the input to add                                             
 ///   @param allowDuplicates - whether multiple such traits are allowed       
 ///   @return the generated symbol name                                       
-GLSL Material::AddInput(RefreshRate rate, const Trait& traitOriginal, bool allowDuplicates) {
+GLSL Material::AddInput(RefreshRate rate, const Trait& t, bool allowDuplicates) {
+   // Get local rate and type, if any                                   
+   DMeta type;
+   t.ForEachDeep(
+      [&](RefreshRate r) noexcept { rate = r; },
+      [&](DMeta       r) noexcept { type = r; }
+   );
+
    // An input must always be declared with a rate, and that rate       
    // must always be smaller or equal to the node's rate                
    // For example, you might want Time input PerPixel, but the          
    // actual uniform will be updated PerTick. So this is                
    // where we step in to override any wrongly provided rate            
    if (rate == Rate::Auto)
-      rate = Node::GetDefaultTrait(traitOriginal.GetTrait()).mRate;
+      rate = Node::GetDefaultTrait(t.GetTrait()).mRate;
+   if (not type)
+      type = Node::GetDefaultTrait(t.GetTrait()).mType;
 
    // Find any matching available inputs                                
-   auto& inputs = const_cast<TraitList&>(GetInputs(rate));
+   auto& inputs = mInputs[rate.GetInputIndex()];
+   const auto proto = Trait::FromMeta(t.GetTrait(), type);
    if (not allowDuplicates) {
-      auto found = inputs.Find(traitOriginal);
-      if (not found.IsSpecial())
+      auto found = inputs.Find(proto);
+      if (found)
          return GenerateInputName(rate, inputs[found]);
    }
-   
-   // Add the new input                                                 
-   auto trait = traitOriginal;
-   if (trait.IsUntyped())
-      trait.SetType(Node::GetDefaultTrait(trait.GetTrait()).mType);
 
-   inputs << trait;
-   const auto symbol = GenerateInputName(rate, trait);
-   if (trait.IsTrait<Traits::Image>())
+   // Add the new input                                                 
+   inputs << proto;
+   const auto symbol = GenerateInputName(rate, proto);
+   if (t.IsTrait<Traits::Image>())
       ++mConsumedSamplers;
 
-   VERBOSE_NODE("Added input ", Logger::Cyan, trait, " as `", symbol, "` @ ", rate);
+   VERBOSE_NODE("Added input ", Logger::Cyan, proto.GetTrait(),
+      " as `", symbol, "` at ", rate, " of type ", type);
    return symbol;
 }
 
 /// Add an output to the material                                             
 ///   @param rate - the rate at which the output is refreshed                 
-///   @param traitOriginal - the output to add                                
+///   @param t - the output to add                                            
 ///   @param allowDuplicates - whether multiple such traits are allowed       
 ///   @return the generated symbol name                                       
-GLSL Material::AddOutput(RefreshRate rate, const Trait& traitOriginal, bool allowDuplicates) {
+GLSL Material::AddOutput(RefreshRate rate, const Trait& t, bool allowDuplicates) {
+   // Get local rate and type, if any                                   
+   DMeta type;
+   t.ForEachDeep(
+      [&](RefreshRate r) noexcept { rate = r; },
+      [&](DMeta       r) noexcept { type = r; }
+   );
+
    LANGULUS_ASSERT(rate.IsShaderStage(), Material,
       "Can't add material outputs to rates, "
       "that don't correspond to shader stages");
 
-   auto& outputs = const_cast<TraitList&>(GetOutputs(rate));
+   if (not type)
+      type = Node::GetDefaultTrait(t.GetTrait()).mType;
+
+   auto& outputs = mOutputs[rate.GetInputIndex()];
+   const auto proto = Trait::FromMeta(t.GetTrait(), type);
    if (not allowDuplicates) {
-      auto found = outputs.Find(traitOriginal);
-      if (not found.IsSpecial())
+      auto found = outputs.Find(proto);
+      if (found)
          return GenerateOutputName(rate, outputs[found]);
    }
 
    // Add the new output                                                
-   auto trait = traitOriginal;
-   if (trait.IsUntyped())
-      trait.SetType(Node::GetDefaultTrait(trait.GetTrait()).mType);
-
-   outputs << trait;
-   const auto symbol = GenerateOutputName(rate, trait);
-   VERBOSE_NODE("Added output ", Logger::Cyan, trait, " as `", symbol, "` @ ", rate);
+   outputs << proto;
+   const auto symbol = GenerateOutputName(rate, proto);
+   VERBOSE_NODE("Added output ", Logger::Cyan, proto.GetTrait(),
+      " as `", symbol, "` at ", rate, " of type ", type);
    return symbol;
 }
 
@@ -199,11 +280,13 @@ GLSL Material::GenerateInputName(RefreshRate rate, const Trait& trait) const {
    }
    else if (not rate.IsUniform()) {
       // Name is for a vertex attribute or varying                      
-      return {"in", trait.GetToken()};
+      return {"in", trait.GetTrait()};
    }
 
    // Uniform name inside a uniform buffer                              
-   return Text::TemplateRt("{}.{}", rate, trait.GetTrait());
+   auto rateTxt = static_cast<Text>(rate);
+   auto lastns = rateTxt.Find<true>(':');
+   return Text::TemplateRt("Per{}.{}", rateTxt.Crop(lastns + 1), trait.GetTrait());
 }
 
 /// Generate output name                                                      
@@ -213,7 +296,7 @@ GLSL Material::GenerateInputName(RefreshRate rate, const Trait& trait) const {
 GLSL Material::GenerateOutputName(RefreshRate rate, const Trait& trait) const {
    LANGULUS_ASSERT(rate.IsShaderStage(), Material,
       "Can't have an output outside a shader stage rate");
-   return {"out", trait.GetToken()};
+   return {"out", trait.GetTrait()};
 }
 
 /// Generate uniform buffer descriptions for all shader stages                
@@ -278,18 +361,18 @@ void Material::GenerateUniforms() {
             1, rate.GetDynamicUniformIndex(), GLSL {rate}, body
          );
       }
-      else LANGULUS_THROW(Material, "Uniform rate neither static, nor dynamic");
+      else LANGULUS_OOPS(Material, "Uniform rate neither static, nor dynamic");
 
       // Add the uniform buffer to each stage it is used in             
-      for (auto& code : GetStages()) {
+      ForEachStage([&](GLSL& code) {
          for (const auto& name : names) {
-            if (!code.Find(name))
+            if (not code.Find(name))
                continue;
 
             Edit(code).Select(ShaderToken::Uniform) << ubo;
             break;
          }
-      }
+      });
    }
 
    // Do another scan for the textures                                  
@@ -317,12 +400,12 @@ void Material::GenerateUniforms() {
       const auto ubo = Text::TemplateRt(layout, textureNumber, type, name);
 
       // Add texture to each stage it is used in                        
-      for (auto& code : GetStages()) {
+      ForEachStage([&](GLSL& code) {
          if (not code.Find(name + textureNumber))
-            continue;
+            return;
 
          Edit(code).Select(ShaderToken::Uniform) << ubo;
-      }
+      });
 
       ++textureNumber;
    }
@@ -379,7 +462,7 @@ void Material::GenerateOutputs() {
       //it depends on the value size: 1 location <= 4 floats
       for (auto& output : outputs) {
          auto vkt = Node::DecayToGLSLType(output.GetType());
-         if (!vkt) {
+         if (not vkt) {
             Logger::Error("Unsupported base for shader output ",
                output.GetTrait(), ": ", vkt, " (decayed from ",
                output.GetType(), ")"

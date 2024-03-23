@@ -467,37 +467,38 @@ Node::DefaultTrait Node::GetDefaultTrait(TMeta trait) {
    static TUnorderedMap<TMeta, DefaultTrait> properties;
 
    if (not properties) {
-      properties[MetaOf<Traits::Time>()] =
-         {MetaOf<Real>(), Rate::Tick};
-      properties[MetaOf<Traits::MousePosition>()] =
-         {MetaOf<Vec2>(), Rate::Tick};
-      properties[MetaOf<Traits::MouseScroll>()] =
-         {MetaOf<Vec2>(), Rate::Tick};
+      properties.Insert(MetaOf<Traits::Time>(),
+         DefaultTrait {MetaOf<Real>(), Rate::Tick});
 
-      properties[MetaOf<Traits::Size>()] =
-         {MetaOf<Vec2>(), Rate::Camera};
-      properties[MetaOf<Traits::Projection>()] =
-         {MetaOf<Mat4>(), Rate::Camera};
-      properties[MetaOf<Traits::FOV>()] =
-         {MetaOf<Real>(), Rate::Camera};
+      properties.Insert(MetaOf<Traits::MousePosition>(),
+         DefaultTrait {MetaOf<Vec2>(), Rate::Tick});
+      properties.Insert(MetaOf<Traits::MouseScroll>(),
+         DefaultTrait {MetaOf<Vec2>(), Rate::Tick});
 
-      properties[MetaOf<Traits::View>()] =
-         {MetaOf<Mat4>(), Rate::Level};
+      properties.Insert(MetaOf<Traits::Size>(),
+         DefaultTrait {MetaOf<Vec2>(), Rate::Camera});
+      properties.Insert(MetaOf<Traits::Projection>(),
+         DefaultTrait {MetaOf<Mat4>(), Rate::Camera});
+      properties.Insert(MetaOf<Traits::FOV>(),
+         DefaultTrait {MetaOf<Real>(), Rate::Camera});
 
-      properties[MetaOf<Traits::Image>()] =
-         {MetaOf<A::Image>(), Rate::Renderable};
+      properties.Insert(MetaOf<Traits::View>(),
+         DefaultTrait {MetaOf<Mat4>(), Rate::Level});
 
-      properties[MetaOf<Traits::Transform>()] =
-         {MetaOf<Mat4>(), Rate::Instance};
+      properties.Insert(MetaOf<Traits::Image>(),
+         DefaultTrait {MetaOf<A::Image>(), Rate::Renderable});
 
-      properties[MetaOf<Traits::Place>()] =
-         {MetaOf<Vec3>(), Rate::Vertex};
-      properties[MetaOf<Traits::Sampler>()] =
-         {MetaOf<Vec2>(), Rate::Vertex};
-      properties[MetaOf<Traits::Aim>()] =
-         {MetaOf<Vec3>(), Rate::Vertex};
-      properties[MetaOf<Traits::Color>()] =
-         {MetaOf<Vec4>(), Rate::Vertex};
+      properties.Insert(MetaOf<Traits::Transform>(),
+         DefaultTrait {MetaOf<Mat4>(), Rate::Instance});
+
+      properties.Insert(MetaOf<Traits::Place>(),
+         DefaultTrait {MetaOf<Vec3>(), Rate::Vertex});
+      properties.Insert(MetaOf<Traits::Sampler>(),
+         DefaultTrait {MetaOf<Vec2>(), Rate::Vertex});
+      properties.Insert(MetaOf<Traits::Aim>(),
+         DefaultTrait {MetaOf<Vec3>(), Rate::Vertex});
+      properties.Insert(MetaOf<Traits::Color>(),
+         DefaultTrait {MetaOf<Vec4>(), Rate::Vertex});
    }
 
    auto found = properties.Find(trait);
