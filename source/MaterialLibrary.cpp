@@ -1,6 +1,7 @@
 ///                                                                           
 /// Langulus::Module::Assets::Materials                                       
-/// Copyright(C) 2016 Dimo Markov <langulusteam@gmail.com>                    
+/// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
+/// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
 /// Distributed under GNU General Public License v3+                          
 /// See LICENSE file, or https://www.gnu.org/licenses                         
@@ -44,7 +45,8 @@ LANGULUS_DEFINE_MODULE(
 ///   @param runtime - the runtime that owns the module                       
 ///   @param descriptor - instructions for configuring the module             
 MaterialLibrary::MaterialLibrary(Runtime* runtime, const Neat&)
-   : A::AssetModule {MetaOf<MaterialLibrary>(), runtime}
+   : Resolvable {MetaOf<MaterialLibrary>()}
+   , Module {runtime}
    , mMaterials {this} {
    Logger::Verbose(Self(), "Initializing...");
    Logger::Verbose(Self(), "Initialized");

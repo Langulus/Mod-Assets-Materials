@@ -1,6 +1,7 @@
 ///                                                                           
 /// Langulus::Module::Assets::Materials                                       
-/// Copyright(C) 2016 Dimo Markov <langulusteam@gmail.com>                    
+/// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
+/// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
 /// Distributed under GNU General Public License v3+                          
 /// See LICENSE file, or https://www.gnu.org/licenses                         
@@ -15,7 +16,8 @@ using namespace Nodes;
 /// Raymarcher node descriptor-constructor                                    
 ///   @param desc - raymarch descriptor                                       
 Raymarch::Raymarch(Describe&& descriptor)
-   : Node {MetaOf<Raymarch>(), *descriptor} {
+   : Resolvable {MetaOf<Raymarch>()}
+   , Node {*descriptor} {
    // Extract RaymarchConfig.mDetail                                    
    mDescriptor.ExtractTrait<Traits::Count>(mDetail);
    LANGULUS_ASSERT(mDetail > 0, Material,

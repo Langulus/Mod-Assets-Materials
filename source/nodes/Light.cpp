@@ -1,6 +1,7 @@
 ///                                                                           
 /// Langulus::Module::Assets::Materials                                       
-/// Copyright(C) 2016 Dimo Markov <langulusteam@gmail.com>                    
+/// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
+/// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
 /// Distributed under GNU General Public License v3+                          
 /// See LICENSE file, or https://www.gnu.org/licenses                         
@@ -13,7 +14,8 @@ using namespace Nodes;
 /// Light node creation                                                       
 ///   @param desc - descriptor for the node                                   
 Light::Light(Describe&& descriptor)
-   : Node {MetaOf<Light>(), *descriptor} { }
+   : Resolvable {MetaOf<Light>()}
+   , Node {*descriptor} { }
 
 /// Generate the light functionality                                          
 ///   @return the light function template                                     

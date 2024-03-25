@@ -1,6 +1,7 @@
 ///                                                                           
 /// Langulus::Module::Assets::Materials                                       
-/// Copyright(C) 2016 Dimo Markov <langulusteam@gmail.com>                    
+/// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
+/// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
 /// Distributed under GNU General Public License v3+                          
 /// See LICENSE file, or https://www.gnu.org/licenses                         
@@ -15,7 +16,8 @@ using namespace Nodes;
 /// Camera node descriptor-constructor                                        
 ///   @param desc - the camera node descriptor                                
 Camera::Camera(Describe&& descriptor)
-   : Node {MetaOf<Camera>(), *descriptor} { }
+   : Resolvable {MetaOf<Camera>()}
+   , Node {*descriptor} { }
 
 /// Generate the camera code                                                  
 ///   @return the output symbol                                               

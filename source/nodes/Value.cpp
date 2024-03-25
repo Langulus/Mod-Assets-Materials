@@ -1,6 +1,7 @@
 ///                                                                           
 /// Langulus::Module::Assets::Materials                                       
-/// Copyright(C) 2016 Dimo Markov <langulusteam@gmail.com>                    
+/// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
+/// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
 /// Distributed under GNU General Public License v3+                          
 /// See LICENSE file, or https://www.gnu.org/licenses                         
@@ -14,7 +15,8 @@ using namespace Nodes;
 /// Value node constructor                                                    
 ///   @param parent - the node's parent                                       
 Value::Value(Node* parent)
-   : Node {MetaOf<Value>(), parent, {}} {}
+   : Resolvable {MetaOf<Value>()}
+   , Node {parent, {}} {}
 
 /// Generate code for the value - turn any verbs executed on it to their GLSL 
 /// code equivalent, and add animation functions if such are needed.          

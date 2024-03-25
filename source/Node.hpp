@@ -1,6 +1,7 @@
 ///                                                                           
 /// Langulus::Module::Assets::Materials                                       
-/// Copyright(C) 2016 Dimo Markov <langulusteam@gmail.com>                    
+/// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
+/// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
 /// Distributed under GNU General Public License v3+                          
 /// See LICENSE file, or https://www.gnu.org/licenses                         
@@ -70,9 +71,9 @@ public:
       Verbs::Randomize
    );
 
-   Node(DMeta, Material*, const Neat&);
-   Node(DMeta, Node*, const Neat&);
-   Node(DMeta, const Neat&);
+   Node(Material*, const Neat&);
+   Node(Node*, const Neat&);
+   Node(const Neat&);
    Node(Node&&) = delete;
 
    virtual ~Node();

@@ -1,6 +1,7 @@
 ///                                                                           
 /// Langulus::Module::Assets::Materials                                       
-/// Copyright(C) 2016 Dimo Markov <langulusteam@gmail.com>                    
+/// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
+/// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
 /// Distributed under GNU General Public License v3+                          
 /// See LICENSE file, or https://www.gnu.org/licenses                         
@@ -15,21 +16,19 @@
 
 
 /// Material node construction for Nodes::Root                                
-///   @param classid - the node type                                          
 ///   @param material - the parent material                                   
 ///   @param descriptor - the node descriptor                                 
-Node::Node(DMeta classid, Material* material, const Neat& descriptor)
-   : Node {classid, descriptor} {
+Node::Node(Material* material, const Neat& descriptor)
+   : Node {descriptor} {
    mMaterial = material;
    mDescriptor = descriptor;
 }
 
 /// Material node construction for members/locals                             
-///   @param classid - the node type                                          
 ///   @param parent - the parent node                                         
 ///   @param descriptor - the node descriptor                                 
-Node::Node(DMeta classid, Node* parent, const Neat& descriptor)
-   : A::Unit {classid}
+Node::Node(Node* parent, const Neat& descriptor)
+   : Resolvable {DMeta {}}
    , mDescriptor {descriptor} {
    // Add the Node to the hierarchy                                     
    if (parent)
@@ -37,10 +36,9 @@ Node::Node(DMeta classid, Node* parent, const Neat& descriptor)
 }
 
 /// Material node construction used in the rest of the Nodes                  
-///   @param classid - the node type                                          
 ///   @param descriptor - the node descriptor                                 
-Node::Node(DMeta classid, const Neat& descriptor)
-   : A::Unit {classid}
+Node::Node(const Neat& descriptor)
+   : Resolvable {DMeta {}}
    , mDescriptor {descriptor} {
    // Add the Node to the hierarchy                                     
    Node* owner {};

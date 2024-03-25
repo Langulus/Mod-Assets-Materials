@@ -1,6 +1,7 @@
 ///                                                                           
 /// Langulus::Module::Assets::Materials                                       
-/// Copyright(C) 2016 Dimo Markov <langulusteam@gmail.com>                    
+/// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
+/// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
 /// Distributed under GNU General Public License v3+                          
 /// See LICENSE file, or https://www.gnu.org/licenses                         
@@ -18,7 +19,8 @@ using namespace Nodes;
 /// Scene node descriptor-constructor                                         
 ///   @param desc - the node descriptor                                       
 Scene::Scene(Describe&& descriptor)
-   : Node {MetaOf<Scene>(), *descriptor} {
+   : Resolvable {MetaOf<Scene>()}
+   , Node {*descriptor} {
    // Notice how we don't satisfy the rest of the descriptor            
    // How the scene is generated depends on whether we're rasterizing,  
    // raymarching, raytracing, etc.                                     

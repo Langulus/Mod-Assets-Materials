@@ -1,6 +1,7 @@
 ///                                                                           
 /// Langulus::Module::Assets::Materials                                       
-/// Copyright(C) 2016 Dimo Markov <langulusteam@gmail.com>                    
+/// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
+/// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
 /// Distributed under GNU General Public License v3+                          
 /// See LICENSE file, or https://www.gnu.org/licenses                         
@@ -14,7 +15,8 @@
 ///   @param producer - the producer                                          
 ///   @param desc - instructions for configuring the material                 
 Material::Material(A::AssetModule* producer, const Neat& desc)
-   : A::Material {MetaOf<::Material>(), producer, desc}
+   : Resolvable {MetaOf<::Material>()}
+   , ProducedFrom {producer, desc}
    , mRoot {this, desc} {
    Logger::Verbose(Self(), "Initializing...");
 
