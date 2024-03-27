@@ -18,7 +18,7 @@ using namespace Nodes;
 /// Texture node descriptor-constructor                                       
 ///   @param describe - the node descriptor                                   
 Texture::Texture(Describe&& describe)
-   : Resolvable {MetaOf<Texture>()}
+   : Resolvable {this}
    , Node {*describe} {
    // Create any subnodes here, it is allowed                           
    // This will also execute any encountered [subcode], and set rate    

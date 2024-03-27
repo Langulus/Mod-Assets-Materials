@@ -16,7 +16,7 @@ using namespace Nodes;
 /// FBM node descriptor-constructor                                           
 ///   @param desc - node descriptor                                           
 FBM::FBM(Describe&& descriptor)
-   : Resolvable {MetaOf<FBM>()}
+   : Resolvable {this}
    , Node {*descriptor} {
    // Extract number of octaves                                         
    mDescriptor.ExtractTrait<Traits::Count>(mOctaveCount);

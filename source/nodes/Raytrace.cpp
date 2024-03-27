@@ -14,7 +14,7 @@ using namespace Nodes;
 /// Raytracer node descriptor-constructor                                     
 ///   @param desc - raytrace descriptor                                       
 Raytrace::Raytrace(Describe&& descriptor)
-   : Resolvable {MetaOf<Raytrace>()}
+   : Resolvable {this}
    , Node {*descriptor} { }
 
 /// Generate raytracer code                                                   

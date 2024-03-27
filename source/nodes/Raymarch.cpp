@@ -16,7 +16,7 @@ using namespace Nodes;
 /// Raymarcher node descriptor-constructor                                    
 ///   @param desc - raymarch descriptor                                       
 Raymarch::Raymarch(Describe&& descriptor)
-   : Resolvable {MetaOf<Raymarch>()}
+   : Resolvable {this}
    , Node {*descriptor} {
    // Extract RaymarchConfig.mDetail                                    
    mDescriptor.ExtractTrait<Traits::Count>(mDetail);

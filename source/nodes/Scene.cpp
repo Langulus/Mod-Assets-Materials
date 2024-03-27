@@ -19,7 +19,7 @@ using namespace Nodes;
 /// Scene node descriptor-constructor                                         
 ///   @param desc - the node descriptor                                       
 Scene::Scene(Describe&& descriptor)
-   : Resolvable {MetaOf<Scene>()}
+   : Resolvable {this}
    , Node {*descriptor} {
    // Notice how we don't satisfy the rest of the descriptor            
    // How the scene is generated depends on whether we're rasterizing,  

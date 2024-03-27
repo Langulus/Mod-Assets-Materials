@@ -16,7 +16,7 @@ using namespace Nodes;
 /// Camera node descriptor-constructor                                        
 ///   @param desc - the camera node descriptor                                
 Camera::Camera(Describe&& descriptor)
-   : Resolvable {MetaOf<Camera>()}
+   : Resolvable {this}
    , Node {*descriptor} { }
 
 /// Generate the camera code                                                  

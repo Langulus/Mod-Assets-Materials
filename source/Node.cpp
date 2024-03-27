@@ -28,7 +28,7 @@ Node::Node(Material* material, const Neat& descriptor)
 ///   @param parent - the parent node                                         
 ///   @param descriptor - the node descriptor                                 
 Node::Node(Node* parent, const Neat& descriptor)
-   : Resolvable {DMeta {}}
+   : Resolvable {this}
    , mDescriptor {descriptor} {
    // Add the Node to the hierarchy                                     
    if (parent)
@@ -38,7 +38,7 @@ Node::Node(Node* parent, const Neat& descriptor)
 /// Material node construction used in the rest of the Nodes                  
 ///   @param descriptor - the node descriptor                                 
 Node::Node(const Neat& descriptor)
-   : Resolvable {DMeta {}}
+   : Resolvable {this}
    , mDescriptor {descriptor} {
    // Add the Node to the hierarchy                                     
    Node* owner {};

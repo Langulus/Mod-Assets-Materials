@@ -14,7 +14,7 @@ using namespace Nodes;
 /// Raycaster node descriptor-constructor                                     
 ///   @param desc - raycast descriptor                                        
 Raycast::Raycast(Describe&& descriptor)
-   : Resolvable {MetaOf<Raycast>()}
+   : Resolvable {this}
    , Node {*descriptor} { }
 
 /// Generate the raycaster code                                               

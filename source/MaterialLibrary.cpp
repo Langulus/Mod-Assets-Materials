@@ -45,7 +45,7 @@ LANGULUS_DEFINE_MODULE(
 ///   @param runtime - the runtime that owns the module                       
 ///   @param descriptor - instructions for configuring the module             
 MaterialLibrary::MaterialLibrary(Runtime* runtime, const Neat&)
-   : Resolvable {MetaOf<MaterialLibrary>()}
+   : Resolvable {this}
    , Module {runtime}
    , mMaterials {this} {
    Logger::Verbose(Self(), "Initializing...");

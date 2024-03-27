@@ -15,7 +15,7 @@
 ///   @param producer - the producer                                          
 ///   @param desc - instructions for configuring the material                 
 Material::Material(A::AssetModule* producer, const Neat& desc)
-   : Resolvable {MetaOf<::Material>()}
+   : Resolvable {this}
    , ProducedFrom {producer, desc}
    , mRoot {this, desc} {
    Logger::Verbose(Self(), "Initializing...");

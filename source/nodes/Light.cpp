@@ -14,7 +14,7 @@ using namespace Nodes;
 /// Light node creation                                                       
 ///   @param desc - descriptor for the node                                   
 Light::Light(Describe&& descriptor)
-   : Resolvable {MetaOf<Light>()}
+   : Resolvable {this}
    , Node {*descriptor} { }
 
 /// Generate the light functionality                                          

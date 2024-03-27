@@ -15,7 +15,7 @@ using namespace Nodes;
 /// Value node constructor                                                    
 ///   @param parent - the node's parent                                       
 Value::Value(Node* parent)
-   : Resolvable {MetaOf<Value>()}
+   : Resolvable {this}
    , Node {parent, {}} {}
 
 /// Generate code for the value - turn any verbs executed on it to their GLSL 

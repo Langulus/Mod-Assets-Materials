@@ -17,7 +17,7 @@ using namespace Nodes;
 /// Rasterizer node creation                                                  
 ///   @param desc - the rasterizer descriptor                                 
 Raster::Raster(Describe&& descriptor)
-   : Resolvable {MetaOf<Raster>()}
+   : Resolvable {this}
    , Node {*descriptor} {
    // Extract settings                                                  
    mDescriptor.ExtractTrait<Traits::Bilateral>(mBilateral);
