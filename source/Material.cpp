@@ -77,7 +77,6 @@ bool Material::Generate(TMeta trait, Offset) {
    mDataListMap[trait].New(ShaderStage::Counter, GLSL {});
 
    // If a vertex shader is missing, add a default one                  
-   auto& stages = *found.mValue;
    GLSL& vs = GetStage(ShaderStage::Vertex);
    if (vs.IsEmpty()) {
       // Default vertex stage - a rectangle filling the screen          
@@ -101,7 +100,7 @@ bool Material::Generate(TMeta trait, Offset) {
       // Write shader version to all relevant codes                     
       stage.code.SetVersion("450");
 
-      Logger::Verbose(Self(), "Stage (", stage.id, "):\n");
+      Logger::Verbose(Self(), "Stage (", ShaderStage::Names[stage.id], "):\n");
       Logger::Verbose(Self(), stage.code.Pretty());
    });
 
