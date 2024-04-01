@@ -94,9 +94,8 @@ namespace fmt
          return ctx.begin();
       }
 
-      template<class CONTEXT>
-      LANGULUS(INLINED)
-      auto format(Symbol const& element, CONTEXT& ctx) {
+      template<class CONTEXT> LANGULUS(INLINED)
+      auto format(Symbol const& element, CONTEXT& ctx) const {
          using namespace Langulus;
          auto asText = element.mCode.operator Token();
          return fmt::format_to(ctx.out(), "{}", asText);
