@@ -130,13 +130,13 @@ GLSL Transform::GetInterpolator(Offset idx) {
 ///   @return the generated GLSL code                                         
 GLSL Transform::GetTimer(Offset idx) {
    // Scan for interpolator traits up to the requested keyframe idx     
-   Any timer;
+   Many timer;
    pcptr progress = 0;
    for (const auto& keyframe : mKeyframes.Values()) {
       keyframe.ForEachDeep([&](const Block& group) {
          group.ForEach([&](const Trait& trait) {
             if (trait.TraitIs<Traits::Time>())
-               timer = static_cast<const Any&>(trait);
+               timer = static_cast<const Many&>(trait);
          });
       });
 

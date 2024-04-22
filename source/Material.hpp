@@ -29,7 +29,7 @@ private:
    Temporal mCompiled;
 
    // Defined symbols for each shader stage                             
-   TUnorderedMap<GLSL, TAny<GLSL>> mDefinitions[ShaderStage::Counter];
+   TUnorderedMap<GLSL, TMany<GLSL>> mDefinitions[ShaderStage::Counter];
 
    // Root node                                                         
    // It is of utmost importance this node is the last member, because  

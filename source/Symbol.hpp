@@ -36,7 +36,7 @@ struct Symbol {
    // List of arguments, in case this symbol is a function call template
    // One must TemplateFill mCode with these traits to instantiate the  
    // symbol                                                            
-   TAny<Trait> mArguments;
+   TMany<Trait> mArguments;
 
    // Number of times a symbol is used                                  
    // If an expression with many uses, the symbol will be moved to a    
@@ -77,7 +77,7 @@ protected:
    void PushArgument(Trait&&);
 };
 
-using Symbols = TAny<Symbol>;
+using Symbols = TMany<Symbol>;
 
 #include "Symbol.inl"
 

@@ -28,7 +28,7 @@ Material::Material(A::AssetModule* producer, const Neat& desc)
    desc.ForEachTrait([&](const Trait& trait) {
       auto commonRate = Rate::Auto;
 
-      trait.ForEachDeep([&](const Any& part) {
+      trait.ForEachDeep([&](const Many& part) {
          part.ForEach(
             [&](RefreshRate  i) noexcept { commonRate = i; },
             [&](const Trait& i) noexcept {
@@ -329,7 +329,7 @@ void Material::GenerateUniforms() {
 
       // Generate the list of uniform variables inside the buffer       
       GLSL body;
-      TAny<GLSL> names;
+      TMany<GLSL> names;
       for (auto& trait : traits) {
          // Skip textures for now                                       
          if (trait.IsTrait<Traits::Image>())

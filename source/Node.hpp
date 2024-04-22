@@ -24,7 +24,7 @@ protected:
    friend struct Nodes::FBM;
 
    // The children that this node leads to                              
-   TAny<Ref<Node>> mChildren;
+   TMany<Ref<Node>> mChildren;
 
    // The material this node belongs to                                 
    Material* mMaterial {};

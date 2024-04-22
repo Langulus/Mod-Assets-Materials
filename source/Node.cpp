@@ -86,7 +86,7 @@ void Node::InnerCreate() {
    });
    
    // Consider all provided data                                        
-   mDescriptor.ForEachTail([&](const Any& data) {
+   mDescriptor.ForEachTail([&](const Many& data) {
       if (data.CastsTo<Code>()) {
          // Execute code snippet                                        
          const auto& subcode = data.Get<Code>();
@@ -116,7 +116,7 @@ Node* Node::NodeFromConstruct(const Construct& construct) {
    Construct local {construct};
    local << Traits::Parent {this};
 
-   auto newInstance = Any::FromMeta(construct.GetType());
+   auto newInstance = Many::FromMeta(construct.GetType());
    newInstance.Emplace(IndexBack, local.GetDescriptor());
    return newInstance.As<Node*>();
 }

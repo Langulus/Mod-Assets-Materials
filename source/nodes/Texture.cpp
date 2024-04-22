@@ -29,7 +29,7 @@ Texture::Texture(Describe&& describe)
       VERBOSE_NODE("Texture id changed to: ", mTextureId);
 
    // Extract Traits::File, if any                                      
-   Any file; mDescriptor.ExtractTrait<Traits::Path>(file);
+   Many file; mDescriptor.ExtractTrait<Traits::Path>(file);
    if (file) {
       mTexture = CreateTexture(Neat {file});
       VERBOSE_NODE("Texture generator changed to: ", mTexture);
@@ -45,7 +45,7 @@ Texture::Texture(Describe&& describe)
    });
    
    // Consider all other provided data                                  
-   mDescriptor.ForEachTail([&](const Any& data) {
+   mDescriptor.ForEachTail([&](const Many& data) {
       if (data.CastsTo<A::Image>()) {
          // Reuse a texture generator directly                          
          mTexture = data.As<A::Image*>();
@@ -134,7 +134,7 @@ GLSL Texture::GenerateKeyframe(const Temporal&) {
             if (construct.CastsTo<A::File>()) {
                // Generate keyframe from a texture file                 
                Verbs::Create creator {&construct};
-               Any environment = mProducer->GetOwners();
+               Many environment = mProducer->GetOwners();
                Verb::ExecuteVerb(environment, creator);
                creator->ForEachDeep([&](A::Texture* t) {
                   t->Generate();
