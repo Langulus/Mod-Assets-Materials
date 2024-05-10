@@ -287,7 +287,7 @@ GLSL Material::GenerateInputName(RefreshRate rate, const Trait& trait) const {
    // Uniform name inside a uniform buffer                              
    auto rateTxt = static_cast<Text>(rate);
    auto lastns = rateTxt.Find<true>(':');
-   return Text::TemplateRt("Per{}.{}", rateTxt.Crop(lastns + 1), trait.GetTrait());
+   return Text::TemplateRt("Per{}.{}", rateTxt.Select(lastns + 1), trait.GetTrait());
 }
 
 /// Generate output name                                                      
