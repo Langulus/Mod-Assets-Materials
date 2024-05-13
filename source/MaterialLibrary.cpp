@@ -18,11 +18,11 @@
 #include "nodes/Texture.hpp"
 #include "nodes/Value.hpp"
 
-#include <Math/Normal.hpp>       //TODO move this to geometry mod
-#include <Math/Primitives.hpp>   //TODO move this to geometry mod
-#include <Math/Angle.hpp>        //TODO move this to geometry mod
-#include <Math/SimplexNoise.hpp> //TODO move this to geometry mod
-#include <Math/Config.hpp>       //TODO move this to geometry mod
+#include <Math/Normal.hpp>
+#include <Math/Primitives.hpp>
+#include <Math/Angle.hpp>
+#include <Math/SimplexNoise.hpp>
+#include <Math/Config.hpp>
 
 LANGULUS_DEFINE_MODULE(
    MaterialLibrary, 9, "AssetsMaterials",
@@ -49,14 +49,12 @@ MaterialLibrary::MaterialLibrary(Runtime* runtime, const Neat&)
    , Module {runtime}
    , mMaterials {this} {
    Logger::Verbose(Self(), "Initializing...");
-   Logger::Verbose(Self(), "Initialized");
-
-   //TODO move these to geometry mod
    Math::RegisterNormals();
    Math::RegisterPrimitives();
    Math::RegisterAngles();
    Math::RegisterTraits();
    Math::RegisterVerbs();
+   Logger::Verbose(Self(), "Initialized");
 }
 
 /// Create/Destroy materials                                                  

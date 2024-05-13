@@ -72,20 +72,6 @@ LANGULUS(INLINED)
 GLSL::GLSL(TMeta meta)
    : Text {"trait", meta->mToken} {}
 
-/// Rate to GLSL                                                              
-///   @param rate - rate to stringify                                         
-/*LANGULUS(INLINED)
-GLSL::GLSL(Rate rate) {
-   for (auto& constant : Rate::CTTI_NamedValues) {
-      if (Rate {constant.mValue} == rate) {
-         operator += (constant.mToken);
-         return;
-      }
-   }
-
-   LANGULUS_THROW(Material, "Bad rate token");
-}*/
-
 /// Meta constant -> GLSL serializer                                          
 ///   @param trait - trait to serialize                                       
 LANGULUS(INLINED)
@@ -97,8 +83,7 @@ GLSL::GLSL(CMeta) {
 ///   @tparam T - vector type (deducible)                                     
 ///   @tparam C - vector size (deducible)                                     
 ///   @param vector - vector to serialize                                     
-template<CT::DenseNumber T, Count C>
-LANGULUS(INLINED)
+template<CT::Number T, Count C> LANGULUS(INLINED)
 GLSL::GLSL(const TVector<T, C>& vector) {
    if constexpr (C == 1)
       *this += vector[0];
@@ -119,8 +104,7 @@ GLSL::GLSL(const TVector<T, C>& vector) {
 ///   @tparam C - matrix columns (deducible)                                  
 ///   @tparam R - matrix rows (deducible)                                     
 ///   @param matrix - matrix to serialize                                     
-template<CT::DenseNumber T, Count C, Count R>
-LANGULUS(INLINED)
+template<CT::Number T, Count C, Count R> LANGULUS(INLINED)
 GLSL::GLSL(const TMatrix<T, C, R>& matrix) {
    *this += GLSL::template Type<TMatrix<T, C, R>>();
    *this += '(';
@@ -135,8 +119,7 @@ GLSL::GLSL(const TMatrix<T, C, R>& matrix) {
 /// Quaternion -> GLSL serializer                                             
 ///   @tparam T - quaternion type (deducible)                                 
 ///   @param quaternion - quaternion to serialize                             
-template<CT::DenseNumber T>
-LANGULUS(INLINED)
+template<CT::Number T> LANGULUS(INLINED)
 GLSL::GLSL(const TQuaternion<T>& quaternion) {
    *this += GLSL::template Type<TQuaternion<T>>();
    *this += '(';
@@ -152,8 +135,7 @@ GLSL::GLSL(const TQuaternion<T>& quaternion) {
 
 /// GLSL static type string conversion                                        
 ///   @return the GLSL string                                                 
-template<CT::Data T>
-LANGULUS(INLINED)
+template<CT::Data T> LANGULUS(INLINED)
 GLSL GLSL::Type() {
    return Type(MetaOf<Decay<T>>());
 }
@@ -195,7 +177,7 @@ inline GLSL GLSL::Type(DMeta meta) {
       else LANGULUS_THROW(GLSL, "Unsupported GLSL type");
 
       // If this is reached, then we have a vector/matrix/quaternion    
-      Text token {prefix};
+      Text token = prefix;
       if (meta->CastsTo<A::Matrix>()) {
          // Find the number of columns in the matrix                    
          RTTI::Base matbase;
@@ -254,17 +236,17 @@ inline GLSL GLSL::Type(DMeta meta) {
    LANGULUS_THROW(GLSL, "Unsupported GLSL type");
 }
 
-/// Concatenate two text containers                                        
-///   @param rhs - right hand side                                         
-///   @return the concatenated text container                              
+/// Concatenate two text containers                                           
+///   @param rhs - right hand side                                            
+///   @return the concatenated text container                                 
 template<class T> requires CT::ConvertibleToGLSL<Desem<T>> LANGULUS(INLINED)
 GLSL GLSL::operator + (T&& rhs) const {
    return Text::ConcatInner<GLSL>(Forward<T>(rhs));
 }
 
-/// Concatenate (destructively) text containers                            
-///   @param rhs - right hand side                                         
-///   @return a reference to this container                                
+/// Concatenate (destructively) text containers                               
+///   @param rhs - right hand side                                            
+///   @return a reference to this container                                   
 template<class T> requires CT::ConvertibleToGLSL<Desem<T>> LANGULUS(INLINED)
 GLSL& GLSL::operator += (T&& rhs) {
    return Text::ConcatRelativeInner<GLSL>(Forward<T>(rhs));

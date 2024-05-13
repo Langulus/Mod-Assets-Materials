@@ -143,13 +143,12 @@ public:
    explicit GLSL(DMeta);
    explicit GLSL(TMeta);
    explicit GLSL(CMeta);
-   //explicit GLSL(Rate);
 
-   template<CT::DenseNumber T, Count C>
+   template<CT::Number T, Count C>
    explicit GLSL(const TVector<T, C>&);
-   template<CT::DenseNumber T, Count C, Count R>
+   template<CT::Number T, Count C, Count R>
    explicit GLSL(const TMatrix<T, C, R>&);
-   template<CT::DenseNumber T>
+   template<CT::Number T>
    explicit GLSL(const TQuaternion<T>&);
 
    NOD() static GLSL Template(Offset);
