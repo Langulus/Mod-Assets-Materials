@@ -10,7 +10,7 @@
 #include <Anyness/Edit.hpp>
 #include <Flow/Verbs/Catenate.hpp>
 
-#define GLSL_VERBOSE(a)
+#define GLSL_VERBOSE(a) LANGULUS(NOOP)
 
 
 /// Create GLSL from shader template                                          

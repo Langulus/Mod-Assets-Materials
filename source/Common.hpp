@@ -17,8 +17,13 @@ struct MaterialLibrary;
 struct Material;
 struct Node;
 
-#define VERBOSE_NODE(...)     Logger::Verbose(Self(), __VA_ARGS__)
-#define VERBOSE_NODE_TAB(...) const auto tab = Logger::Verbose(Self(), __VA_ARGS__, Logger::Tabs {})
+#if 0
+   #define VERBOSE_NODE(...)     Logger::Verbose(Self(), __VA_ARGS__)
+   #define VERBOSE_NODE_TAB(...) const auto tab = Logger::Verbose(Self(), __VA_ARGS__, Logger::Tabs {})
+#else
+   #define VERBOSE_NODE(...)     LANGULUS(NOOP)
+   #define VERBOSE_NODE_TAB(...) LANGULUS(NOOP)
+#endif
 
 
 namespace Nodes
