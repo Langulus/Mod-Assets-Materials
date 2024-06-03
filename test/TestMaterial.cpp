@@ -55,12 +55,11 @@ SCENARIO("Shader generation", "[materials]") {
    for (int repeat = 0; repeat != 10; ++repeat) {
       GIVEN(std::string("Init and shutdown cycle #") + std::to_string(repeat)) {
          // Create root entity                                          
-         Thing root;
-         root.SetName("ROOT");
-         root.CreateRuntime();
-         root.LoadMod("FileSystem");
-         root.LoadMod("AssetsImages");
-         root.LoadMod("AssetsMaterials");
+         auto root = Thing::Root<false>(
+            "FileSystem",
+            "AssetsImages",
+            "AssetsMaterials"
+         );
          
          WHEN("The material is created via abstractions") {
             auto producedMaterial = root.CreateUnit<A::Material>(Code(MaterialCode));
