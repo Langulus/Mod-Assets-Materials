@@ -53,7 +53,7 @@ const Symbol& Scene::GenerateLines() {
       // We generate color, too                                         
       auto geometryDescriptor = c;
       geometryDescriptor <<= MetaOf<A::Line>();
-      geometryDescriptor <<= MetaOf<Point3>();
+      geometryDescriptor <<= MetaOf<Vec3>();
       geometryDescriptor <<= MetaOf<RGBA>();
 
       // Get the generated geometry asset                               
@@ -162,7 +162,7 @@ const Symbol& Scene::GenerateTriangles() {
       // We generate color, too                                         
       auto geometryDescriptor = c;
       geometryDescriptor <<= MetaOf<A::Triangle>();
-      geometryDescriptor <<= MetaOf<Point3>();
+      geometryDescriptor <<= MetaOf<Vec3>();
       geometryDescriptor <<= MetaOf<Normal>();
       geometryDescriptor <<= MetaOf<Sampler2>();
 
