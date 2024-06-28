@@ -130,7 +130,7 @@ MaterialLibrary* Node::GetLibrary() const noexcept {
 /// Create new nodes                                                          
 ///   @param verb - the selection verb                                        
 void Node::Create(Verb& verb) {
-   verb.ForEachDeep([&](const Block<>& group) {
+   verb.ForEachDeep([&](const Many& group) {
       group.ForEach(
          [&](DMeta type) {
             verb << NodeFromConstruct(Construct {type});
@@ -155,7 +155,7 @@ void Node::Select(Verb& verb) {
    DMeta dataFilter = {};
 
    // Collect filters from verb argument                                
-   verb.ForEachDeep([&](const Block<>& group) {
+   verb.ForEachDeep([&](const Many& group) {
       group.ForEach(
          [&](RefreshRate r) noexcept { rateFilter = r; },
          [&](Index i) noexcept { index = i; },
@@ -205,8 +205,8 @@ void Node::ArithmeticVerb(Verb& verb, const Token& pos, const Token& neg, const 
 
    // Scan arguments: anything convertible to GLSL can be added to      
    // output symbols' expressions                                       
-   verb.ForEachDeep([&](const Block<>& group) {
-      group.ForEachElement([&](const Block<>& element) {
+   verb.ForEachDeep([&](const Many& group) {
+      group.ForEachElement([&](const Many& element) {
          try {
             const auto code = element.AsCast<GLSL>();
             if (not code)
@@ -267,7 +267,7 @@ void Node::Randomize(Verb& verb) {
    // Collect randomization methods and output types                    
    DMeta otype {};
    Text method = "simplex";
-   verb.ForEachDeep([&](const Block<>& group) {
+   verb.ForEachDeep([&](const Many& group) {
       group.ForEach(
          [&](const Text& token) { method = token; },
          [&](const DMeta& t)    { otype = t; }
