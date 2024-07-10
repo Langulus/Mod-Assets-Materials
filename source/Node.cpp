@@ -338,7 +338,7 @@ void Node::Dump() const {
       return;
    }
 
-   const auto scope = Logger::Verbose(Self(), Logger::Tabs{});
+   const auto scope = Logger::VerboseTab(Self());
    for (auto child : mChildren)
       child->Dump();
 }

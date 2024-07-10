@@ -19,7 +19,7 @@ struct Node;
 
 #if 0
    #define VERBOSE_NODE(...)     Logger::Verbose(Self(), __VA_ARGS__)
-   #define VERBOSE_NODE_TAB(...) const auto tab = Logger::Verbose(Self(), __VA_ARGS__, Logger::Tabs {})
+   #define VERBOSE_NODE_TAB(...) const auto tab = Logger::VerboseTab(Self(), __VA_ARGS__)
 #else
    #define VERBOSE_NODE(...)     LANGULUS(NOOP)
    #define VERBOSE_NODE_TAB(...) LANGULUS(NOOP)
