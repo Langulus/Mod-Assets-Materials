@@ -239,7 +239,7 @@ inline GLSL GLSL::Type(DMeta meta) {
 /// Concatenate two text containers                                           
 ///   @param rhs - right hand side                                            
 ///   @return the concatenated text container                                 
-template<class T> requires CT::ConvertibleToGLSL<Desem<T>> LANGULUS(INLINED)
+template<class T> requires CT::ConvertibleToGLSL<Deint<T>> LANGULUS(INLINED)
 GLSL GLSL::operator + (T&& rhs) const {
    return Text::ConcatInner<GLSL>(Forward<T>(rhs));
 }
@@ -247,7 +247,7 @@ GLSL GLSL::operator + (T&& rhs) const {
 /// Concatenate (destructively) text containers                               
 ///   @param rhs - right hand side                                            
 ///   @return a reference to this container                                   
-template<class T> requires CT::ConvertibleToGLSL<Desem<T>> LANGULUS(INLINED)
+template<class T> requires CT::ConvertibleToGLSL<Deint<T>> LANGULUS(INLINED)
 GLSL& GLSL::operator += (T&& rhs) {
    return Text::ConcatRelativeInner<GLSL>(Forward<T>(rhs));
 }

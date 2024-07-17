@@ -50,21 +50,21 @@ public:
    Symbol(Symbol&& other) noexcept
       : Symbol {Move(other)} {}
 
-   template<CT::Semantic S>
-   Symbol(S&& other) requires CT::Exact<TypeOf<S>, Symbol>
+   template<CT::Intent S> requires CT::Exact<TypeOf<S>, Symbol>
+   Symbol(S&& other)
       : mRate {other->mRate}
       , mTrait {S::Nest(other->mTrait)}
       , mCode {S::Nest(other->mCode)}
       , mCount {other->mCount}
       , mArguments {S::Nest(other->mArguments)} {}
 
-   template<CT::Data T, class...ARGS>
+   template<CT::Data, class...ARGS>
    NOD() static Symbol Function(RefreshRate, const Token&, ARGS&&...);
 
-   template<CT::Trait T, CT::Data D>
+   template<CT::Trait, CT::Data D>
    NOD() static Symbol Literal(RefreshRate, D&&);
 
-   template<CT::Trait T, CT::Data D>
+   template<CT::Trait, CT::Data D>
    NOD() static Symbol Variable(RefreshRate, D&&, const Token&);
 
    NOD() bool MatchesFilter(DMeta, RefreshRate) const noexcept;

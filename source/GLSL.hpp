@@ -167,10 +167,10 @@ public:
    ///                                                                        
    ///   Concatenation                                                        
    ///                                                                        
-   template<class T> requires CT::ConvertibleToGLSL<Desem<T>>
+   template<class T> requires CT::ConvertibleToGLSL<Deint<T>>
    NOD() GLSL operator + (T&&) const;
 
-   template<class T> requires CT::ConvertibleToGLSL<Desem<T>>
+   template<class T> requires CT::ConvertibleToGLSL<Deint<T>>
    GLSL& operator += (T&&);
 };
 
