@@ -65,7 +65,7 @@ SCENARIO("Shader generation", "[materials]") {
             auto producedMaterial = root.CreateUnit<A::Material>(Code(MaterialCode));
 
             // Update once                                              
-            root.Update(Time::zero());
+            root.Update({});
             root.DumpHierarchy();
 
             REQUIRE(producedMaterial.GetCount() == 1);
@@ -79,7 +79,7 @@ SCENARIO("Shader generation", "[materials]") {
             auto producedMaterial = root.CreateUnitToken("Material", Code(MaterialCode));
             
             // Update once                                              
-            root.Update(Time::zero());
+            root.Update({});
             root.DumpHierarchy();
 
             REQUIRE(producedMaterial.GetCount() == 1);
