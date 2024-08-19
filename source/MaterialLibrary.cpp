@@ -47,7 +47,7 @@ LANGULUS_DEFINE_MODULE(
 MaterialLibrary::MaterialLibrary(Runtime* runtime, const Neat&)
    : Resolvable {this}
    , Module {runtime}
-   , mMaterials {this} {
+   /*, mMaterials {this}*/ {
    Logger::Verbose(Self(), "Initializing...");
    Math::RegisterNormals();
    Math::RegisterPrimitives();
@@ -60,5 +60,5 @@ MaterialLibrary::MaterialLibrary(Runtime* runtime, const Neat&)
 /// Create/Destroy materials                                                  
 ///   @param verb - the creation/destruction verb                             
 void MaterialLibrary::Create(Verb& verb) {
-   mMaterials.Create(verb);
+   mMaterials.Create(this, verb);
 }
