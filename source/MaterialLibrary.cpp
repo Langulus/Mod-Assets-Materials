@@ -46,8 +46,7 @@ LANGULUS_DEFINE_MODULE(
 ///   @param descriptor - instructions for configuring the module             
 MaterialLibrary::MaterialLibrary(Runtime* runtime, const Neat&)
    : Resolvable {this}
-   , Module {runtime}
-   /*, mMaterials {this}*/ {
+   , Module     {runtime} {
    Logger::Verbose(Self(), "Initializing...");
    Math::RegisterNormals();
    Math::RegisterPrimitives();
