@@ -21,14 +21,14 @@ CATCH_TRANSLATE_EXCEPTION(::Langulus::Exception const& ex) {
 constexpr auto MaterialCode = R"code(
    Nodes::Scene(
       // Create an animated rectangle, that rotates/scales/moves with time
-      Box2, [
+      Box2, {
          Interpolator(Cerp), Time(.Time % 5),
          Move @0   (Yaw(180), Scale(275.5, 381), Point(400, 400)),
          Move @1   (Roll(3),  Scale(551, 762),   .MousePosition),
          Move @1.5 (Roll(3),  Scale(551, 762),   .MousePosition),
          Move @3   (          Scale(551, 762),   .MousePosition),
          Move @4   (Yaw(180), Scale(275.5, 381), Point(400, 400))
-      ]
+      }
    ),
 
    // Rasterize scene. Since no scene was provided as argument, 
@@ -39,9 +39,11 @@ constexpr auto MaterialCode = R"code(
    // it will seek an available Nodes::Raster in the node hierarchy
    Nodes::Texture(Front, `pebbles.png`),
    Nodes::Texture(Back,  `border.png`),
-   Nodes::Texture([
-      Nodes::FBM(4, [vec2(.Sampler.x, -(.Time * 8.75 - .Sampler.y ^ 2)) rand real])
-   ]),
+   Nodes::Texture({
+      Nodes::FBM(4, {
+         vec2(.Sampler.x, -(.Time * 8.75 - .Sampler.y ^ 2)) rand real
+      })
+   }),
 
    // Illuminate directionally. Since no node was provided as argument,
    // it will seek an available Nodes::Raster in the node hierarchy
