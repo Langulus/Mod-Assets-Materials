@@ -46,7 +46,9 @@ namespace Langulus::CT
 ///   GLSL code container & tools                                             
 ///                                                                           
 struct GLSL : Text {
+   LANGULUS(NAME) "GLSL";
    LANGULUS_BASES(Text);
+
 private:
    /// GLSL template for each programmable shader stage                       
    static constexpr Token Templates[ShaderStage::Counter] = {
