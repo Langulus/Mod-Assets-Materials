@@ -36,7 +36,7 @@ namespace Nodes
       const Symbol& Generate();
 
    private:
-      Ref<A::Image> CreateTexture(const Neat&);
+      Ref<A::Image> CreateTexture(Describe);
       GLSL GenerateKeyframe(const Temporal&);
    };
 

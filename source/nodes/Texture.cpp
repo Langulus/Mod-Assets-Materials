@@ -30,7 +30,7 @@ Texture::Texture(Describe&& describe)
    // Extract Traits::File, if any                                      
    Many file; mDescriptor.ExtractTrait<Traits::Path>(file);
    if (file) {
-      mTexture = CreateTexture(Neat {file});
+      mTexture = CreateTexture(file);
       VERBOSE_NODE("Texture generator changed to: ", mTexture);
    }
    
@@ -74,7 +74,7 @@ void Texture::Detach() {
 /// Create a texture from the provided descriptor                             
 ///   @param descriptor - the descriptor for the texture                      
 ///   @return the produced texture                                            
-Ref<A::Image> Texture::CreateTexture(const Neat& descriptor) {
+Ref<A::Image> Texture::CreateTexture(Describe descriptor) {
    auto local = Construct::From<A::Image>(descriptor);
    local << Traits::Parent {Ref {this}};
    Verbs::Create creator {&local};

@@ -70,9 +70,9 @@ public:
       Verbs::Randomize
    );
 
-   Node(Material*, const Neat&);
-   Node(Node*, const Neat&);
-   Node(const Neat&);
+   Node(Material*, Describe);
+   Node(Node*, Describe);
+   Node(Describe);
    Node(Node&&) = delete;
 
    virtual ~Node();

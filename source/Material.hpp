@@ -42,7 +42,7 @@ public:
    LANGULUS_BASES(A::Material);
    LANGULUS_VERBS(Verbs::Create);
 
-   Material(A::AssetModule*, const Neat&);
+   Material(A::AssetModule*, Describe);
    ~Material();
 
    void Create(Verb&);

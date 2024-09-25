@@ -14,9 +14,9 @@ using namespace Nodes;
 /// Root node creation                                                        
 ///   @param producer - the producer material                                 
 ///   @param desc - the node descriptor                                       
-Root::Root(Material* producer, const Neat& desc)
+Root::Root(Material* producer, Describe desc)
    : Resolvable {this}
-   , Node {producer, desc} {
+   , Node       {producer, desc} {
    // Satisfy the rest of the descriptor                                
    // This is just a root node, so we can safely create anything in it  
    producer->Couple(desc); //TODO crappy solution

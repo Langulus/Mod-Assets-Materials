@@ -13,7 +13,7 @@
 /// Material construction                                                     
 ///   @param producer - the producer                                          
 ///   @param desc - instructions for configuring the material                 
-Material::Material(A::AssetModule* producer, const Neat& desc)
+Material::Material(A::AssetModule* producer, Describe desc)
    : Resolvable {this}
    , ProducedFrom {producer, desc}
    , mRoot {this, desc} {

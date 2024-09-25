@@ -17,7 +17,7 @@
 /// Material node construction for Nodes::Root                                
 ///   @param material - the parent material                                   
 ///   @param descriptor - the node descriptor                                 
-Node::Node(Material* material, const Neat& descriptor)
+Node::Node(Material* material, Describe descriptor)
    : Node {descriptor} {
    mMaterial = material;
    mDescriptor = descriptor;
@@ -26,8 +26,8 @@ Node::Node(Material* material, const Neat& descriptor)
 /// Material node construction for members/locals                             
 ///   @param parent - the parent node                                         
 ///   @param descriptor - the node descriptor                                 
-Node::Node(Node* parent, const Neat& descriptor)
-   : Resolvable {this}
+Node::Node(Node* parent, Describe descriptor)
+   : Resolvable  {this}
    , mDescriptor {descriptor} {
    // Add the Node to the hierarchy                                     
    if (parent)
@@ -36,8 +36,8 @@ Node::Node(Node* parent, const Neat& descriptor)
 
 /// Material node construction used in the rest of the Nodes                  
 ///   @param descriptor - the node descriptor                                 
-Node::Node(const Neat& descriptor)
-   : Resolvable {this}
+Node::Node(Describe descriptor)
+   : Resolvable  {this}
    , mDescriptor {descriptor} {
    // Add the Node to the hierarchy                                     
    Node* owner {};
