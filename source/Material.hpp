@@ -42,17 +42,17 @@ public:
    LANGULUS_BASES(A::Material);
    LANGULUS_VERBS(Verbs::Create);
 
-   Material(A::AssetModule*, Describe);
+   Material(A::AssetModule*, const Many&);
    ~Material();
 
    void Create(Verb&);
    void Refresh() {}
    bool Generate(TMeta, Offset = 0);
 
-   NOD() Ref<A::Material>  GetLOD(const LOD&) const;
-   NOD() RefreshRate       GetDefaultRate() const noexcept;
-   NOD() GLSL&             GetStage(Offset);
-   NOD() GLSL const&       GetStage(Offset) const;
+   NOD() auto GetLOD(const LOD&) const -> Ref<A::Material>;
+   NOD() auto GetDefaultRate() const noexcept -> RefreshRate;
+   NOD() auto GetStage(Offset) -> GLSL&;
+   NOD() auto GetStage(Offset) const -> GLSL const&;
 
    struct Stage {
       ShaderStage::Enum id;

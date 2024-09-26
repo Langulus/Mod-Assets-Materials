@@ -70,9 +70,9 @@ public:
       Verbs::Randomize
    );
 
-   Node(Material*, Describe);
-   Node(Node*, Describe);
-   Node(Describe);
+   Node(Material*, const Many&);
+   Node(Node*, const Many&);
+   Node(const Many&);
    Node(Node&&) = delete;
 
    virtual ~Node();
@@ -90,12 +90,12 @@ public:
 
    virtual const Symbol& Generate() = 0;
 
-   NOD() RefreshRate GetRate() const noexcept;
-   NOD() Offset GetStage() const;
-   NOD() Material* GetMaterial() const noexcept;
-   NOD() MaterialLibrary* GetLibrary() const noexcept;
-   NOD() static DefaultTrait GetDefaultTrait(TMeta);
-   NOD() static DMeta DecayToGLSLType(DMeta);
+   NOD() auto GetRate() const noexcept -> RefreshRate;
+   NOD() auto GetStage() const -> Offset;
+   NOD() auto GetMaterial() const noexcept -> Material*;
+   NOD() auto GetLibrary() const noexcept -> MaterialLibrary*;
+   NOD() static auto GetDefaultTrait(TMeta) -> DefaultTrait;
+   NOD() static auto DecayToGLSLType(DMeta) -> DMeta;
 
    template<bool TWOSIDED = true>
    Count AddChild(Node*);
@@ -107,13 +107,13 @@ public:
    template<class F>
    Count ForEachChild(F&&);
 
-   NOD() Symbol*        GetSymbol(TMeta, DMeta = nullptr, RefreshRate = Rate::Auto, Index = IndexLast);
-   NOD() Symbol const*  GetSymbol(TMeta, DMeta = nullptr, RefreshRate = Rate::Auto, Index = IndexLast) const;
+   NOD() auto GetSymbol(TMeta, DMeta = nullptr, RefreshRate = Rate::Auto, Index = IndexLast) -> Symbol*;
+   NOD() auto GetSymbol(TMeta, DMeta = nullptr, RefreshRate = Rate::Auto, Index = IndexLast) const -> Symbol const*;
 
    template<class = void, class = void>
-   NOD() Symbol*        GetSymbol(RefreshRate = Rate::Auto, Index = IndexLast);
+   NOD() auto GetSymbol(RefreshRate = Rate::Auto, Index = IndexLast) -> Symbol*;
    template<class = void, class = void>
-   NOD() Symbol const*  GetSymbol(RefreshRate = Rate::Auto, Index = IndexLast) const;
+   NOD() auto GetSymbol(RefreshRate = Rate::Auto, Index = IndexLast) const -> Symbol const*;
 
    template<class F>
    Count ForEachInput(F&&);
@@ -128,16 +128,16 @@ protected:
    NOD() Text DebugEnd() const;
 
    template<CT::Trait T, CT::Data D>
-   const Symbol& AddLocal(D&&, const Token&);
+   auto AddLocal(D&&, const Token&) -> const Symbol&;
    
    template<CT::Trait T, CT::Data D>
-   const Symbol& AddLiteral(D&&);
+   auto AddLiteral(D&&) -> const Symbol&;
 
    template<CT::Data T, class... ARGS>
-   Symbol& ExposeData(const Token&, ARGS&&...);
+   auto ExposeData(const Token&, ARGS&&...) -> Symbol&;
 
    template<CT::Trait T, CT::Data D, class... ARGS>
-   Symbol& ExposeTrait(const Token&, ARGS&&...);
+   auto ExposeTrait(const Token&, ARGS&&...) -> Symbol&;
 
    void AddDefine(const Token&, const GLSL&);
 

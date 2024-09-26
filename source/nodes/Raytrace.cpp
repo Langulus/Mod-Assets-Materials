@@ -12,9 +12,9 @@ using namespace Nodes;
 
 /// Raytracer node descriptor-constructor                                     
 ///   @param desc - raytrace descriptor                                       
-Raytrace::Raytrace(Describe&& descriptor)
+Raytrace::Raytrace(Describe descriptor)
    : Resolvable {this}
-   , Node {*descriptor} { }
+   , Node       {*descriptor} { }
 
 /// Generate raytracer code                                                   
 ///   @return the output symbol                                               

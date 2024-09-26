@@ -17,7 +17,7 @@
 /// Material node construction for Nodes::Root                                
 ///   @param material - the parent material                                   
 ///   @param descriptor - the node descriptor                                 
-Node::Node(Material* material, Describe descriptor)
+Node::Node(Material* material, const Many& descriptor)
    : Node {descriptor} {
    mMaterial = material;
    mDescriptor = descriptor;
@@ -26,7 +26,7 @@ Node::Node(Material* material, Describe descriptor)
 /// Material node construction for members/locals                             
 ///   @param parent - the parent node                                         
 ///   @param descriptor - the node descriptor                                 
-Node::Node(Node* parent, Describe descriptor)
+Node::Node(Node* parent, const Many& descriptor)
    : Resolvable  {this}
    , mDescriptor {descriptor} {
    // Add the Node to the hierarchy                                     
@@ -36,7 +36,7 @@ Node::Node(Node* parent, Describe descriptor)
 
 /// Material node construction used in the rest of the Nodes                  
 ///   @param descriptor - the node descriptor                                 
-Node::Node(Describe descriptor)
+Node::Node(const Many& descriptor)
    : Resolvable  {this}
    , mDescriptor {descriptor} {
    // Add the Node to the hierarchy                                     
@@ -104,7 +104,7 @@ void Node::InnerCreate() {
 /// Create a child node from a construct                                      
 ///   @param construct - the construct to satisfy                             
 ///   @return a pointer to the child node                                     
-Node* Node::NodeFromConstruct(const Construct& construct) {
+auto Node::NodeFromConstruct(const Construct& construct) -> Node* {
    if (not construct.CastsTo<Node>()) {
       Logger::Warning(Self(), "Ignored construct: ", construct);
       return {};
@@ -122,7 +122,7 @@ Node* Node::NodeFromConstruct(const Construct& construct) {
 
 /// Get material library                                                      
 ///   @return a pointer to the manager                                        
-MaterialLibrary* Node::GetLibrary() const noexcept {
+auto Node::GetLibrary() const noexcept -> MaterialLibrary* {
    return static_cast<MaterialLibrary*>(mMaterial->GetProducer());
 }
 
@@ -300,7 +300,7 @@ void Node::Randomize(Verb& verb) {
 
 /// Get stage from node rate                                                  
 ///   @return the shader stage that will be used                              
-Offset Node::GetStage() const {
+auto Node::GetStage() const -> Offset {
    auto result = mRate.GetStageIndex();
    if (result != ShaderStage::Counter)
       return result;
@@ -540,7 +540,7 @@ DMeta Node::DecayToGLSLType(DMeta meta) {
 ///   @param r - rate filter                                                  
 ///   @param i - index filter                                                 
 ///   @return a pointer to the symbol, or nullptr if not found                
-Symbol* Node::GetSymbol(TMeta t, DMeta d, RefreshRate r, Index i) {
+auto Node::GetSymbol(TMeta t, DMeta d, RefreshRate r, Index i) -> Symbol* {
    Offset nth = i.IsSpecial() ? 0 : i.GetOffsetUnsafe();
 
    if (t) {

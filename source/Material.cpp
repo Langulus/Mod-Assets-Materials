@@ -13,10 +13,10 @@
 /// Material construction                                                     
 ///   @param producer - the producer                                          
 ///   @param desc - instructions for configuring the material                 
-Material::Material(A::AssetModule* producer, Describe desc)
-   : Resolvable {this}
+Material::Material(A::AssetModule* producer, const Many& desc)
+   : Resolvable   {this}
    , ProducedFrom {producer, desc}
-   , mRoot {this, desc} {
+   , mRoot        {this, desc} {
    Logger::Verbose(Self(), "Initializing...");
 
    // Extract default rate if any                                       
@@ -109,14 +109,14 @@ bool Material::Generate(TMeta trait, Offset) {
 /// Get material adapter for lower or higher level of detail                  
 ///   @param lod - the level-of-detail state                                  
 ///   @return a pointer to the material generator                             
-Ref<A::Material> Material::GetLOD(const LOD&) const {
+auto Material::GetLOD(const LOD&) const -> Ref<A::Material> {
    TODO();
    return {};
 }
 
 /// Get default material rate                                                 
 ///   @return the rate                                                        
-RefreshRate Material::GetDefaultRate() const noexcept {
+auto Material::GetDefaultRate() const noexcept -> RefreshRate {
    return mDefaultRate;
 }
 

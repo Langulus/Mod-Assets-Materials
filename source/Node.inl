@@ -82,7 +82,7 @@ Count Node::ForEachChild(F&& call) {
 ///                     the value will be used as a literal constant          
 ///   @return reference to the symbol that corresponds to the input           
 template<CT::Trait T, CT::Data D>
-const Symbol& Node::AddLocal(D&& value, const Token& variable) {
+auto Node::AddLocal(D&& value, const Token& variable) -> const Symbol& {
    const auto meta = MetaOf<T>();
    mLocalsT[meta] << Symbol::Variable<T>(mRate, Forward<D>(value), variable);
    return mLocalsT[meta].Last();
@@ -94,7 +94,7 @@ const Symbol& Node::AddLocal(D&& value, const Token& variable) {
 ///   @param value - the value itself                                         
 ///   @return reference to the symbol that corresponds to the input           
 template<CT::Trait T, CT::Data D>
-const Symbol& Node::AddLiteral(D&& value) {
+auto Node::AddLiteral(D&& value) -> const Symbol& {
    const auto meta = MetaOf<T>();
    mLocalsT[meta] << Symbol::Literal<T>(mRate, Forward<D>(value));
    return mLocalsT[meta].Last();
@@ -109,7 +109,7 @@ const Symbol& Node::AddLiteral(D&& value) {
 ///   @param a... - parameters, in case pattern is a function template        
 ///   @return the symbol handle                                               
 template<CT::Data T, class... ARGS>
-Symbol& Node::ExposeData(const Token& pattern, ARGS&&... a) {
+auto Node::ExposeData(const Token& pattern, ARGS&&... a) -> Symbol& {
    const auto meta = MetaOf<T>();
    mLocalsD[meta] << Symbol::Function<T>(mRate, pattern, Forward<ARGS>(a)...);
    return mLocalsD[meta].Last();
@@ -125,7 +125,7 @@ Symbol& Node::ExposeData(const Token& pattern, ARGS&&... a) {
 ///   @param a... - parameters, in case pattern is a function template        
 ///   @return the symbol handle                                               
 template<CT::Trait T, CT::Data D, class... ARGS>
-Symbol& Node::ExposeTrait(const Token& pattern, ARGS&&... a) {
+auto Node::ExposeTrait(const Token& pattern, ARGS&&... a) -> Symbol& {
    const auto meta = MetaOf<T>();
    mLocalsT[meta] << Symbol::Function<D>(mRate, pattern, Forward<ARGS>(a)...);
    return mLocalsT[meta].Last();
@@ -140,7 +140,7 @@ Symbol& Node::ExposeTrait(const Token& pattern, ARGS&&... a) {
 ///   @param i - index filter                                                 
 ///   @return a pointer to the symbol, or nullptr if not found                
 LANGULUS(INLINED)
-const Symbol* Node::GetSymbol(TMeta t, DMeta d, RefreshRate r, Index i) const {
+auto Node::GetSymbol(TMeta t, DMeta d, RefreshRate r, Index i) const -> const Symbol* {
    return const_cast<Node*>(this)->GetSymbol(t, d, r, i);
 }
 
@@ -153,7 +153,7 @@ const Symbol* Node::GetSymbol(TMeta t, DMeta d, RefreshRate r, Index i) const {
 ///   @param i - index filter                                                 
 ///   @return a pointer to the symbol, or nullptr if not found                
 template<class T, class D> LANGULUS(INLINED)
-Symbol* Node::GetSymbol(RefreshRate r, Index i) {
+auto Node::GetSymbol(RefreshRate r, Index i) -> Symbol* {
    static_assert(CT::Void<T> or CT::Trait<T>,
       "T must be either trait, or void");
    static_assert(CT::Void<D> or CT::Data<D>,
@@ -171,14 +171,14 @@ Symbol* Node::GetSymbol(RefreshRate r, Index i) {
 ///   @param i - index filter                                                 
 ///   @return a pointer to the symbol, or nullptr if not found                
 template<class T, class D> LANGULUS(INLINED)
-const Symbol* Node::GetSymbol(RefreshRate r, Index i) const {
+auto Node::GetSymbol(RefreshRate r, Index i) const -> const Symbol* {
    return const_cast<Node*>(this)->template GetSymbol<T, D>(r, i);
 }
 
 /// Get the refresh rate of the node                                          
 ///   @return the rate of this node                                           
 LANGULUS(INLINED)
-RefreshRate Node::GetRate() const noexcept {
+auto Node::GetRate() const noexcept -> RefreshRate {
    return mRate;
 }
 
