@@ -16,9 +16,9 @@ using namespace Nodes;
 
 /// Texture node descriptor-constructor                                       
 ///   @param describe - the node descriptor                                   
-Texture::Texture(Describe&& describe)
+Texture::Texture(Describe describe)
    : Resolvable {this}
-   , Node {*describe} {
+   , Node       {*describe} {
    // Create any subnodes here, it is allowed                           
    // This will also execute any encountered [subcode], and set rate    
    InnerCreate();
@@ -74,7 +74,7 @@ void Texture::Detach() {
 /// Create a texture from the provided descriptor                             
 ///   @param descriptor - the descriptor for the texture                      
 ///   @return the produced texture                                            
-Ref<A::Image> Texture::CreateTexture(Describe descriptor) {
+auto Texture::CreateTexture(const Many& descriptor) -> Ref<A::Image> {
    auto local = Construct::From<A::Image>(descriptor);
    local << Traits::Parent {Ref {this}};
    Verbs::Create creator {&local};
@@ -86,7 +86,7 @@ Ref<A::Image> Texture::CreateTexture(Describe descriptor) {
 ///   @param uv - texture coordinates                                         
 ///   @param result - the resulting color format                              
 ///   @return generated texture call                                          
-GLSL GetPixel(const GLSL& sampler, const GLSL& uv, DMeta result) {
+auto GetPixel(const GLSL& sampler, const GLSL& uv, DMeta result) -> GLSL {
    LANGULUS_ASSERT(result, Material, "Unknown texture format");
    const auto pixel = Text::TemplateRt(GetPixelFunction, sampler, uv);
    switch (result->GetMemberCount()) {
@@ -102,7 +102,7 @@ GLSL GetPixel(const GLSL& sampler, const GLSL& uv, DMeta result) {
 ///   @param keyIdx - the index of the keyframe                               
 ///   @param uv - the texture coordinate symbol                               
 ///   @return the generated GLSL code                                         
-GLSL Texture::GenerateKeyframe(const Temporal&) {
+auto Texture::GenerateKeyframe(const Temporal&) -> GLSL {
    GLSL symbol;
 
    // Scan the keyframe verb                                            
@@ -239,7 +239,7 @@ GLSL Texture::GenerateKeyframe(const Temporal&) {
 }*/
 
 /// Generate the shader stages                                                
-const Symbol& Texture::Generate() {
+auto Texture::Generate() -> const Symbol& {
    Descend();
 
    /*Count totalKeyframeCount {};

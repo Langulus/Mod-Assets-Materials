@@ -24,7 +24,7 @@ Material::Material(A::AssetModule* producer, const Many& desc)
       desc.ExtractData(mDefaultRate);
 
    // Scan descriptor for Traits::Input and Traits::Output              
-   desc.ForEachTrait([&](const Trait& trait) {
+   desc.ForEachDeep([&](const Trait& trait) {
       auto commonRate = Rate::Auto;
 
       trait.ForEachDeep([&](const Many& part) {

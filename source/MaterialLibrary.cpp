@@ -43,7 +43,7 @@ LANGULUS_DEFINE_MODULE(
 /// Module construction                                                       
 ///   @param runtime - the runtime that owns the module                       
 ///   @param descriptor - instructions for configuring the module             
-MaterialLibrary::MaterialLibrary(Runtime* runtime, Describe)
+MaterialLibrary::MaterialLibrary(Runtime* runtime, const Many&)
    : Resolvable {this}
    , Module     {runtime} {
    Logger::Verbose(Self(), "Initializing...");

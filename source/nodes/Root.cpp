@@ -14,7 +14,7 @@ using namespace Nodes;
 /// Root node creation                                                        
 ///   @param producer - the producer material                                 
 ///   @param desc - the node descriptor                                       
-Root::Root(Material* producer, Describe desc)
+Root::Root(Material* producer, const Many& desc)
    : Resolvable {this}
    , Node       {producer, desc} {
    // Satisfy the rest of the descriptor                                
@@ -24,7 +24,7 @@ Root::Root(Material* producer, Describe desc)
 }
 
 /// Generate the shader stages                                                
-const Symbol& Root::Generate() {
+auto Root::Generate() -> const Symbol& {
    // Just generate children                                            
    Descend();
    TODO();

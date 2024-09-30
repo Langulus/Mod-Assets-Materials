@@ -19,8 +19,8 @@ namespace Nodes
       LANGULUS(ABSTRACT) false;
       LANGULUS_BASES(Node);
 
-      Camera(Describe&&);
-      const Symbol& Generate();
+      Camera(Describe);
+      auto Generate() -> const Symbol&;
    };
 
 } // namespace Nodes

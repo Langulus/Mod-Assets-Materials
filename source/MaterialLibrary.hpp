@@ -27,7 +27,7 @@ private:
    Ref<A::Folder> mFolder;
 
 public:
-   MaterialLibrary(Runtime*, Describe);
+   MaterialLibrary(Runtime*, const Many&);
 
    void Create(Verb&);
 };

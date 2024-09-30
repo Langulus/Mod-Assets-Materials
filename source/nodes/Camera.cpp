@@ -14,13 +14,13 @@ using namespace Nodes;
 
 /// Camera node descriptor-constructor                                        
 ///   @param desc - the camera node descriptor                                
-Camera::Camera(Describe&& descriptor)
+Camera::Camera(Describe descriptor)
    : Resolvable {this}
-   , Node {*descriptor} { }
+   , Node       {*descriptor} { }
 
 /// Generate the camera code                                                  
 ///   @return the output symbol                                               
-const Symbol& Camera::Generate() {
+auto Camera::Generate() -> const Symbol& {
    // Generate children first                                           
    Descend();
    AddDefine("CameraResult", CameraResult);
@@ -28,15 +28,15 @@ const Symbol& Camera::Generate() {
    // Check traits in descriptor to figure out what kind of camera we   
    // are creating                                                      
    bool explicitCamera = false;
-   mDescriptor.ForEachTrait([&](const Traits::View& view) {
+   mDescriptor.ForEachDeep([&](const Traits::View& view) {
       (void) view;
 
       // Projection based on camera view transformation                 
       if (mRate == Rate::Pixel) {
-         auto symView = GetSymbol<Traits::View, Mat4>(Rate::Level);
-         auto symFov  = GetSymbol<Traits::FOV, Real>(Rate::Camera);
+         auto symView = GetSymbol<Traits::View,       Mat4>(Rate::Level);
+         auto symFov  = GetSymbol<Traits::FOV,        Real>(Rate::Camera);
          auto symProj = GetSymbol<Traits::Projection, Mat4>(Rate::Level);
-         auto symRes  = GetSymbol<Traits::Size, Vec2>(Rate::Tick);
+         auto symRes  = GetSymbol<Traits::Size,       Vec2>(Rate::Tick);
 
          // Combine pixel position with the view matrix to from         
          // the projection per pixel. This allows for optically         
@@ -46,7 +46,7 @@ const Symbol& Camera::Generate() {
          explicitCamera = true;
       }
       else if (mRate == Rate::Vertex) {
-         auto symView = GetSymbol<Traits::View, Mat4>(Rate::Level);
+         auto symView = GetSymbol<Traits::View,  Mat4>(Rate::Level);
          auto symPos  = GetSymbol<Traits::Place, Vec4>(Rate::Vertex);
 
          // Combine vertex position with the view matrix to from        

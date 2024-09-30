@@ -25,19 +25,18 @@ namespace Nodes
 
    private:
       Temporal mKeyframes;
-      Index mTextureId {IndexNone};
+      Index mTextureId = IndexNone;
       Ref<A::Image> mTexture;
 
    public:
-      Texture(Describe&&);
+      Texture(Describe);
 
       void Detach();
-
-      const Symbol& Generate();
+      auto Generate() -> const Symbol&;
 
    private:
-      Ref<A::Image> CreateTexture(Describe);
-      GLSL GenerateKeyframe(const Temporal&);
+      auto CreateTexture(const Many&) -> Ref<A::Image>;
+      auto GenerateKeyframe(const Temporal&) -> GLSL;
    };
 
 } // namespace Nodes
