@@ -46,6 +46,7 @@ namespace Langulus::CT
 ///                                                                           
 struct GLSL : Text {
    LANGULUS(NAME) "GLSL";
+   LANGULUS(ACT_AS) GLSL;
    LANGULUS_BASES(Text);
 
 private:
