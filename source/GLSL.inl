@@ -69,7 +69,7 @@ GLSL::GLSL(DMeta meta)
 ///   @param trait - trait to serialize                                       
 LANGULUS(INLINED)
 GLSL::GLSL(TMeta meta)
-   : Text {"trait", meta->mToken} {}
+   : Text {"trait", meta.GetToken()} {}
 
 /// Meta constant -> GLSL serializer                                          
 ///   @param trait - trait to serialize                                       
