@@ -55,12 +55,6 @@ MaterialLibrary::MaterialLibrary(Runtime* runtime, const Many&)
    Logger::Verbose(Self(), "Initialized");
 }
 
-/// Shutdown mesh library                                                     
-MaterialLibrary::~MaterialLibrary() {
-   for (auto& asset : mMaterials)
-      asset.Detach();
-}
-
 /// Create/Destroy materials                                                  
 ///   @param verb - the creation/destruction verb                             
 void MaterialLibrary::Create(Verb& verb) {
