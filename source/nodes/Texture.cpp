@@ -76,7 +76,7 @@ void Texture::Detach() {
 ///   @return the produced texture                                            
 auto Texture::CreateTexture(const Many& descriptor) -> Ref<A::Image> {
    auto local = Construct::From<A::Image>(descriptor);
-   local << Traits::Parent {Ref {this}};
+   local << Traits::Parent {this}; // Ref {this}
    Verbs::Create creator {&local};
    return GetMaterial()->RunIn(creator)->As<A::Image*>();
 }
