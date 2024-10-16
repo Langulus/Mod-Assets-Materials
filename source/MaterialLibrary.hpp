@@ -29,6 +29,8 @@ private:
 public:
    MaterialLibrary(Runtime*, const Many&);
 
+   void RequestGarbageCollection() {}
+
    void Create(Verb&);
 };
 

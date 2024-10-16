@@ -123,7 +123,7 @@ auto Node::NodeFromConstruct(const Construct& construct) -> Node* {
 /// Get material library                                                      
 ///   @return a pointer to the manager                                        
 auto Node::GetLibrary() const noexcept -> MaterialLibrary* {
-   return static_cast<MaterialLibrary*>(mMaterial->GetProducer());
+   return mMaterial->GetProducer().As<MaterialLibrary>();
 }
 
 /// Create new nodes                                                          
