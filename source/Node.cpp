@@ -47,19 +47,19 @@ Node::Node(const Many& descriptor)
 
 /// Detach all nodes from the hierarchy, reducing references                  
 void Node::Detach() {
-   VERBOSE_NODE_TAB("Destroying (", Reference(0), " uses):");
+   VERBOSE_NODE_TAB("Destroying (", GetReferences(), " uses):");
    mDescriptor.Reset();
 
    // Decouple all children from their parent                           
    for (auto& child : mChildren) {
       VERBOSE_NODE("Decoupling child: ", child);
       child->mParent.Reset();
-      VERBOSE_NODE("...", Reference(0), " uses remain");
+      VERBOSE_NODE("...", GetReferences(), " uses remain");
    }
 
    for (auto& child : mChildren) {
       child->Detach();
-      VERBOSE_NODE("...", Reference(0), " uses remain");
+      VERBOSE_NODE("...", GetReferences(), " uses remain");
    }
 }
 
