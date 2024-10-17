@@ -32,5 +32,6 @@ public:
    void RequestGarbageCollection() {}
 
    void Create(Verb&);
+   void Teardown();
 };
 

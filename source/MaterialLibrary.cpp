@@ -55,6 +55,11 @@ MaterialLibrary::MaterialLibrary(Runtime* runtime, const Many&)
    Logger::Verbose(Self(), "Initialized");
 }
 
+/// First stage destruction                                                   
+void MaterialLibrary::Teardown() {
+   mMaterials.Teardown();
+}
+
 /// Create/Destroy materials                                                  
 ///   @param verb - the creation/destruction verb                             
 void MaterialLibrary::Create(Verb& verb) {

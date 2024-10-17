@@ -39,6 +39,7 @@ private:
 
 public:
    LANGULUS(ABSTRACT) false;
+   LANGULUS(PRODUCER) MaterialLibrary;
    LANGULUS_BASES(A::Material);
    LANGULUS_VERBS(Verbs::Create);
 
