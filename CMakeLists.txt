@@ -12,11 +12,7 @@ file(GLOB_RECURSE
 )
 
 # Build the module                                                              
-add_library(LangulusModAssetsMaterials SHARED ${LANGULUS_MOD_ASSETS_MATERIALS_SOURCES})
-
-target_link_libraries(LangulusModAssetsMaterials 
-    PRIVATE     Langulus
-)
+add_langulus_mod(LangulusModAssetsMaterials ${LANGULUS_MOD_ASSETS_MATERIALS_SOURCES})
 
 if(LANGULUS_TESTING)
     enable_testing()
