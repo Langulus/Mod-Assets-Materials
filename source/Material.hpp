@@ -50,10 +50,10 @@ public:
    void Refresh() {}
    bool Generate(TMeta, Offset = 0);
 
-   NOD() auto GetLOD(const LOD&) const -> Ref<A::Material>;
-   NOD() auto GetDefaultRate() const noexcept -> RefreshRate;
-   NOD() auto GetStage(Offset) -> GLSL&;
-   NOD() auto GetStage(Offset) const -> GLSL const&;
+   auto GetLOD(const LOD&) const -> Ref<A::Material>;
+   auto GetDefaultRate() const noexcept -> RefreshRate;
+   auto GetStage(Offset) -> GLSL&;
+   auto GetStage(Offset) const -> GLSL const&;
 
    struct Stage {
       ShaderStage::Enum id;
@@ -67,8 +67,8 @@ public:
    void AddDefine(RefreshRate, const Token&, const GLSL&);
 
 private:
-   NOD() GLSL GenerateInputName (RefreshRate, const Trait&) const;
-   NOD() GLSL GenerateOutputName(RefreshRate, const Trait&) const;
+   GLSL GenerateInputName (RefreshRate, const Trait&) const;
+   GLSL GenerateOutputName(RefreshRate, const Trait&) const;
    void GenerateUniforms();
    void GenerateInputs();
    void GenerateOutputs();

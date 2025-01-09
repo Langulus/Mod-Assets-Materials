@@ -153,15 +153,15 @@ public:
    template<CT::Number T>
    explicit GLSL(const TQuaternion<T>&);
 
-   NOD() static GLSL Template(Offset);
-   NOD() static bool IsOperator(char);
+   static GLSL Template(Offset);
+   static bool IsOperator(char);
    template<CT::Data T>
-   NOD() static GLSL Type();
+   static GLSL Type();
 
-   NOD() bool IsDefined(const Token&) const;
-   NOD() Index FindKeyword(const Text&) const;
-   NOD() Text Pretty() const;
-   NOD() static GLSL Type(DMeta);
+   bool IsDefined(const Token&) const;
+   Index FindKeyword(const Text&) const;
+   Text Pretty() const;
+   static GLSL Type(DMeta);
 
    GLSL& Define(const Token&);
    GLSL& SetVersion(const Token&);
@@ -170,7 +170,7 @@ public:
    ///   Concatenation                                                        
    ///                                                                        
    template<class T> requires CT::ConvertibleToGLSL<Deint<T>>
-   NOD() GLSL operator + (T&&) const;
+   GLSL operator + (T&&) const;
 
    template<class T> requires CT::ConvertibleToGLSL<Deint<T>>
    GLSL& operator += (T&&);

@@ -32,7 +32,7 @@ namespace Nodes
       FBM(Describe&&);
 
       const Symbol& Generate();
-      NOD() operator Text() const;
+      operator Text() const;
    };
 
 } // namespace Nodes

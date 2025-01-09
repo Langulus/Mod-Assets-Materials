@@ -90,12 +90,12 @@ public:
 
    virtual const Symbol& Generate() = 0;
 
-   NOD() auto GetRate() const noexcept -> RefreshRate;
-   NOD() auto GetStage() const -> Offset;
-   NOD() auto GetMaterial() const noexcept -> Material*;
-   NOD() auto GetLibrary() const noexcept -> MaterialLibrary*;
-   NOD() static auto GetDefaultTrait(TMeta) -> DefaultTrait;
-   NOD() static auto DecayToGLSLType(DMeta) -> DMeta;
+   auto GetRate() const noexcept -> RefreshRate;
+   auto GetStage() const -> Offset;
+   auto GetMaterial() const noexcept -> Material*;
+   auto GetLibrary() const noexcept -> MaterialLibrary*;
+   static auto GetDefaultTrait(TMeta) -> DefaultTrait;
+   static auto DecayToGLSLType(DMeta) -> DMeta;
 
    template<bool TWOSIDED = true>
    Count AddChild(Node*);
@@ -107,13 +107,13 @@ public:
    template<class F>
    Count ForEachChild(F&&);
 
-   NOD() auto GetSymbol(TMeta, DMeta = nullptr, RefreshRate = Rate::Auto, Index = IndexLast) -> Symbol*;
-   NOD() auto GetSymbol(TMeta, DMeta = nullptr, RefreshRate = Rate::Auto, Index = IndexLast) const -> Symbol const*;
+   auto GetSymbol(TMeta, DMeta = nullptr, RefreshRate = Rate::Auto, Index = IndexLast)       -> Symbol*;
+   auto GetSymbol(TMeta, DMeta = nullptr, RefreshRate = Rate::Auto, Index = IndexLast) const -> Symbol const*;
 
    template<class = void, class = void>
-   NOD() auto GetSymbol(RefreshRate = Rate::Auto, Index = IndexLast) -> Symbol*;
+   auto GetSymbol(RefreshRate = Rate::Auto, Index = IndexLast) -> Symbol*;
    template<class = void, class = void>
-   NOD() auto GetSymbol(RefreshRate = Rate::Auto, Index = IndexLast) const -> Symbol const*;
+   auto GetSymbol(RefreshRate = Rate::Auto, Index = IndexLast) const -> Symbol const*;
 
    template<class F>
    Count ForEachInput(F&&);
@@ -122,10 +122,10 @@ public:
    
 protected:
    void InnerCreate();
-   Node* NodeFromConstruct(const Construct&);
+   auto NodeFromConstruct(const Construct&) -> Node*;
 
-   NOD() Text DebugBegin() const;
-   NOD() Text DebugEnd() const;
+   Text DebugBegin() const;
+   Text DebugEnd() const;
 
    template<CT::Trait T, CT::Data D>
    auto AddLocal(D&&, const Token&) -> const Symbol&;

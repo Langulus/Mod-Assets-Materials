@@ -58,17 +58,17 @@ public:
       , mArguments {S::Nest(other->mArguments)} {}
 
    template<CT::Data, class...ARGS>
-   NOD() static Symbol Function(RefreshRate, const Token&, ARGS&&...);
+   static Symbol Function(RefreshRate, const Token&, ARGS&&...);
 
    template<CT::Trait, CT::Data D>
-   NOD() static Symbol Literal(RefreshRate, D&&);
+   static Symbol Literal(RefreshRate, D&&);
 
    template<CT::Trait, CT::Data D>
-   NOD() static Symbol Variable(RefreshRate, D&&, const Token&);
+   static Symbol Variable(RefreshRate, D&&, const Token&);
 
-   NOD() bool MatchesFilter(DMeta, RefreshRate) const noexcept;
+   bool MatchesFilter(DMeta, RefreshRate) const noexcept;
 
-   NOD() GLSL Generate(const Node*) const;
+   GLSL Generate(const Node*) const;
 
 protected:
    void PushArgument(DMeta&&);
