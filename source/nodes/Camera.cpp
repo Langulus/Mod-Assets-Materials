@@ -7,7 +7,7 @@
 ///                                                                           
 #include "Camera.hpp"
 #include <Langulus/Graphics.hpp>
-#include <Math/Matrix.hpp>
+#include <Langulus/Math/Matrix.hpp>
 
 using namespace Nodes;
 

@@ -7,11 +7,11 @@
 ///                                                                           
 #pragma once
 #include "Symbol.hpp"
-#include <Math/Verbs/Add.hpp>
-#include <Math/Verbs/Multiply.hpp>
-#include <Math/Verbs/Modulate.hpp>
-#include <Math/Verbs/Exponent.hpp>
-#include <Math/Verbs/Randomize.hpp>
+#include <Langulus/Verbs/Add.hpp>
+#include <Langulus/Verbs/Multiply.hpp>
+#include <Langulus/Verbs/Modulate.hpp>
+#include <Langulus/Verbs/Exponent.hpp>
+#include <Langulus/Verbs/Randomize.hpp>
 
 
 ///                                                                           

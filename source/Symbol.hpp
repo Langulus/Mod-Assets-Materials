@@ -7,7 +7,7 @@
 ///                                                                           
 #pragma once
 #include "GLSL.hpp"
-#include <Flow/Rate.hpp>
+#include <Langulus/Flow/Rate.hpp>
 
 
 ///                                                                           

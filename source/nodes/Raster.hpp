@@ -7,7 +7,7 @@
 ///                                                                           
 #pragma once
 #include "../Node.hpp"
-#include <Math/Range.hpp>
+#include <Langulus/Math/Range.hpp>
 
 
 namespace Nodes

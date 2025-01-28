@@ -8,9 +8,9 @@
 #include "Scene.hpp"
 #include "../Material.hpp"
 #include <Langulus/Mesh.hpp>
-#include <Math/Color.hpp>
-#include <Math/Normal.hpp>
-#include <Math/Sampler.hpp>
+#include <Langulus/Math/Color.hpp>
+#include <Langulus/Math/Normal.hpp>
+#include <Langulus/Math/Sampler.hpp>
 
 using namespace Nodes;
 

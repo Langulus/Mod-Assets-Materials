@@ -9,7 +9,7 @@
 #include "Material.hpp"
 #include "MaterialLibrary.hpp"
 #include "nodes/Value.hpp"
-#include <Math/SimplexNoise.hpp>
+#include <Langulus/Math/SimplexNoise.hpp>
 #include <Langulus/Graphics.hpp>
 #include <Langulus/Platform.hpp>
 
