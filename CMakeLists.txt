@@ -15,6 +15,6 @@ file(GLOB_RECURSE
 add_langulus_mod(LangulusModAssetsMaterials ${LANGULUS_MOD_ASSETS_MATERIALS_SOURCES})
 
 if(LANGULUS_TESTING)
-    enable_testing()
+	enable_testing()
 	add_subdirectory(test)
 endif()

@@ -5,16 +5,9 @@
 ///                                                                           
 /// SPDX-License-Identifier: GPL-3.0-or-later                                 
 ///                                                                           
-#include "Main.hpp"
 #include <Langulus/Material.hpp>
-#include <catch2/catch.hpp>
+#include <Langulus/Testing.hpp>
 
-
-/// See https://github.com/catchorg/Catch2/blob/devel/docs/tostring.md        
-CATCH_TRANSLATE_EXCEPTION(::Langulus::Exception const& ex) {
-   const Text serialized {ex};
-   return ::std::string {Token {serialized}};
-}
 
 /// Flow code for generating a complex material                               
 constexpr auto MaterialCode = R"code(
