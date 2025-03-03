@@ -569,10 +569,10 @@ auto Node::GetSymbol(TMeta t, DMeta d, RefreshRate r, Index i) -> Symbol* {
    else if (d) {
       // Filter by data type                                            
       for (auto pair : mLocalsD) {
-         if (not pair.mKey->CastsTo(d))
+         if (not pair.GetKey()->CastsTo(d))
             continue;
 
-         auto& candidates = pair.mValue;
+         auto& candidates = pair.GetValue();
          if (i and i.IsSpecial()) {
             // Pick a special index                                     
             auto& candidate = candidates[i];

@@ -194,7 +194,7 @@ Count Node::ForEachInput(F&& call) {
 
    Count counter {};
    for (auto pair : mLocalsT) {
-      for (auto& symbol : pair.mValue) {
+      for (auto& symbol : pair.GetValue()) {
          if constexpr (CT::Bool<R>) {
             if (not call(symbol))
                return counter;
@@ -205,7 +205,7 @@ Count Node::ForEachInput(F&& call) {
    }
 
    for (auto pair : mLocalsD) {
-      for (auto& symbol : pair.mValue) {
+      for (auto& symbol : pair.GetValue()) {
          if constexpr (CT::Bool<R>) {
             if (not call(symbol))
                return counter;
@@ -230,7 +230,7 @@ Count Node::ForEachOutput(F&& call) {
 
    Count counter {};
    for (auto pair : mOutputsT) {
-      for (auto& symbol : pair.mValue) {
+      for (auto& symbol : pair.GetValue()) {
          if constexpr (CT::Bool<R>) {
             if (not call(symbol))
                return counter;
@@ -241,7 +241,7 @@ Count Node::ForEachOutput(F&& call) {
    }
 
    for (auto pair : mOutputsD) {
-      for (auto& symbol : pair.mValue) {
+      for (auto& symbol : pair.GetValue()) {
          if constexpr (CT::Bool<R>) {
             if (not call(symbol))
                return counter;
