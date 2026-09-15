@@ -7,7 +7,7 @@
 ///                                                                           
 #include "Material.hpp"
 #include "MaterialLibrary.hpp"
-#include <Langulus/Anyness/Edit.hpp>
+#include <Langulus/Annies/Edit.hpp>
 
 
 /// Material construction                                                     

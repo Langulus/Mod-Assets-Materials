@@ -182,7 +182,7 @@ namespace Langulus
    /// Make a GLSL literal                                                    
    LANGULUS(INLINED)
    GLSL operator ""_glsl(const char* text, ::std::size_t size) {
-      return Anyness::Text::From(text, size);
+      return Annies::Text::From(text, size);
    }
 
 } // namespace Langulus
