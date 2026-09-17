@@ -60,10 +60,10 @@ public:
    template<CT::Data, class...ARGS>
    static Symbol Function(RefreshRate, const Token&, ARGS&&...);
 
-   template<CT::Trait, CT::Data D>
+   template<CT::Trait, CT::NotVoid D>
    static Symbol Literal(RefreshRate, D&&);
 
-   template<CT::Trait, CT::Data D>
+   template<CT::Trait, CT::NotVoid D>
    static Symbol Variable(RefreshRate, D&&, const Token&);
 
    bool MatchesFilter(DMeta, RefreshRate) const noexcept;

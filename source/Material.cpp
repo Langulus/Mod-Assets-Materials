@@ -142,14 +142,14 @@ void Material::Commit(RefreshRate rate, const Token& place, const Token& additio
 ///   @return the code associated with the stage                              
 GLSL& Material::GetStage(Offset stage) {
    auto stages = GetDataList<Traits::Shader>();
-   LANGULUS_ASSUME(DevAssumes, stages,
+   LglsAssumeDev(stages,
       "No data inside material");
-   LANGULUS_ASSUME(DevAssumes, stage < ShaderStage::Counter,
+   LglsAssumeDev(stage < ShaderStage::Counter,
       "Bad stage offset");
-   LANGULUS_ASSUME(DevAssumes, stages->GetCount() == ShaderStage::Counter,
+   LglsAssumeDev(stages->GetCount() == ShaderStage::Counter,
       "Bad material data count");
    IF_SAFE(for (auto& s : *stages) {
-      LANGULUS_ASSUME(DevAssumes, s.IsExact<GLSL>() and s.GetCount() == 1,
+      LglsAssumeDev(s.IsExact<GLSL>() and s.GetCount() == 1,
          "Bad stage commited");
    })
 

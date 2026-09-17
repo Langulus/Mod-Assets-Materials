@@ -16,9 +16,9 @@
 ///   @param  pattern - the template of the function (libfmt format string)   
 ///   @param ... arguments - the arguments for the pattern                    
 ///   @return the symbol instance                                             
-template<CT::Data T, class... ARGS>
+template<CT::NotVoid T, class... ARGS>
 Symbol Symbol::Function(RefreshRate rate, const Token& pattern, ARGS&&... arguments) {
-   LANGULUS_ASSUME(DevAssumes, rate != Rate::Auto, "Rate should be resolved");
+   LglsAssumeDev(rate != Rate::Auto, "Rate should be resolved");
    (void)Text::TemplateCheck(pattern, arguments...);
 
    Symbol s;
@@ -35,9 +35,9 @@ Symbol Symbol::Function(RefreshRate rate, const Token& pattern, ARGS&&... argume
 ///   @param rate - the refresh rate of the symbol                            
 ///   @param value - the value of the literal                                 
 ///   @return the symbol instance                                             
-template<CT::Trait T, CT::Data D>
+template<CT::Trait T, CT::NotVoid D>
 Symbol Symbol::Literal(RefreshRate rate, D&& value) {
-   LANGULUS_ASSUME(DevAssumes, rate != Rate::Auto, "Rate should be resolved");
+   LglsAssumeDev(rate != Rate::Auto, "Rate should be resolved");
 
    Symbol s;
    s.mRate = rate;
@@ -52,9 +52,9 @@ Symbol Symbol::Literal(RefreshRate rate, D&& value) {
 ///   @param value - the initial value of the variable                        
 ///   @param name - the variable token                                        
 ///   @return the symbol instance                                             
-template<CT::Trait T, CT::Data D>
+template<CT::Trait T, CT::NotVoid D>
 Symbol Symbol::Variable(RefreshRate rate, D&& value, const Token& name) {
-   LANGULUS_ASSUME(DevAssumes, rate != Rate::Auto, "Rate should be resolved");
+   LglsAssumeDev(rate != Rate::Auto, "Rate should be resolved");
 
    Symbol s;
    s.mRate = rate;
@@ -70,7 +70,7 @@ Symbol Symbol::Variable(RefreshRate rate, D&& value, const Token& name) {
 ///   @return true if this symbol matches the filter requirements             
 LANGULUS(INLINED)
 bool Symbol::MatchesFilter(DMeta d, RefreshRate r) const noexcept {
-   LANGULUS_ASSUME(DevAssumes, mRate != Rate::Auto, "Rate should be resolved");
+   LglsAssumeDev(mRate != Rate::Auto, "Rate should be resolved");
    return (!d || mTrait.CastsToMeta(d)) && (r == Rate::Auto || r <= mRate);
 }
 

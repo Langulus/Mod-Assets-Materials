@@ -24,7 +24,7 @@ Material* Node::GetMaterial() const noexcept {
 ///   @return the number of added children                                    
 template<bool TWOSIDED>
 Count Node::AddChild(Node* node) {
-   LANGULUS_ASSUME(UserAssumes, node, "Bad node pointer");
+   LglsAssumeUser(node, "Bad node pointer");
    VERBOSE_NODE("Adding child ", node, " (", node->GetReferences(), " uses)");
    const auto added = mChildren.Merge(IndexBack, node);
    if constexpr (TWOSIDED) {
@@ -49,7 +49,7 @@ Count Node::AddChild(Node* node) {
 ///   @return the number of removed children                                  
 template<bool TWOSIDED>
 Count Node::RemoveChild(Node* node) {
-   LANGULUS_ASSUME(UserAssumes, node, "Bad node pointer");
+   LglsAssumeUser(node, "Bad node pointer");
    VERBOSE_NODE("Removing child ", node, " (", node->GetReferences(), " uses)");
    const auto removed = mChildren.Remove(node);
    if constexpr (TWOSIDED) {
@@ -81,7 +81,7 @@ Count Node::ForEachChild(F&& call) {
 ///   @param variable - optional name for the variable; if not name is given  
 ///                     the value will be used as a literal constant          
 ///   @return reference to the symbol that corresponds to the input           
-template<CT::Trait T, CT::Data D>
+template<CT::Trait T, CT::NotVoid D>
 auto Node::AddLocal(D&& value, const Token& variable) -> const Symbol& {
    const auto meta = MetaOf<T>();
    mLocalsT[meta] << Symbol::Variable<T>(mRate, Forward<D>(value), variable);
@@ -93,7 +93,7 @@ auto Node::AddLocal(D&& value, const Token& variable) -> const Symbol& {
 ///   @tparam D - data type of the value (deducible)                          
 ///   @param value - the value itself                                         
 ///   @return reference to the symbol that corresponds to the input           
-template<CT::Trait T, CT::Data D>
+template<CT::Trait T, CT::NotVoid D>
 auto Node::AddLiteral(D&& value) -> const Symbol& {
    const auto meta = MetaOf<T>();
    mLocalsT[meta] << Symbol::Literal<T>(mRate, Forward<D>(value));
@@ -108,7 +108,7 @@ auto Node::AddLiteral(D&& value) -> const Symbol& {
 ///   @param pattern - the symbol name/function template                      
 ///   @param a... - parameters, in case pattern is a function template        
 ///   @return the symbol handle                                               
-template<CT::Data T, class... ARGS>
+template<CT::NotVoid T, class... ARGS>
 auto Node::ExposeData(const Token& pattern, ARGS&&... a) -> Symbol& {
    const auto meta = MetaOf<T>();
    mLocalsD[meta] << Symbol::Function<T>(mRate, pattern, Forward<ARGS>(a)...);
@@ -124,7 +124,7 @@ auto Node::ExposeData(const Token& pattern, ARGS&&... a) -> Symbol& {
 ///   @param pattern - the symbol name/function template                      
 ///   @param a... - parameters, in case pattern is a function template        
 ///   @return the symbol handle                                               
-template<CT::Trait T, CT::Data D, class... ARGS>
+template<CT::Trait T, CT::NotVoid D, class... ARGS>
 auto Node::ExposeTrait(const Token& pattern, ARGS&&... a) -> Symbol& {
    const auto meta = MetaOf<T>();
    mLocalsT[meta] << Symbol::Function<D>(mRate, pattern, Forward<ARGS>(a)...);

@@ -127,16 +127,16 @@ protected:
    Text DebugBegin() const;
    Text DebugEnd() const;
 
-   template<CT::Trait T, CT::Data D>
+   template<CT::Trait T, CT::NotVoid D>
    auto AddLocal(D&&, const Token&) -> const Symbol&;
    
-   template<CT::Trait T, CT::Data D>
+   template<CT::Trait T, CT::NotVoid D>
    auto AddLiteral(D&&) -> const Symbol&;
 
-   template<CT::Data T, class... ARGS>
+   template<CT::NotVoid T, class... ARGS>
    auto ExposeData(const Token&, ARGS&&...) -> Symbol&;
 
-   template<CT::Trait T, CT::Data D, class... ARGS>
+   template<CT::Trait T, CT::NotVoid D, class... ARGS>
    auto ExposeTrait(const Token&, ARGS&&...) -> Symbol&;
 
    void AddDefine(const Token&, const GLSL&);

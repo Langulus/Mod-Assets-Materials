@@ -134,7 +134,7 @@ GLSL::GLSL(const TQuaternion<T>& quaternion) {
 
 /// GLSL static type string conversion                                        
 ///   @return the GLSL string                                                 
-template<CT::Data T> LANGULUS(INLINED)
+template<CT::NotVoid T> LANGULUS(INLINED)
 GLSL GLSL::Type() {
    return Type(MetaOf<Decay<T>>());
 }

@@ -155,7 +155,7 @@ public:
 
    static GLSL Template(Offset);
    static bool IsOperator(char);
-   template<CT::Data T>
+   template<CT::NotVoid T>
    static GLSL Type();
 
    bool IsDefined(const Token&) const;
