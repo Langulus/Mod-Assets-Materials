@@ -21,8 +21,8 @@ private:
    RefreshRate mDefaultRate = Rate::Pixel;
 
    // Consumed bindings                                                 
-   Count mConsumedSamplers = 0;
-   //Count mConsumedLocations {};
+   size_t mConsumedSamplers = 0;
+   //size_t mConsumedLocations {};
 
    // Compiled flow                                                     
    Temporal mCompiled;
@@ -48,12 +48,12 @@ public:
 
    void Create(Verb&);
    void Refresh() {}
-   bool Generate(TMeta, Offset = 0);
+   bool Generate(TMeta, size_t = 0);
 
    auto GetLOD(const LOD&) const -> Ref<A::Material>;
    auto GetDefaultRate() const noexcept -> RefreshRate;
-   auto GetStage(Offset) -> GLSL&;
-   auto GetStage(Offset) const -> GLSL const&;
+   auto GetStage(size_t) -> GLSL&;
+   auto GetStage(size_t) const -> GLSL const&;
 
    struct Stage {
       ShaderStage::Enum id;

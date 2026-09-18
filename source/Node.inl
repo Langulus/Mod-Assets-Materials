@@ -23,7 +23,7 @@ Material* Node::GetMaterial() const noexcept {
 ///   @param node - node instance to add as child                             
 ///   @return the number of added children                                    
 template<bool TWOSIDED>
-Count Node::AddChild(Node* node) {
+size_t Node::AddChild(Node* node) {
    LglsAssumeUser(node, "Bad node pointer");
    VERBOSE_NODE("Adding child ", node, " (", node->GetReferences(), " uses)");
    const auto added = mChildren.Merge(IndexBack, node);
@@ -48,7 +48,7 @@ Count Node::AddChild(Node* node) {
 ///   @param node - node instance to remove from children                     
 ///   @return the number of removed children                                  
 template<bool TWOSIDED>
-Count Node::RemoveChild(Node* node) {
+size_t Node::RemoveChild(Node* node) {
    LglsAssumeUser(node, "Bad node pointer");
    VERBOSE_NODE("Removing child ", node, " (", node->GetReferences(), " uses)");
    const auto removed = mChildren.Remove(node);
@@ -67,7 +67,7 @@ Count Node::RemoveChild(Node* node) {
 ///   @param call - the function callback                                     
 ///   @return the number of successulf executions of the call                 
 template<class F>
-Count Node::ForEachChild(F&& call) {
+size_t Node::ForEachChild(F&& call) {
    auto counter = mChildren.ForEach(Forward<F>(call));
    for (auto child : mChildren)
       counter += child->ForEachChild(Forward<F>(call));
@@ -187,12 +187,12 @@ auto Node::GetRate() const noexcept -> RefreshRate {
 ///   @param call - the function to call for each symbol                      
 ///   @return the number of execution of call                                 
 template<class F>
-Count Node::ForEachInput(F&& call) {
+size_t Node::ForEachInput(F&& call) {
    using A = ArgumentOf<F>;
    using R = ReturnOf<F>;
    static_assert(CT::Same<A, Symbol>, "Function argument must be a Symbol");
 
-   Count counter {};
+   size_t counter {};
    for (auto pair : mLocalsT) {
       for (auto& symbol : pair.GetValue()) {
          if constexpr (CT::Bool<R>) {
@@ -223,12 +223,12 @@ Count Node::ForEachInput(F&& call) {
 ///   @param call - the function to call for each symbol                      
 ///   @return the number of execution of call                                 
 template<class F>
-Count Node::ForEachOutput(F&& call) {
+size_t Node::ForEachOutput(F&& call) {
    using A = ArgumentOf<F>;
    using R = ReturnOf<F>;
    static_assert(CT::Same<A, Symbol>, "Function argument must be a Symbol");
 
-   Count counter {};
+   size_t counter {};
    for (auto pair : mOutputsT) {
       for (auto& symbol : pair.GetValue()) {
          if constexpr (CT::Bool<R>) {

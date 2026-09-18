@@ -31,7 +31,7 @@ GLSL::GLSL(const CT::Deep auto& block) : Text {} {
    const auto count = block.GetCount();
    if (block.IsDeep()) {
       // Nest                                                           
-      for (Count i = 0; i < count; ++i) {
+      for (size_t i = 0; i < count; ++i) {
          *this += GLSL {block.template As<Block>(i)};
          if (i < count - 1)
             *this += ", ";
@@ -41,7 +41,7 @@ GLSL::GLSL(const CT::Deep auto& block) : Text {} {
 
    if (block.template CastsTo<Text>()) {
       // Contained type is code - just concatenate everything           
-      for (Count i = 0; i < count; ++i) {
+      for (size_t i = 0; i < count; ++i) {
          *this += block.template As<Text>(i);
          if (i < count - 1)
             *this += ", ";
@@ -50,7 +50,7 @@ GLSL::GLSL(const CT::Deep auto& block) : Text {} {
    }
 
    // Finally, attempt to interpret each element as GLSL and concat     
-   for (Count index = 0; index < count; ++index) {
+   for (size_t index = 0; index < count; ++index) {
       *this = Verbs::Interpret::To<GLSL>(block);
 
       // Failed, but try doing GASM interpretation                      
@@ -82,14 +82,14 @@ GLSL::GLSL(CMeta) {
 ///   @tparam T - vector type (deducible)                                     
 ///   @tparam C - vector size (deducible)                                     
 ///   @param vector - vector to serialize                                     
-template<CT::Number T, Count C> LANGULUS(INLINED)
+template<CT::Number T, size_t C> LANGULUS(INLINED)
 GLSL::GLSL(const TVector<T, C>& vector) {
    if constexpr (C == 1)
       *this += vector[0];
    else {
       *this += GLSL::template Type<TVector<T, C>>();
       *this += '(';
-      for (Count i = 0; i < C; ++i) {
+      for (size_t i = 0; i < C; ++i) {
          *this += vector[i];
          if (i < C - 1)
             *this += ", ";
@@ -103,11 +103,11 @@ GLSL::GLSL(const TVector<T, C>& vector) {
 ///   @tparam C - matrix columns (deducible)                                  
 ///   @tparam R - matrix rows (deducible)                                     
 ///   @param matrix - matrix to serialize                                     
-template<CT::Number T, Count C, Count R> LANGULUS(INLINED)
+template<CT::Number T, size_t C, size_t R> LANGULUS(INLINED)
 GLSL::GLSL(const TMatrix<T, C, R>& matrix) {
    *this += GLSL::template Type<TMatrix<T, C, R>>();
    *this += '(';
-   for (Count i = 0; i < C * R; ++i) {
+   for (size_t i = 0; i < C * R; ++i) {
       *this += matrix[i];
       if (i < (C * R) - 1)
          *this += ", ";
@@ -180,8 +180,8 @@ inline GLSL GLSL::Type(DMeta meta) {
       if (meta->CastsTo<A::Matrix>()) {
          // Find the number of columns in the matrix                    
          RTTI::Base matbase;
-         Count columns {};
-         Count rows {};
+         size_t columns {};
+         size_t rows {};
 
          if (meta->GetBase<A::Vector>(0, matbase)) {
             if (matbase.mCount == 1) {

@@ -15,7 +15,7 @@
 /// Create GLSL from shader template                                          
 ///   @param stage - the shader stage to use as template                      
 ///   @return the GLSL code                                                   
-GLSL GLSL::Template(Offset stage) {
+GLSL GLSL::Template(size_t stage) {
    LglsAssumeDev(stage < ShaderStage::Counter, "Bad index");
    return Templates[stage];
 }
@@ -103,18 +103,18 @@ Text GLSL::Pretty() const {
    const auto linescount = GetLineCount();
    const auto linedigits = CountDigits(linescount);
    Text result {"\n"};
-   Count line = 1;
-   Offset lstart = 0;
-   Offset lend = 0;
+   size_t line = 1;
+   size_t lstart = 0;
+   size_t lend = 0;
 
-   for (Offset i = 0; i <= mCount; ++i) {
+   for (size_t i = 0; i <= mCount; ++i) {
       if (i == mCount or (*this)[i] == '\n') {
          const auto size = lend - lstart;
 
          // Insert line number                                          
          auto segment = result.Extend(size + linedigits + 3);
 
-         Offset lt = 0;
+         size_t lt = 0;
          for (; lt < linedigits - CountDigits(line); ++lt)
             segment.GetRaw()[lt] = ' ';
 

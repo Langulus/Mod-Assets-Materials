@@ -107,13 +107,13 @@ auto Texture::GenerateKeyframe(const Temporal&) -> GLSL {
 
    // Scan the keyframe verb                                            
    /*bool usingChannelId {};
-   Offset channelId {};
+   size_t channelId {};
    keyframe.ForEachDeep([&](const Block& group) {
       group.ForEach(
          [&](const Real& id) {
             // Get a channel ID                                         
             usingChannelId = true;
-            channelId = static_cast<Offset>(id);
+            channelId = static_cast<size_t>(id);
          },
          [&](const Code& code) {
             // Generate keyframe from GASM code                         
@@ -199,7 +199,7 @@ auto Texture::GenerateKeyframe(const Temporal&) -> GLSL {
 
    // Since samplers can't be saved to a variable, we have to explictly 
    // generate an if statement for each inter-keyframe situation :(     
-   for (Offset i = 1; i < count; ++i) {
+   for (size_t i = 1; i < count; ++i) {
       const auto frameStart = frameMap->Keys()[i-1].SecondsReal();
       const auto frameEnd = frameMap->Keys()[i].SecondsReal();
       const auto frameLength = frameEnd - frameStart;
@@ -242,7 +242,7 @@ auto Texture::GenerateKeyframe(const Temporal&) -> GLSL {
 auto Texture::Generate() -> const Symbol& {
    Descend();
 
-   /*Count totalKeyframeCount {};
+   /*size_t totalKeyframeCount {};
    totalKeyframeCount += mKeyframesGlobal.GetCount();
    for (auto& channel : mKeyframes)
       totalKeyframeCount += channel.GetCount();
@@ -270,7 +270,7 @@ auto Texture::Generate() -> const Symbol& {
    if (hasGlobalKeyframes)
       texturize += "   vec4 temporary = " + GenerateDefinition(&mKeyframesGlobal, "uv") + ";\n";
 
-   for (Offset i = 0; i < mKeyframes.GetCount(); ++i) {
+   for (size_t i = 0; i < mKeyframes.GetCount(); ++i) {
       // Generate a branch for each channel                             
       const auto& id = mKeyframes.GetKey(i);
       if (id != mKeyframes.Keys()[0])

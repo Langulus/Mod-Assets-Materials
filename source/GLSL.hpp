@@ -146,14 +146,14 @@ public:
    explicit GLSL(TMeta);
    explicit GLSL(CMeta);
 
-   template<CT::Number T, Count C>
+   template<CT::Number T, size_t C>
    explicit GLSL(const TVector<T, C>&);
-   template<CT::Number T, Count C, Count R>
+   template<CT::Number T, size_t C, size_t R>
    explicit GLSL(const TMatrix<T, C, R>&);
    template<CT::Number T>
    explicit GLSL(const TQuaternion<T>&);
 
-   static GLSL Template(Offset);
+   static GLSL Template(size_t);
    static bool IsOperator(char);
    template<CT::NotVoid T>
    static GLSL Type();

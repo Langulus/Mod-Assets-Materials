@@ -26,7 +26,7 @@ namespace Nodes
       // Base weight value                                              
       Real mBaseWeight {0.5};
       // Number of octaves                                              
-      Count mOctaveCount {2};
+      size_t mOctaveCount {2};
 
    public:
       FBM(Describe&&);

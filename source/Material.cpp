@@ -64,7 +64,7 @@ void Material::Create(Verb& verb) {
 ///   @param trait - the trait to generate                                    
 ///   @param index - trait group to generate                                  
 ///   @return true if data was generated                                      
-bool Material::Generate(TMeta trait, Offset) {
+bool Material::Generate(TMeta trait, size_t) {
    const auto found = mDataListMap.FindIt(trait);
    if (found)
       return true;
@@ -140,7 +140,7 @@ void Material::Commit(RefreshRate rate, const Token& place, const Token& additio
 /// Get a GLSL stage                                                          
 ///   @param stage - the stage index                                          
 ///   @return the code associated with the stage                              
-GLSL& Material::GetStage(Offset stage) {
+GLSL& Material::GetStage(size_t stage) {
    auto stages = GetDataList<Traits::Shader>();
    LglsAssumeDev(stages,
       "No data inside material");
@@ -159,7 +159,7 @@ GLSL& Material::GetStage(Offset stage) {
 /// Get a GLSL stage (const)                                                  
 ///   @param stage - the stage index                                          
 ///   @return the code associated with the stage                              
-const GLSL& Material::GetStage(Offset stage) const {
+const GLSL& Material::GetStage(size_t stage) const {
    return const_cast<Material*>(this)->GetStage(stage);
 }
 
@@ -172,11 +172,11 @@ void Material::ForEachStage(auto&& call) {
       "Function argument must be of type GLSL");
 
    if constexpr (CT::Same<A, GLSL>) {
-      for (Offset i = 0; i < ShaderStage::Counter; ++i)
+      for (size_t i = 0; i < ShaderStage::Counter; ++i)
          call(GetStage(i));
    }
    else {
-      for (Offset i = 0; i < ShaderStage::Counter; ++i)
+      for (size_t i = 0; i < ShaderStage::Counter; ++i)
          call({ShaderStage::Enum(i), GetStage(i)});
    }
 }
@@ -303,7 +303,7 @@ GLSL Material::GenerateOutputName(RefreshRate rate, const Trait& trait) const {
 void Material::GenerateUniforms() {
    // Scan all uniform rates:                                           
    // Tick, Pass, Camera, Level, Renderable, Instance                   
-   for (Offset i = 0; i < RefreshRate::UniformCount; ++i) {
+   for (size_t i = 0; i < RefreshRate::UniformCount; ++i) {
       const RefreshRate rate = i + RefreshRate::UniformBegin;
       auto& traits = GetInputs(i);
       if (not traits)
@@ -378,7 +378,7 @@ void Material::GenerateUniforms() {
    // Do another scan for the textures                                  
    // Textures are always updated per renderable for now                
    // Samplers always use layout set #2 for now                         
-   Offset textureNumber = 0;
+   size_t textureNumber = 0;
    auto& traits = GetInputs(Rate::Renderable);
    for (auto& trait : traits) {
       // Skip anything BUT textures                                     
@@ -413,10 +413,10 @@ void Material::GenerateUniforms() {
 
 /// Generate vertex attributes (aka vertex shader inputs)                     
 void Material::GenerateInputs() {
-   for (Offset i = 0; i < ShaderStage::Counter; ++i) {
+   for (size_t i = 0; i < ShaderStage::Counter; ++i) {
       const RefreshRate rate = RefreshRate::StagesBegin + i;
       const auto& inputs = GetInputs(rate);
-      Offset location = 0;
+      size_t location = 0;
 
       //TODO make sure that correct amount of locations are used,
       //it depends on the value size: 1 location <= 4 floats
@@ -453,10 +453,10 @@ void Material::GenerateInputs() {
 
 /// Generate shader outputs                                                   
 void Material::GenerateOutputs() {
-   for (Offset i = 0; i < ShaderStage::Counter; ++i) {
+   for (size_t i = 0; i < ShaderStage::Counter; ++i) {
       const RefreshRate rate = RefreshRate::StagesBegin + i;
       const auto& outputs = GetOutputs(rate);
-      Offset location = 0;
+      size_t location = 0;
 
       //TODO make sure that correct amount of locations are used,
       //it depends on the value size: 1 location <= 4 floats

@@ -52,7 +52,7 @@ const Symbol& FBM::Generate() {
    // Generate octaves                                                  
    Real f {mBaseWeight};
    GLSL octaves;
-   for (Offset i = 0; i < mOctaveCount && mBaseWeight != 0; ++i) {
+   for (size_t i = 0; i < mOctaveCount && mBaseWeight != 0; ++i) {
       // Make a temporary node for each octave, we don't want any       
       // persistent side effects from executing the code here           
       Nodes::Value temporary {this};

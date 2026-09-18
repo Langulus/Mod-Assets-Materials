@@ -91,21 +91,21 @@ public:
    virtual const Symbol& Generate() = 0;
 
    auto GetRate() const noexcept -> RefreshRate;
-   auto GetStage() const -> Offset;
+   auto GetStage() const -> size_t;
    auto GetMaterial() const noexcept -> Material*;
    auto GetLibrary() const noexcept -> MaterialLibrary*;
    static auto GetDefaultTrait(TMeta) -> DefaultTrait;
    static auto DecayToGLSLType(DMeta) -> DMeta;
 
    template<bool TWOSIDED = true>
-   Count AddChild(Node*);
+   size_t AddChild(Node*);
    template<bool TWOSIDED = true>
-   Count RemoveChild(Node*);
+   size_t RemoveChild(Node*);
 
    void Descend();
 
    template<class F>
-   Count ForEachChild(F&&);
+   size_t ForEachChild(F&&);
 
    auto GetSymbol(TMeta, DMeta = nullptr, RefreshRate = Rate::Auto, Index = IndexLast)       -> Symbol*;
    auto GetSymbol(TMeta, DMeta = nullptr, RefreshRate = Rate::Auto, Index = IndexLast) const -> Symbol const*;
@@ -116,9 +116,9 @@ public:
    auto GetSymbol(RefreshRate = Rate::Auto, Index = IndexLast) const -> Symbol const*;
 
    template<class F>
-   Count ForEachInput(F&&);
+   size_t ForEachInput(F&&);
    template<class F>
-   Count ForEachOutput(F&&);
+   size_t ForEachOutput(F&&);
    
 protected:
    void InnerCreate();

@@ -300,7 +300,7 @@ void Node::Randomize(Verb& verb) {
 
 /// Get stage from node rate                                                  
 ///   @return the shader stage that will be used                              
-auto Node::GetStage() const -> Offset {
+auto Node::GetStage() const -> size_t {
    auto result = mRate.GetStageIndex();
    if (result != ShaderStage::Counter)
       return result;
@@ -541,7 +541,7 @@ DMeta Node::DecayToGLSLType(DMeta meta) {
 ///   @param i - index filter                                                 
 ///   @return a pointer to the symbol, or nullptr if not found                
 auto Node::GetSymbol(TMeta t, DMeta d, RefreshRate r, Index i) -> Symbol* {
-   Offset nth = i.IsSpecial() ? 0 : i.GetOffsetUnsafe();
+   size_t nth = i.IsSpecial() ? 0 : i.GetOffsetUnsafe();
 
    if (t) {
       // Filter by traits                                               

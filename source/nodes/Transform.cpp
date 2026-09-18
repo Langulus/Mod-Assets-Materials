@@ -45,7 +45,7 @@ Transform::operator Debug() const {
 /// Get a transformation matrix from a specific keyframe                      
 ///   @param idx - the keyframe index                                         
 ///   @return the instance                                                    
-/*TInstance<Vec3> Transform::GetInstance(Offset idx) {
+/*TInstance<Vec3> Transform::GetInstance(size_t idx) {
    auto keyframe = mKeyframes.GetValue(idx);
    //bool relative = IsRelativeKeyframe(keyframe);
    TInstance<Vec3> instance;
@@ -56,7 +56,7 @@ Transform::operator Debug() const {
 /// Turn a keyframe position to GLSL code                                     
 ///   @param idx - the index of the keyframe                                  
 ///   @return the generated GLSL code                                         
-GLSL Transform::GetPosition(Offset idx, bool& runtime) {
+GLSL Transform::GetPosition(size_t idx, bool& runtime) {
    GLSL symbol;
    auto& keyframe = mKeyframes.GetValue(idx);
    keyframe.ForEachDeep([&](const Block& group) {
@@ -81,7 +81,7 @@ GLSL Transform::GetPosition(Offset idx, bool& runtime) {
 /// Turn a keyframe scale to GLSL code                                        
 ///   @param idx - the index of the keyframe                                  
 ///   @return the generated GLSL code                                         
-GLSL Transform::GetScale(Offset idx, bool&) {
+GLSL Transform::GetScale(size_t idx, bool&) {
    const auto instance = GetInstance(idx);
    GLSL result;
    result += instance.GetScale();
@@ -91,7 +91,7 @@ GLSL Transform::GetScale(Offset idx, bool&) {
 /// Turn a keyframe orientation to GLSL code                                  
 ///   @param idx - the index of the keyframe                                  
 ///   @return the generated GLSL code                                         
-GLSL Transform::GetAim(Offset idx, bool&) {
+GLSL Transform::GetAim(size_t idx, bool&) {
    const auto instance = GetInstance(idx);
    GLSL result;
    result += instance.GetAim();
@@ -101,10 +101,10 @@ GLSL Transform::GetAim(Offset idx, bool&) {
 /// Turn a keyframe interpolator to GLSL code                                 
 ///   @param idx - the index of the keyframe                                  
 ///   @return the generated GLSL code                                         
-GLSL Transform::GetInterpolator(Offset idx) {
+GLSL Transform::GetInterpolator(size_t idx) {
    // Scan for interpolator traits up to the requested keyframe idx     
    auto interpolator = Verbs::Lerp::ID;
-   Offset progress = 0;
+   size_t progress = 0;
    for (const auto& keyframe : mKeyframes.Values()) {
       keyframe.ForEachDeep([&](const Block& group) {
          group.ForEach([&](const Trait& trait) {
@@ -127,7 +127,7 @@ GLSL Transform::GetInterpolator(Offset idx) {
 /// Turn a keyframe time to GLSL code                                         
 ///   @param idx - the index of the keyframe                                  
 ///   @return the generated GLSL code                                         
-GLSL Transform::GetTimer(Offset idx) {
+GLSL Transform::GetTimer(size_t idx) {
    // Scan for interpolator traits up to the requested keyframe idx     
    Many timer;
    pcptr progress = 0;
@@ -245,7 +245,7 @@ void Transform::GenerateDefinition() {
    SuccessTrap sizeDynamic;
    bool sizeRuntime = false;
    const auto sizeReference = GetScale(0, sizeRuntime);
-   for (Offset i = 0; i < mKeyframes.GetCount(); ++i) {
+   for (size_t i = 0; i < mKeyframes.GetCount(); ++i) {
       const auto size = GetScale(i, sizeRuntime);
       sizeDynamic = sizeReference != size;
       keyframeSize += "   ";
@@ -268,7 +268,7 @@ void Transform::GenerateDefinition() {
    SuccessTrap aimDynamic;
    bool aimRuntime = false;
    const auto aimReference = GetAim(0, aimRuntime);
-   for (Offset i = 0; i < mKeyframes.GetCount(); ++i) {
+   for (size_t i = 0; i < mKeyframes.GetCount(); ++i) {
       const auto aim = GetAim(i, aimRuntime);
       aimDynamic = aimReference != aim;
       keyframeAim += "   ";

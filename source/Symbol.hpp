@@ -30,7 +30,7 @@ struct Symbol {
    GLSL mCode;
 
    // Number of elements, if symbol is an array                         
-   Count mCount = 1;
+   size_t mCount = 1;
 
    // List of arguments, in case this symbol is a function call template
    // One must TemplateFill mCode with these traits to instantiate the  
@@ -40,7 +40,7 @@ struct Symbol {
    // Number of times a symbol is used                                  
    // If an expression with many uses, the symbol will be moved to a    
    // variable, that will be used instead                               
-   Count mUses = 1;
+   size_t mUses = 1;
 
 public:
    constexpr Symbol() = default;

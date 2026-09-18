@@ -40,7 +40,7 @@ const Symbol& Scene::Generate() {
 ///   @return the array of lines symbol                                       
 const Symbol& Scene::GenerateLines() {
    GLSL lines;
-   Count countCombined = 0;
+   size_t countCombined = 0;
 
    // Get the lines of each geometry construct                          
    mDescriptor.ForEachConstruct([&](const Construct& c) {
@@ -59,7 +59,7 @@ const Symbol& Scene::GenerateLines() {
       Verbs::Create creator {geometryDescriptor};
       const auto geometry = mMaterial->RunIn(creator)->As<A::Mesh*>();
       const auto count = geometry->GetLineCount();
-      for (Count i = 0; i < count; ++i) {
+      for (size_t i = 0; i < count; ++i) {
          // Extract each line, and convert it to shader code            
          auto position = geometry->GetLineTrait<Traits::Place>(i);
          LANGULUS_ASSERT(position, Material,
@@ -149,7 +149,7 @@ const Symbol& Scene::GenerateSDF() {
 ///   @return the array of triangles symbol                                   
 const Symbol& Scene::GenerateTriangles() {
    GLSL triangles;
-   Count countCombined = 0;
+   size_t countCombined = 0;
 
    // Get the triangles of each geometry construct                      
    mDescriptor.ForEachConstruct([&](const Construct& c) {
@@ -169,7 +169,7 @@ const Symbol& Scene::GenerateTriangles() {
       Verbs::Create creator {geometryDescriptor};
       const auto geometry = mMaterial->RunIn(creator)->As<A::Mesh*>();
       const auto count = geometry->GetTriangleCount();
-      for (Count i = 0; i < count; ++i) {
+      for (size_t i = 0; i < count; ++i) {
          auto position = geometry->template GetTriangleTrait<Traits::Place>(i);
          LANGULUS_ASSERT(position, Material,
             "Can't rasterize a triangle without Traits::Place");
