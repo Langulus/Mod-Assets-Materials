@@ -6,7 +6,7 @@
 /// SPDX-License-Identifier: GPL-3.0-or-later                                 
 ///                                                                           
 #include "GLSL.hpp"
-#include <Langulus/Annies/Edit.hpp>
+#include <Langulus/Edit.hpp>
 #include <Langulus/Verbs/Catenate.hpp>
 
 #define GLSL_VERBOSE(a) LANGULUS(NOOP)
