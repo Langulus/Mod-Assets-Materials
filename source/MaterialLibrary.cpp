@@ -17,11 +17,11 @@
 #include "nodes/Texture.hpp"
 #include "nodes/Value.hpp"
 
-#include <Langulus/Math/Normal.hpp>
-#include <Langulus/Math/Primitives.hpp>
-#include <Langulus/Math/Angle.hpp>
-#include <Langulus/Math/SimplexNoise.hpp>
-#include <Langulus/Math/Config.hpp>
+#include <Langulus/Vectors/TNormal.hpp>
+#include <Langulus/Primitives/Primitive.hpp>
+#include <Langulus/Numbers/TAngle.hpp>
+#include <Langulus/Randomness/SimplexNoise.hpp>
+#include <Langulus/Math/Export.hpp>
 
 LANGULUS_DEFINE_MODULE(
    MaterialLibrary, 9, "AssetsMaterials",

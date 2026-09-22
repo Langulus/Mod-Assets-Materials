@@ -7,7 +7,7 @@
 ///                                                                           
 #pragma once
 #include "Material.hpp"
-#include <Langulus/Flow/Factory.hpp>
+#include <Langulus/Factory.hpp>
 #include <Langulus/Verbs/Create.hpp>
 
 
@@ -16,16 +16,16 @@
 ///                                                                           
 /// Manages and produces Material(s)                                          
 ///                                                                           
-struct MaterialLibrary final : A::AssetModule {
-   LANGULUS(ABSTRACT) false;
-   LANGULUS_BASES(A::AssetModule);
-   LANGULUS_VERBS(Verbs::Create);
+struct MaterialLibrary final : Things::AssetModule {
+   using CTTI_Abstract  = No;
+   using CTTI_Bases     = Things::AssetModule;
+   using CTTI_Ability   = Verbs::Create;
 
 private:
    // Material factory                                                  
-   TFactoryUnique<::Material> mMaterials;
+   TFactoryUnique<Material> mMaterials;
    // Data folder, where materials will be saved or loaded from         
-   Ref<A::Folder> mFolder;
+   Ref<Things::Folder> mFolder;
 
 public:
    MaterialLibrary(Runtime*, const Many&);

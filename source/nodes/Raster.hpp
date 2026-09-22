@@ -7,18 +7,17 @@
 ///                                                                           
 #pragma once
 #include "../Node.hpp"
-#include <Langulus/Math/Range.hpp>
+#include <Langulus/Ranges/TRange.hpp>
 
 
 namespace Nodes
 {
-
    ///                                                                        
    ///   Rasterizer material node                                             
    ///                                                                        
    struct Raster final : Node {
-      LANGULUS(ABSTRACT) false;
-      LANGULUS_BASES(Node);
+      using CTTI_Abstract  = No;
+      using CTTI_Bases     = Node;
 
    private:
       // Code for the rasterizer                                        
@@ -41,8 +40,7 @@ namespace Nodes
       const Symbol& GeneratePerPixel();
       const Symbol& GeneratePerVertex();
    };
-
-} // namespace Nodes
+}
 
 
 /// Rasterizer result                                                         

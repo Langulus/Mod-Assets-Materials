@@ -7,7 +7,7 @@
 ///                                                                           
 #include "Camera.hpp"
 #include <Langulus/Graphics.hpp>
-#include <Langulus/Math/Matrix.hpp>
+#include <Langulus/Matrices/TMatrix.hpp>
 
 using namespace Nodes;
 
@@ -28,15 +28,15 @@ auto Camera::Generate() -> const Symbol& {
    // Check traits in descriptor to figure out what kind of camera we   
    // are creating                                                      
    bool explicitCamera = false;
-   mDescriptor.ForEachDeep([&](const Traits::View& view) {
+   mDescriptor.ForEachDeep([&](const Tags::View& view) {
       (void) view;
 
       // Projection based on camera view transformation                 
       if (mRate == Rate::Pixel) {
-         auto symView = GetSymbol<Traits::View,       Mat4>(Rate::Level);
-         auto symFov  = GetSymbol<Traits::FOV,        Real>(Rate::Camera);
-         auto symProj = GetSymbol<Traits::Projection, Mat4>(Rate::Level);
-         auto symRes  = GetSymbol<Traits::Size,       Vec2>(Rate::Tick);
+         auto symView = GetSymbol<Tags::View,       Mat4>(Rate::Level);
+         auto symFov  = GetSymbol<Tags::FOV,        Real>(Rate::Camera);
+         auto symProj = GetSymbol<Tags::Projection, Mat4>(Rate::Level);
+         auto symRes  = GetSymbol<Tags::Size,       Vec2>(Rate::Tick);
 
          // Combine pixel position with the view matrix to from         
          // the projection per pixel. This allows for optically         
@@ -46,8 +46,8 @@ auto Camera::Generate() -> const Symbol& {
          explicitCamera = true;
       }
       else if (mRate == Rate::Vertex) {
-         auto symView = GetSymbol<Traits::View,  Mat4>(Rate::Level);
-         auto symPos  = GetSymbol<Traits::Place, Vec4>(Rate::Vertex);
+         auto symView = GetSymbol<Tags::View,  Mat4>(Rate::Level);
+         auto symPos  = GetSymbol<Tags::Place, Vec4>(Rate::Vertex);
 
          // Combine vertex position with the view matrix to from        
          // the projection per vertex                                   
@@ -62,16 +62,17 @@ auto Camera::Generate() -> const Symbol& {
       // By default it simply projects 2D based on the pixel position   
       Logger::Warning("No explicit camera defined - using default 2D screen projection");
       mRate = Rate::Pixel;
-      auto symRes = GetSymbol<Traits::Size, Vec2>(Rate::Tick);
+      auto symRes = GetSymbol<Tags::Size, Vec2>(Rate::Tick);
       AddDefine("Camera", Text::TemplateRt(CameraFuncDefault, *symRes));
    }
 
    // Expose the results to the rest of the nodes                       
    return ExposeData<Camera>("Camera()");
 
-   /*Expose<Traits::Place, Vec2>("camResult.mFragment");
-   Expose<Traits::Sampler, Vec2>("camResult.mScreenUV");
-   Expose<Traits::Place, Vec3>("camResult.mOrigin");
-   Expose<Traits::Projection, Mat4>("camResult.mProjectedView");
-   Expose<Traits::Aim, Vec3>("camResult.mDirection");*/
+   /*
+   Expose<Tags::Place, Vec2>("camResult.mFragment");
+   Expose<Tags::Sampler, Vec2>("camResult.mScreenUV");
+   Expose<Tags::Place, Vec3>("camResult.mOrigin");
+   Expose<Tags::Projection, Mat4>("camResult.mProjectedView");
+   Expose<Tags::Aim, Vec3>("camResult.mDirection");*/
 }

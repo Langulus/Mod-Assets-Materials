@@ -7,13 +7,13 @@
 ///                                                                           
 #include "Material.hpp"
 #include "MaterialLibrary.hpp"
-#include <Langulus/Annies/Edit.hpp>
+#include <Langulus/Edit.hpp>
 
 
 /// Material construction                                                     
 ///   @param producer - the producer                                          
 ///   @param desc - instructions for configuring the material                 
-Material::Material(A::AssetModule* producer, const Many& desc)
+Material::Material(Things::AssetModule* producer, const Many& desc)
    : Resolvable   {this}
    , ProducedFrom {producer, desc}
    , mRoot        {this, desc} {

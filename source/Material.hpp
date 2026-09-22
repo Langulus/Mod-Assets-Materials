@@ -15,7 +15,7 @@
 /// Capable of generating HLSL/GLSL code and meta data for shader compilation 
 /// by parsing a material descriptor                                          
 ///                                                                           
-struct Material final : A::Material {
+struct Material final : Things::Material {
 private:
    // Default material rate                                             
    RefreshRate mDefaultRate = Rate::Pixel;
@@ -28,7 +28,7 @@ private:
    Temporal mCompiled;
 
    // Defined symbols for each shader stage                             
-   TUnorderedMap<GLSL, TMany<GLSL>> mDefinitions[ShaderStage::Counter];
+   TMapUnsorted<GLSL, TMany<GLSL>> mDefinitions[ShaderStage::Counter];
 
    // Root node                                                         
    // It is of utmost importance this node is the last member, because  
@@ -38,19 +38,19 @@ private:
    Nodes::Root mRoot;
 
 public:
-   LANGULUS(ABSTRACT) false;
-   LANGULUS(PRODUCER) MaterialLibrary;
-   LANGULUS_BASES(A::Material);
-   LANGULUS_VERBS(Verbs::Create);
+   using CTTI_Abstract = No;
+   using CTTI_Producer = MaterialLibrary;
+   using CTTI_Bases    = Things::Material;
+   using CTTI_Ability  = Verbs::Create;
 
-   Material(A::AssetModule*, const Many&);
+   Material(Things::AssetModule*, const Many&);
    ~Material();
 
    void Create(Verb&);
    void Refresh() {}
    bool Generate(TMeta, size_t = 0);
 
-   auto GetLOD(const LOD&) const -> Ref<A::Material>;
+   auto GetLOD(const LOD&) const -> Ref<Things::Material>;
    auto GetDefaultRate() const noexcept -> RefreshRate;
    auto GetStage(size_t) -> GLSL&;
    auto GetStage(size_t) const -> GLSL const&;
@@ -62,13 +62,13 @@ public:
 
    void ForEachStage(auto&&);
    void Commit   (RefreshRate, const Token&, const Token&);
-   GLSL AddInput (RefreshRate, const Trait&, bool allowDuplicates);
-   GLSL AddOutput(RefreshRate, const Trait&, bool allowDuplicates);
+   GLSL AddInput (RefreshRate, const Tag&, bool allowDuplicates);
+   GLSL AddOutput(RefreshRate, const Tag&, bool allowDuplicates);
    void AddDefine(RefreshRate, const Token&, const GLSL&);
 
 private:
-   GLSL GenerateInputName (RefreshRate, const Trait&) const;
-   GLSL GenerateOutputName(RefreshRate, const Trait&) const;
+   GLSL GenerateInputName (RefreshRate, const Tag&) const;
+   GLSL GenerateOutputName(RefreshRate, const Tag&) const;
    void GenerateUniforms();
    void GenerateInputs();
    void GenerateOutputs();

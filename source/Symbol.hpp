@@ -7,7 +7,7 @@
 ///                                                                           
 #pragma once
 #include "GLSL.hpp"
-#include <Langulus/Flow/Rate.hpp>
+#include <Langulus/Rate.hpp>
 
 
 ///                                                                           
@@ -20,10 +20,10 @@ struct Symbol {
    // The rate at which this symbol is recomputed                       
    RefreshRate mRate = Rate::Auto;
 
-   // The trait (if any), the data type (if any), and the value (if     
+   // The tag (if any), the data type (if any), and the value (if       
    // the symbol is a constant/literal). If this symbol represents a    
    // function call, then this is its return type                       
-   Trait mTrait;
+   Tag mTag;
 
    // The generated code for the symbol. Will contain a template, if    
    // this symbol is for a function call                                
@@ -33,9 +33,9 @@ struct Symbol {
    size_t mCount = 1;
 
    // List of arguments, in case this symbol is a function call template
-   // One must TemplateFill mCode with these traits to instantiate the  
+   // One must TemplateFill mCode with these tags to instantiate the    
    // symbol                                                            
-   TMany<Trait> mArguments;
+   TMany<Tag> mArguments;
 
    // Number of times a symbol is used                                  
    // If an expression with many uses, the symbol will be moved to a    
@@ -52,18 +52,18 @@ public:
    template<CT::Intent S> requires CT::Exact<TypeOf<S>, Symbol>
    Symbol(S&& other)
       : mRate {other->mRate}
-      , mTrait {S::Nest(other->mTrait)}
+      , mTag {S::Nest(other->mTag)}
       , mCode {S::Nest(other->mCode)}
       , mCount {other->mCount}
       , mArguments {S::Nest(other->mArguments)} {}
 
-   template<CT::Data, class...ARGS>
+   template<CT::NotVoid, class...ARGS>
    static Symbol Function(RefreshRate, const Token&, ARGS&&...);
 
-   template<CT::Trait, CT::NotVoid D>
+   template<CT::DefineTag, CT::NotVoid D>
    static Symbol Literal(RefreshRate, D&&);
 
-   template<CT::Trait, CT::NotVoid D>
+   template<CT::DefineTag, CT::NotVoid D>
    static Symbol Variable(RefreshRate, D&&, const Token&);
 
    bool MatchesFilter(DMeta, RefreshRate) const noexcept;
@@ -82,7 +82,6 @@ using Symbols = TMany<Symbol>;
 
 namespace fmt
 {
-
    ///                                                                        
    /// Extend FMT to be capable of log/fill templates with symbols            
    ///                                                                        
@@ -100,5 +99,4 @@ namespace fmt
          return fmt::format_to(ctx.out(), "{}", asText);
       }
    };
-
-} // namespace fmt
+}
