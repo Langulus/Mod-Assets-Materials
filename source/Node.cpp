@@ -17,7 +17,7 @@
 /// Material node construction for Nodes::Root                                
 ///   @param material - the parent material                                   
 ///   @param descriptor - the node descriptor                                 
-Node::Node(Material* material, const Many& descriptor)
+Node::Node(Material* material, Many const& descriptor)
    : Node {descriptor} {
    mMaterial = material;
    mDescriptor = descriptor;
@@ -26,7 +26,7 @@ Node::Node(Material* material, const Many& descriptor)
 /// Material node construction for members/locals                             
 ///   @param parent - the parent node                                         
 ///   @param descriptor - the node descriptor                                 
-Node::Node(Node* parent, const Many& descriptor)
+Node::Node(Node* parent, Many const& descriptor)
    : Resolvable  {this}
    , mDescriptor {descriptor} {
    // Add the Node to the hierarchy                                     
@@ -36,7 +36,7 @@ Node::Node(Node* parent, const Many& descriptor)
 
 /// Material node construction used in the rest of the Nodes                  
 ///   @param descriptor - the node descriptor                                 
-Node::Node(const Many& descriptor)
+Node::Node(Many const& descriptor)
    : Resolvable  {this}
    , mDescriptor {descriptor} {
    // Add the Node to the hierarchy                                     
@@ -85,7 +85,7 @@ void Node::InnerCreate() {
    });
    
    // Consider all provided data                                        
-   mDescriptor.ForEachTail([&](const Many& data) {
+   mDescriptor.ForEachTail([&](Many const& data) {
       if (data.CastsTo<Code>()) {
          // Execute code snippet                                        
          const auto& subcode = data.Get<Code>();
@@ -129,7 +129,7 @@ auto Node::GetLibrary() const noexcept -> MaterialLibrary* {
 /// Create new nodes                                                          
 ///   @param verb - the selection verb                                        
 void Node::Create(Verb& verb) {
-   verb.ForEachDeep([&](const Many& group) {
+   verb.ForEachDeep([&](Many const& group) {
       group.ForEach(
          [&](DMeta type) {
             verb << NodeFromConstruct(Construct {type});
@@ -154,14 +154,14 @@ void Node::Select(Verb& verb) {
    DMeta dataFilter = {};
 
    // Collect filters from verb argument                                
-   verb.ForEachDeep([&](const Many& group) {
+   verb.ForEachDeep([&](Many const& group) {
       group.ForEach(
          [&](RefreshRate r) noexcept { rateFilter = r; },
          [&](Index i) noexcept { index = i; },
          [&](Real  i) noexcept { index = static_cast<Index>(i); },
          [&](TMeta t) noexcept { traitFilter = t; },
          [&](DMeta t) noexcept { dataFilter = t; },
-         [&](const Trait& trait) noexcept {
+         [&](const Tag& trait) noexcept {
             dataFilter  = trait.GetType();
             traitFilter = trait.GetTrait();
          }
@@ -183,7 +183,7 @@ void Node::Select(Verb& verb) {
 ///   @param pos - the positive pattern                                       
 ///   @param neg - the negative pattern (optional)                            
 ///   @param unary - the unary pattern (optional)                             
-void Node::ArithmeticVerb(Verb& verb, const Token& pos, const Token& neg, const Token& unary) {
+void Node::ArithmeticVerb(Verb& verb, Token const& pos, Token const& neg, Token const& unary) {
    if (verb.GetMass() == 0)
       return;
 
@@ -204,8 +204,8 @@ void Node::ArithmeticVerb(Verb& verb, const Token& pos, const Token& neg, const 
 
    // Scan arguments: anything convertible to GLSL can be added to      
    // output symbols' expressions                                       
-   verb.ForEachDeep([&](const Many& group) {
-      group.ForEachElement([&](const Many& element) {
+   verb.ForEachDeep([&](Many const& group) {
+      group.ForEachElement([&](Many const& element) {
          try {
             const auto code = element.AsCast<GLSL>();
             if (not code)
@@ -266,7 +266,7 @@ void Node::Randomize(Verb& verb) {
    // Collect randomization methods and output types                    
    DMeta otype {};
    Text method = "simplex";
-   verb.ForEachDeep([&](const Many& group) {
+   verb.ForEachDeep([&](Many const& group) {
       group.ForEach(
          [&](const Text& token) { method = token; },
          [&](const DMeta& t)    { otype = t; }
@@ -326,7 +326,7 @@ void Node::Descend() {
 /// Add a definition at the node's rate                                       
 ///   @param name - the definition name (used to detect duplications)         
 ///   @param code - the code snippet to add                                   
-void Node::AddDefine(const Token& name, const GLSL& code) {
+void Node::AddDefine(Token const& name, const GLSL& code) {
    mMaterial->AddDefine(mRate, name, code);
 }
 
@@ -366,7 +366,7 @@ Text Node::DebugEnd() const {
 ///   @param as - the type to convert to                                      
 ///   @param filler - number for filling empty stuff                          
 ///   @return the new symbol                                                  
-GLSL ConvertSymbol(const Trait& trait, const GLSL& symbol, DMeta as, Real filler) {
+GLSL ConvertSymbol(const Tag& trait, const GLSL& symbol, DMeta as, Real filler) {
    auto from = trait.GetType();
    if (from->CastsTo(as))
       return symbol;

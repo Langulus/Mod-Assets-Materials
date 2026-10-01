@@ -107,7 +107,7 @@ GLSL Transform::GetInterpolator(size_t idx) {
    size_t progress = 0;
    for (const auto& keyframe : mKeyframes.Values()) {
       keyframe.ForEachDeep([&](const Block& group) {
-         group.ForEach([&](const Trait& trait) {
+         group.ForEach([&](const Tag& trait) {
             if (trait.TraitIs<Traits::Interpolator>())
                interpolator = trait.AsCast<VerbID>();
          });
@@ -133,9 +133,9 @@ GLSL Transform::GetTimer(size_t idx) {
    pcptr progress = 0;
    for (const auto& keyframe : mKeyframes.Values()) {
       keyframe.ForEachDeep([&](const Block& group) {
-         group.ForEach([&](const Trait& trait) {
+         group.ForEach([&](const Tag& trait) {
             if (trait.TraitIs<Traits::Time>())
-               timer = static_cast<const Many&>(trait);
+               timer = static_cast<Many const&>(trait);
          });
       });
 

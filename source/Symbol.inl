@@ -17,7 +17,7 @@
 ///   @param ... arguments - the arguments for the pattern                    
 ///   @return the symbol instance                                             
 template<CT::NotVoid T, class... ARGS>
-Symbol Symbol::Function(RefreshRate rate, const Token& pattern, ARGS&&... arguments) {
+Symbol Symbol::Function(RefreshRate rate, Token const& pattern, ARGS&&... arguments) {
    LglsAssumeDev(rate != Rate::Auto, "Rate should be resolved");
    (void)Text::TemplateCheck(pattern, arguments...);
 
@@ -35,7 +35,7 @@ Symbol Symbol::Function(RefreshRate rate, const Token& pattern, ARGS&&... argume
 ///   @param rate - the refresh rate of the symbol                            
 ///   @param value - the value of the literal                                 
 ///   @return the symbol instance                                             
-template<CT::Trait T, CT::NotVoid D>
+template<CT::Tag T, CT::NotVoid D>
 Symbol Symbol::Literal(RefreshRate rate, D&& value) {
    LglsAssumeDev(rate != Rate::Auto, "Rate should be resolved");
 
@@ -52,8 +52,8 @@ Symbol Symbol::Literal(RefreshRate rate, D&& value) {
 ///   @param value - the initial value of the variable                        
 ///   @param name - the variable token                                        
 ///   @return the symbol instance                                             
-template<CT::Trait T, CT::NotVoid D>
-Symbol Symbol::Variable(RefreshRate rate, D&& value, const Token& name) {
+template<CT::Tag T, CT::NotVoid D>
+Symbol Symbol::Variable(RefreshRate rate, D&& value, Token const& name) {
    LglsAssumeDev(rate != Rate::Auto, "Rate should be resolved");
 
    Symbol s;
@@ -76,15 +76,15 @@ bool Symbol::MatchesFilter(DMeta d, RefreshRate r) const noexcept {
 
 LANGULUS(INLINED)
 void Symbol::PushArgument(DMeta&& type) {
-   mArguments << Trait::FromMeta(nullptr, type);
+   mArguments << Tag::FromMeta(nullptr, type);
 }
 
 LANGULUS(INLINED)
 void Symbol::PushArgument(TMeta&& type) {
-   mArguments << Trait::FromMeta(type, nullptr);
+   mArguments << Tag::FromMeta(type, nullptr);
 }
 
 LANGULUS(INLINED)
-void Symbol::PushArgument(Trait&& type) {
-   mArguments << Forward<Trait>(type);
+void Symbol::PushArgument(Tag&& type) {
+   mArguments << Forward<Tag>(type);
 }

@@ -19,7 +19,7 @@ namespace Nodes
       LANGULUS(ABSTRACT) false;
       LANGULUS_BASES(Node);
 
-      Root(Material*, const Many&);
+      Root(Material*, Many const&);
 
       auto Generate() -> const Symbol&;
    };

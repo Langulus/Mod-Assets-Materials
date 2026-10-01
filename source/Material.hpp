@@ -43,7 +43,7 @@ public:
    using CTTI_Bases    = Things::Material;
    using CTTI_Ability  = Verbs::Create;
 
-   Material(Things::AssetModule*, const Many&);
+   Material(Things::AssetModule*, Many const&);
    ~Material();
 
    void Create(Verb&);
@@ -61,10 +61,10 @@ public:
    };
 
    void ForEachStage(auto&&);
-   void Commit   (RefreshRate, const Token&, const Token&);
+   void Commit   (RefreshRate, Token const&, Token const&);
    GLSL AddInput (RefreshRate, const Tag&, bool allowDuplicates);
    GLSL AddOutput(RefreshRate, const Tag&, bool allowDuplicates);
-   void AddDefine(RefreshRate, const Token&, const GLSL&);
+   void AddDefine(RefreshRate, Token const&, const GLSL&);
 
 private:
    GLSL GenerateInputName (RefreshRate, const Tag&) const;

@@ -17,7 +17,7 @@
 ///                                                                           
 ///   Abstract material node                                                  
 ///                                                                           
-struct Node : A::Unit {
+struct Node : Part {
 protected:
    friend struct Material;
    friend struct Nodes::FBM;
@@ -70,9 +70,9 @@ public:
       Verbs::Randomize
    );
 
-   Node(Material*, const Many&);
-   Node(Node*, const Many&);
-   Node(const Many&);
+   Node(Material*, Many const&);
+   Node(Node*, Many const&);
+   Node(Many const&);
    Node(Node&&) = delete;
 
    virtual ~Node();
@@ -127,21 +127,21 @@ protected:
    Text DebugBegin() const;
    Text DebugEnd() const;
 
-   template<CT::Trait T, CT::NotVoid D>
-   auto AddLocal(D&&, const Token&) -> const Symbol&;
+   template<CT::Tag T, CT::NotVoid D>
+   auto AddLocal(D&&, Token const&) -> const Symbol&;
    
-   template<CT::Trait T, CT::NotVoid D>
+   template<CT::Tag T, CT::NotVoid D>
    auto AddLiteral(D&&) -> const Symbol&;
 
    template<CT::NotVoid T, class... ARGS>
-   auto ExposeData(const Token&, ARGS&&...) -> Symbol&;
+   auto ExposeData(Token const&, ARGS&&...) -> Symbol&;
 
-   template<CT::Trait T, CT::NotVoid D, class... ARGS>
-   auto ExposeTrait(const Token&, ARGS&&...) -> Symbol&;
+   template<CT::Tag T, CT::NotVoid D, class... ARGS>
+   auto ExposeTrait(Token const&, ARGS&&...) -> Symbol&;
 
-   void AddDefine(const Token&, const GLSL&);
+   void AddDefine(Token const&, const GLSL&);
 
-   void ArithmeticVerb(Verb&, const Token& pos, const Token& neg = {}, const Token& una = {});
+   void ArithmeticVerb(Verb&, Token const& pos, Token const& neg = {}, Token const& una = {});
 };
 
 #include "Node.inl"

@@ -35,7 +35,7 @@ namespace Nodes
       auto Generate() -> const Symbol&;
 
    private:
-      auto CreateTexture(const Many&) -> Ref<A::Image>;
+      auto CreateTexture(Many const&) -> Ref<A::Image>;
       auto GenerateKeyframe(const Temporal&) -> GLSL;
    };
 

@@ -14,7 +14,7 @@ using namespace Nodes;
 /// Root node creation                                                        
 ///   @param producer - the producer material                                 
 ///   @param desc - the node descriptor                                       
-Root::Root(Material* producer, const Many& desc)
+Root::Root(Material* producer, Many const& desc)
    : Resolvable {this}
    , Node       {producer, desc} {
    // Satisfy the rest of the descriptor                                

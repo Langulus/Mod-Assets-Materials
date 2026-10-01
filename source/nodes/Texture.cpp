@@ -44,7 +44,7 @@ Texture::Texture(Describe describe)
    });
    
    // Consider all other provided data                                  
-   mDescriptor.ForEachTail([&](const Many& data) {
+   mDescriptor.ForEachTail([&](Many const& data) {
       if (data.CastsTo<A::Image>()) {
          // Reuse a texture generator directly                          
          mTexture = data.As<A::Image*>();
@@ -74,7 +74,7 @@ void Texture::Detach() {
 /// Create a texture from the provided descriptor                             
 ///   @param descriptor - the descriptor for the texture                      
 ///   @return the produced texture                                            
-auto Texture::CreateTexture(const Many& descriptor) -> Ref<A::Image> {
+auto Texture::CreateTexture(Many const& descriptor) -> Ref<A::Image> {
    auto local = Construct::From<A::Image>(descriptor);
    local << Traits::Parent {this}; // Ref {this}
    Verbs::Create creator {&local};
@@ -118,7 +118,7 @@ auto Texture::GenerateKeyframe(const Temporal&) -> GLSL {
          [&](const Code& code) {
             // Generate keyframe from GASM code                         
             auto uvNode = Nodes::Value::Local(
-               this, Trait::From<Traits::Sampler, Vec2>(), mRate, 
+               this, Tag::From<Traits::Sampler, Vec2>(), mRate, 
                uv.IsEmpty() ? GetTextureCoordinates() : uv
             );
             uvNode.DoGASM(code);
@@ -137,7 +137,7 @@ auto Texture::GenerateKeyframe(const Temporal&) -> GLSL {
                Verb::ExecuteVerb(environment, creator);
                creator->ForEachDeep([&](A::Texture* t) {
                   t->Generate();
-                  auto uniform = GetProducer()->AddInput(Rate::Auto, Trait::From<Traits::Texture>(t), true);
+                  auto uniform = GetProducer()->AddInput(Rate::Auto, Tag::From<Traits::Texture>(t), true);
                   symbol = GetPixel(
                      uniform,
                      uv.IsEmpty() ? GetTextureCoordinates() : uv,

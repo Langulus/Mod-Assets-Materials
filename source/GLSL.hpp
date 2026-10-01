@@ -158,13 +158,13 @@ public:
    template<CT::NotVoid T>
    static GLSL Type();
 
-   bool IsDefined(const Token&) const;
+   bool IsDefined(Token const&) const;
    Index FindKeyword(const Text&) const;
    Text Pretty() const;
    static GLSL Type(DMeta);
 
-   GLSL& Define(const Token&);
-   GLSL& SetVersion(const Token&);
+   GLSL& Define(Token const&);
+   GLSL& SetVersion(Token const&);
 
    ///                                                                        
    ///   Concatenation                                                        

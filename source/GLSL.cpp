@@ -38,7 +38,7 @@ bool GLSL::IsOperator(char c) {
 /// Check if a #define exists for a symbol                                    
 ///   @param symbol - the definition to search for                            
 ///   @return true if definition exists                                       
-bool GLSL::IsDefined(const Token& symbol) const {
+bool GLSL::IsDefined(Token const& symbol) const {
    return FindKeyword(Text {"#define ", symbol}) != IndexNone;
 }
 
@@ -145,7 +145,7 @@ Text GLSL::Pretty() const {
 /// Add a definition to code                                                  
 ///   @param definition - the definition to add                               
 ///   @return a reference to this code                                        
-GLSL& GLSL::Define(const Token& definition) {
+GLSL& GLSL::Define(Token const& definition) {
    const Text defined {"#define ", definition, '\n'};
    if (FindKeyword(defined))
       return *this;
@@ -157,7 +157,7 @@ GLSL& GLSL::Define(const Token& definition) {
 /// Set GLSL version for the code                                             
 ///   @param version - the version string                                     
 ///   @return a reference to this code                                        
-GLSL& GLSL::SetVersion(const Token& version) {
+GLSL& GLSL::SetVersion(Token const& version) {
    const Text defined {"#version ", version, '\n'};
    if (FindKeyword(defined))
       return *this;

@@ -81,8 +81,8 @@ size_t Node::ForEachChild(F&& call) {
 ///   @param variable - optional name for the variable; if not name is given  
 ///                     the value will be used as a literal constant          
 ///   @return reference to the symbol that corresponds to the input           
-template<CT::Trait T, CT::NotVoid D>
-auto Node::AddLocal(D&& value, const Token& variable) -> const Symbol& {
+template<CT::Tag T, CT::NotVoid D>
+auto Node::AddLocal(D&& value, Token const& variable) -> const Symbol& {
    const auto meta = MetaOf<T>();
    mLocalsT[meta] << Symbol::Variable<T>(mRate, Forward<D>(value), variable);
    return mLocalsT[meta].Last();
@@ -93,7 +93,7 @@ auto Node::AddLocal(D&& value, const Token& variable) -> const Symbol& {
 ///   @tparam D - data type of the value (deducible)                          
 ///   @param value - the value itself                                         
 ///   @return reference to the symbol that corresponds to the input           
-template<CT::Trait T, CT::NotVoid D>
+template<CT::Tag T, CT::NotVoid D>
 auto Node::AddLiteral(D&& value) -> const Symbol& {
    const auto meta = MetaOf<T>();
    mLocalsT[meta] << Symbol::Literal<T>(mRate, Forward<D>(value));
@@ -104,12 +104,12 @@ auto Node::AddLiteral(D&& value) -> const Symbol& {
 ///   @tparam T - the data type of the output (or return type of function)    
 ///   @tparam ...ARGS - optional arguments, if symbol is a function template  
 ///                     these arguments can be DMetas, or TMetas, or both by  
-///                     providing a Trait with a given type                   
+///                     providing a Tag with a given type                   
 ///   @param pattern - the symbol name/function template                      
 ///   @param a... - parameters, in case pattern is a function template        
 ///   @return the symbol handle                                               
 template<CT::NotVoid T, class... ARGS>
-auto Node::ExposeData(const Token& pattern, ARGS&&... a) -> Symbol& {
+auto Node::ExposeData(Token const& pattern, ARGS&&... a) -> Symbol& {
    const auto meta = MetaOf<T>();
    mLocalsD[meta] << Symbol::Function<T>(mRate, pattern, Forward<ARGS>(a)...);
    return mLocalsD[meta].Last();
@@ -118,14 +118,14 @@ auto Node::ExposeData(const Token& pattern, ARGS&&... a) -> Symbol& {
 /// Add an output symbol to the node                                          
 ///   @tparam ...ARGS - optional arguments, if symbol is a function template  
 ///                     these arguments can be DMetas, or TMetas, or both by  
-///                     providing a Trait with a given type                   
+///                     providing a Tag with a given type                   
 ///   @tparam T - the trait type of the output                                
 ///   @tparam D - the data type of the output (or return type of function)    
 ///   @param pattern - the symbol name/function template                      
 ///   @param a... - parameters, in case pattern is a function template        
 ///   @return the symbol handle                                               
-template<CT::Trait T, CT::NotVoid D, class... ARGS>
-auto Node::ExposeTrait(const Token& pattern, ARGS&&... a) -> Symbol& {
+template<CT::Tag T, CT::NotVoid D, class... ARGS>
+auto Node::ExposeTrait(Token const& pattern, ARGS&&... a) -> Symbol& {
    const auto meta = MetaOf<T>();
    mLocalsT[meta] << Symbol::Function<D>(mRate, pattern, Forward<ARGS>(a)...);
    return mLocalsT[meta].Last();
@@ -154,7 +154,7 @@ auto Node::GetSymbol(TMeta t, DMeta d, RefreshRate r, Index i) const -> const Sy
 ///   @return a pointer to the symbol, or nullptr if not found                
 template<class T, class D> LANGULUS(INLINED)
 auto Node::GetSymbol(RefreshRate r, Index i) -> Symbol* {
-   static_assert(CT::Void<T> or CT::Trait<T>,
+   static_assert(CT::Void<T> or CT::Tag<T>,
       "T must be either trait, or void");
    static_assert(CT::Void<D> or CT::Data<D>,
       "D must be either data type, or void");

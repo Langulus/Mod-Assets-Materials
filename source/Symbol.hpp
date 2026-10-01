@@ -58,13 +58,13 @@ public:
       , mArguments {S::Nest(other->mArguments)} {}
 
    template<CT::NotVoid, class...ARGS>
-   static Symbol Function(RefreshRate, const Token&, ARGS&&...);
+   static Symbol Function(RefreshRate, Token const&, ARGS&&...);
 
    template<CT::DefineTag, CT::NotVoid D>
    static Symbol Literal(RefreshRate, D&&);
 
    template<CT::DefineTag, CT::NotVoid D>
-   static Symbol Variable(RefreshRate, D&&, const Token&);
+   static Symbol Variable(RefreshRate, D&&, Token const&);
 
    bool MatchesFilter(DMeta, RefreshRate) const noexcept;
 
@@ -73,7 +73,7 @@ public:
 protected:
    void PushArgument(DMeta&&);
    void PushArgument(TMeta&&);
-   void PushArgument(Trait&&);
+   void PushArgument(Tag&&);
 };
 
 using Symbols = TMany<Symbol>;

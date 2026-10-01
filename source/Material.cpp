@@ -13,7 +13,7 @@
 /// Material construction                                                     
 ///   @param producer - the producer                                          
 ///   @param desc - instructions for configuring the material                 
-Material::Material(Things::AssetModule* producer, const Many& desc)
+Material::Material(Things::AssetModule* producer, Many const& desc)
    : Resolvable   {this}
    , ProducedFrom {producer, desc}
    , mRoot        {this, desc} {
@@ -24,13 +24,13 @@ Material::Material(Things::AssetModule* producer, const Many& desc)
       desc.ExtractData(mDefaultRate);
 
    // Scan descriptor for Traits::Input and Traits::Output              
-   desc.ForEachDeep([&](const Trait& trait) {
+   desc.ForEachDeep([&](const Tag& trait) {
       auto commonRate = Rate::Auto;
 
-      trait.ForEachDeep([&](const Many& part) {
+      trait.ForEachDeep([&](Many const& part) {
          part.ForEach(
             [&](RefreshRate  i) noexcept { commonRate = i; },
-            [&](const Trait& i) noexcept {
+            [&](const Tag& i) noexcept {
                // Add material input/output                             
                if (trait.IsTrait<Traits::Input>())
                   AddInput(commonRate, i, true);
@@ -124,7 +124,7 @@ auto Material::GetDefaultRate() const noexcept -> RefreshRate {
 ///	@param stage - the shader stage to commit to                            
 ///   @param place - the shader token to commit changes at                    
 ///   @param addition - the code to commit                                    
-void Material::Commit(RefreshRate rate, const Token& place, const Token& addition) {
+void Material::Commit(RefreshRate rate, Token const& place, Token const& addition) {
    const auto stage = rate.GetStageIndex();
    auto& code = GetStage(stage);
    if (not code) {
@@ -186,7 +186,7 @@ void Material::ForEachStage(auto&& call) {
 ///   @param t - the input to add                                             
 ///   @param allowDuplicates - whether multiple such traits are allowed       
 ///   @return the generated symbol name                                       
-GLSL Material::AddInput(RefreshRate rate, const Trait& t, bool allowDuplicates) {
+GLSL Material::AddInput(RefreshRate rate, const Tag& t, bool allowDuplicates) {
    // Get local rate and type, if any                                   
    DMeta type;
    t.ForEachDeep(
@@ -206,7 +206,7 @@ GLSL Material::AddInput(RefreshRate rate, const Trait& t, bool allowDuplicates) 
 
    // Find any matching available inputs                                
    auto& inputs = mInputs[rate.GetInputIndex()];
-   const auto proto = Trait::FromMeta(t.GetTrait(), type);
+   const auto proto = Tag::FromMeta(t.GetTrait(), type);
    if (not allowDuplicates) {
       auto found = inputs.Find(proto);
       if (found)
@@ -229,7 +229,7 @@ GLSL Material::AddInput(RefreshRate rate, const Trait& t, bool allowDuplicates) 
 ///   @param t - the output to add                                            
 ///   @param allowDuplicates - whether multiple such traits are allowed       
 ///   @return the generated symbol name                                       
-GLSL Material::AddOutput(RefreshRate rate, const Trait& t, bool allowDuplicates) {
+GLSL Material::AddOutput(RefreshRate rate, const Tag& t, bool allowDuplicates) {
    // Get local rate and type, if any                                   
    DMeta type;
    t.ForEachDeep(
@@ -245,7 +245,7 @@ GLSL Material::AddOutput(RefreshRate rate, const Trait& t, bool allowDuplicates)
       type = Node::GetDefaultTrait(t.GetTrait()).mType;
 
    auto& outputs = mOutputs[rate.GetInputIndex()];
-   const auto proto = Trait::FromMeta(t.GetTrait(), type);
+   const auto proto = Tag::FromMeta(t.GetTrait(), type);
    if (not allowDuplicates) {
       auto found = outputs.Find(proto);
       if (found)
@@ -264,7 +264,7 @@ GLSL Material::AddOutput(RefreshRate rate, const Trait& t, bool allowDuplicates)
 ///   @param rate - the shader stage to place code at                         
 ///   @param name - the name of the definition (to check for duplicated)      
 ///   @param code - the code to insert                                        
-void Material::AddDefine(RefreshRate rate, const Token& name, const GLSL& code) {
+void Material::AddDefine(RefreshRate rate, Token const& name, const GLSL& code) {
    const auto stageIndex = rate.GetStageIndex();
    mDefinitions[stageIndex][name] << code;
 }
@@ -273,7 +273,7 @@ void Material::AddDefine(RefreshRate rate, const Token& name, const GLSL& code) 
 ///   @param rate - the rate at which the input is declared                   
 ///   @param trait - the trait tag for the input                              
 ///   @return the variable name to access the input                           
-GLSL Material::GenerateInputName(RefreshRate rate, const Trait& trait) const {
+GLSL Material::GenerateInputName(RefreshRate rate, const Tag& trait) const {
    if (trait.IsTrait<Traits::Image>()) {
       // Samplers are handled differently                               
       return {trait.GetTrait(), mConsumedSamplers};
@@ -293,7 +293,7 @@ GLSL Material::GenerateInputName(RefreshRate rate, const Trait& trait) const {
 ///   @param rate - the rate at which the output is declared                  
 ///   @param trait - the trait tag for the output                             
 ///   @return the variable name to access the output                          
-GLSL Material::GenerateOutputName(RefreshRate rate, const Trait& trait) const {
+GLSL Material::GenerateOutputName(RefreshRate rate, const Tag& trait) const {
    LANGULUS_ASSERT(rate.IsShaderStage(), Material,
       "Can't have an output outside a shader stage rate");
    return {"out", trait.GetTrait()};
@@ -505,7 +505,7 @@ void Material::InitializeFromShadertoy(const GLSL& code) {
       "#define iFragment vec2(gl_FragCoord.x, iResolution.y - gl_FragCoord.y)");
 
    // Maps a code token to an input trait by using a macro              
-   auto integrate = [&](const Trait& trait, const Token& keyword) {
+   auto integrate = [&](const Tag& trait, Token const& keyword) {
       if (not code.FindKeyword(keyword))
          return;
 
@@ -526,13 +526,13 @@ void Material::InitializeFromShadertoy(const GLSL& code) {
 
    /*TODO
    for snippets that are not from shadertoy, search trait symbols
-   integrate(Trait::From<Traits::ViewProjectTransformInverted>());
-   integrate(Trait::From<Traits::ViewProjectTransform>());
-   integrate(Trait::From<Traits::ViewTransformInverted>());
-   integrate(Trait::From<Traits::ViewTransform>());
-   integrate(Trait::From<Traits::Resolution>());
-   integrate(Trait::From<Traits::Time>());
-   integrate(Trait::From<Traits::FOV>());*/
+   integrate(Tag::From<Traits::ViewProjectTransformInverted>());
+   integrate(Tag::From<Traits::ViewProjectTransform>());
+   integrate(Tag::From<Traits::ViewTransformInverted>());
+   integrate(Tag::From<Traits::ViewTransform>());
+   integrate(Tag::From<Traits::Resolution>());
+   integrate(Tag::From<Traits::Time>());
+   integrate(Tag::From<Traits::FOV>());*/
 
    // Wrap the shadertoy's mainImage function in our own ShadertoyMain  
    Commit(Rate::Pixel, ShaderToken::Functions, R"shader(
