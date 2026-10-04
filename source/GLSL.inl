@@ -7,13 +7,13 @@
 ///                                                                           
 #pragma once
 #include "GLSL.hpp"
-#include <Langulus/Image.hpp>
+#include <Langulus/CppAPI/Image.hpp>
 
 
 /// Construct by copying text                                                 
 ///   @param other - text container to shallow-copy                           
 LANGULUS(INLINED)
-GLSL::GLSL(const Text& other)
+GLSL::GLSL(Text const& other)
    : Text {other} {}
 
 /// Construct by moving text                                                  
@@ -216,7 +216,7 @@ inline GLSL GLSL::Type(DMeta meta) {
 
       return token;
    }
-   else if (meta->CastsTo<A::Image>()) {
+   else if (meta->CastsTo<Things::Image>()) {
       return "sampler2D";
       //TODO distinguish these:
       //gsampler1D   GL_TEXTURE_1D   1D texture

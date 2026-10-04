@@ -45,7 +45,7 @@ bool GLSL::IsDefined(Token const& symbol) const {
 /// Find an isolated token                                                    
 ///   @param symbol - the definition to search for                            
 ///   @return the index of the first match, or IndexNone if not found         
-Index GLSL::FindKeyword(const Text& symbol) const {
+Index GLSL::FindKeyword(Text const& symbol) const {
    if (not symbol)
       return IndexNone;
 

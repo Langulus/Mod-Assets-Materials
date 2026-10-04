@@ -59,7 +59,7 @@ protected:
    static inline const Symbol NoSymbol {};
 
 public:
-   LANGULUS(PRODUCER) Node;
+   using CTTI_Producer = Node;
    LANGULUS_VERBS(
       Verbs::Create,
       Verbs::Select,

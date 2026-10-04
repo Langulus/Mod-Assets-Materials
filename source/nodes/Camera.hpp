@@ -16,7 +16,7 @@ namespace Nodes
    ///   Camera node                                                          
    ///                                                                        
    struct Camera final : Node {
-      LANGULUS(ABSTRACT) false;
+      using CTTI_Abstract = No;
       LANGULUS_BASES(Node);
 
       Camera(Describe);

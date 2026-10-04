@@ -16,7 +16,7 @@ namespace Nodes
    ///   Raycast material node                                                
    ///                                                                        
    struct Raycast final : Node {
-      LANGULUS(ABSTRACT) false;
+      using CTTI_Abstract = No;
       LANGULUS_BASES(Node);
 
       Raycast(Describe&&);

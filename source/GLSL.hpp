@@ -6,7 +6,7 @@
 /// SPDX-License-Identifier: GPL-3.0-or-later                                 
 ///                                                                           
 #pragma once
-#include "Common.hpp"
+#include "Export.hpp"
 
 LANGULUS_EXCEPTION(GLSL);
 
@@ -17,7 +17,6 @@ namespace Langulus::CT
 {
    namespace Inner
    {
-   
       /// Do types have an explicit or implicit cast operator to GLSL         
       template<class...T>
       concept ConvertibleToGLSLByOperator = requires (T&...a) {
@@ -27,8 +26,7 @@ namespace Langulus::CT
       template<class...T>
       concept ConvertibleToGLSLByConstructor = requires (T&...a) {
          ((GLSL {a}), ...); };
-
-   } // namespace Langulus::CT::Inner
+   }
 
    /// A GLSL-convertible type is one that has either an implicit or explicit 
    /// cast operator to GLSL type, or can be used to explicitly initialize a  
@@ -37,8 +35,7 @@ namespace Langulus::CT
    concept ConvertibleToGLSL = ((
            Inner::ConvertibleToGLSLByOperator<T>
         or Inner::ConvertibleToGLSLByConstructor<T>) and ...);
-
-} // namespace Langulus::CT
+}
 
 
 ///                                                                           
@@ -138,7 +135,7 @@ public:
    using Text::Text;
    using Text::operator ==;
 
-   GLSL(const Text&);
+   GLSL(Text const&);
    GLSL(Text&&);
 
    explicit GLSL(const CT::Deep auto&);
@@ -159,7 +156,7 @@ public:
    static GLSL Type();
 
    bool IsDefined(Token const&) const;
-   Index FindKeyword(const Text&) const;
+   Index FindKeyword(Text const&) const;
    Text Pretty() const;
    static GLSL Type(DMeta);
 
@@ -178,13 +175,11 @@ public:
 
 namespace Langulus
 {
-
    /// Make a GLSL literal                                                    
    LANGULUS(INLINED)
    GLSL operator ""_glsl(const char* text, ::std::size_t size) {
       return Annies::Text::From(text, size);
    }
-
-} // namespace Langulus
+}
 
 #include "GLSL.inl"

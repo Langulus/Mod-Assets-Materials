@@ -6,7 +6,7 @@
 /// SPDX-License-Identifier: GPL-3.0-or-later                                 
 ///                                                                           
 #include "Camera.hpp"
-#include <Langulus/Graphics.hpp>
+#include <Langulus/CppAPI/Graphics.hpp>
 #include <Langulus/Matrices/TMatrix.hpp>
 
 using namespace Nodes;

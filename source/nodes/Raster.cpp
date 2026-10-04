@@ -8,7 +8,7 @@
 #include "Raster.hpp"
 #include "Scene.hpp"
 #include "Camera.hpp"
-#include <Langulus/Mesh.hpp>
+#include <Langulus/CppAPI/Mesh.hpp>
 
 using namespace Nodes;
 
@@ -19,11 +19,11 @@ Raster::Raster(Describe&& descriptor)
    : Resolvable {this}
    , Node {*descriptor} {
    // Extract settings                                                  
-   mDescriptor.ExtractTrait<Traits::Bilateral>(mBilateral);
-   mDescriptor.ExtractTrait<Traits::Signed>(mSigned);
-   mDescriptor.ExtractTrait<Traits::Topology>(mTopology);
-   mDescriptor.ExtractTrait<Traits::Min>(mDepth.mMin);
-   mDescriptor.ExtractTrait<Traits::Max>(mDepth.mMax);
+   mDescriptor.ExtractTrait<Tags::Bilateral>(mBilateral);
+   mDescriptor.ExtractTrait<Tags::Signed>(mSigned);
+   mDescriptor.ExtractTrait<Tags::Topology>(mTopology);
+   mDescriptor.ExtractTrait<Tags::Min>(mDepth.mMin);
+   mDescriptor.ExtractTrait<Tags::Max>(mDepth.mMax);
 
    // Extract rasterizer body                                           
    //mDescriptor.ExtractData(mCode);

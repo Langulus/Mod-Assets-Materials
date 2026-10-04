@@ -16,7 +16,7 @@ namespace Nodes
    ///   Fractal Brownian Motion node                                         
    ///                                                                        
    struct FBM final : Node {
-      LANGULUS(ABSTRACT) false;
+      using CTTI_Abstract = No;
       LANGULUS_BASES(Node);
       LANGULUS_CONVERTS_TO(Text);
 

@@ -200,13 +200,13 @@ GLSL Material::AddInput(RefreshRate rate, const Tag& t, bool allowDuplicates) {
    // actual uniform will be updated PerTick. So this is                
    // where we step in to override any wrongly provided rate            
    if (rate == Rate::Auto)
-      rate = Node::GetDefaultTrait(t.GetTrait()).mRate;
+      rate = Node::GetDefaultTrait(t.GetTag()).mRate;
    if (not type)
-      type = Node::GetDefaultTrait(t.GetTrait()).mType;
+      type = Node::GetDefaultTrait(t.GetTag()).mType;
 
    // Find any matching available inputs                                
    auto& inputs = mInputs[rate.GetInputIndex()];
-   const auto proto = Tag::FromMeta(t.GetTrait(), type);
+   const auto proto = Tag::FromMeta(t.GetTag(), type);
    if (not allowDuplicates) {
       auto found = inputs.Find(proto);
       if (found)
@@ -219,7 +219,7 @@ GLSL Material::AddInput(RefreshRate rate, const Tag& t, bool allowDuplicates) {
    if (t.IsTrait<Traits::Image>())
       ++mConsumedSamplers;
 
-   VERBOSE_NODE("Added input ", Logger::Cyan, proto.GetTrait(),
+   VERBOSE_NODE("Added input ", Logger::Cyan, proto.GetTag(),
       " as `", symbol, "` at ", rate, " of type ", type);
    return symbol;
 }
@@ -242,10 +242,10 @@ GLSL Material::AddOutput(RefreshRate rate, const Tag& t, bool allowDuplicates) {
       "that don't correspond to shader stages");
 
    if (not type)
-      type = Node::GetDefaultTrait(t.GetTrait()).mType;
+      type = Node::GetDefaultTrait(t.GetTag()).mType;
 
    auto& outputs = mOutputs[rate.GetInputIndex()];
-   const auto proto = Tag::FromMeta(t.GetTrait(), type);
+   const auto proto = Tag::FromMeta(t.GetTag(), type);
    if (not allowDuplicates) {
       auto found = outputs.Find(proto);
       if (found)
@@ -255,7 +255,7 @@ GLSL Material::AddOutput(RefreshRate rate, const Tag& t, bool allowDuplicates) {
    // Add the new output                                                
    outputs << proto;
    const auto symbol = GenerateOutputName(rate, proto);
-   VERBOSE_NODE("Added output ", Logger::Cyan, proto.GetTrait(),
+   VERBOSE_NODE("Added output ", Logger::Cyan, proto.GetTag(),
       " as `", symbol, "` at ", rate, " of type ", type);
    return symbol;
 }
@@ -276,17 +276,17 @@ void Material::AddDefine(RefreshRate rate, Token const& name, const GLSL& code) 
 GLSL Material::GenerateInputName(RefreshRate rate, const Tag& trait) const {
    if (trait.IsTrait<Traits::Image>()) {
       // Samplers are handled differently                               
-      return {trait.GetTrait(), mConsumedSamplers};
+      return {trait.GetTag(), mConsumedSamplers};
    }
    else if (not rate.IsUniform()) {
       // Name is for a vertex attribute or varying                      
-      return {"in", trait.GetTrait()};
+      return {"in", trait.GetTag()};
    }
 
    // Uniform name inside a uniform buffer                              
    auto rateTxt = static_cast<Text>(rate);
    auto lastns = rateTxt.Find<true>(':');
-   return Text::TemplateRt("Per{}.{}", rateTxt.Select(lastns + 1), trait.GetTrait());
+   return Text::TemplateRt("Per{}.{}", rateTxt.Select(lastns + 1), trait.GetTag());
 }
 
 /// Generate output name                                                      
@@ -296,7 +296,7 @@ GLSL Material::GenerateInputName(RefreshRate rate, const Tag& trait) const {
 GLSL Material::GenerateOutputName(RefreshRate rate, const Tag& trait) const {
    LANGULUS_ASSERT(rate.IsShaderStage(), Material,
       "Can't have an output outside a shader stage rate");
-   return {"out", trait.GetTrait()};
+   return {"out", trait.GetTag()};
 }
 
 /// Generate uniform buffer descriptions for all shader stages                
@@ -336,11 +336,11 @@ void Material::GenerateUniforms() {
 
          LANGULUS_ASSERT(trait.IsTyped(),  Material,
             "Uniform is not typed");
-         LANGULUS_ASSERT(trait.GetTrait(), Material,
+         LANGULUS_ASSERT(trait.GetTag(), Material,
             "Uniform has undefined trait");
 
          const GLSL type {trait.GetType()};
-         const GLSL name {trait.GetTrait()};
+         const GLSL name {trait.GetTag()};
          body += Text::TemplateRt("{} {};", type, name);
          if (&trait != &traits.Last())
             body += '\n';
@@ -396,7 +396,7 @@ void Material::GenerateUniforms() {
       )shader";
 
       const GLSL type {trait.GetType()};
-      const GLSL name {trait.GetTrait()};
+      const GLSL name {trait.GetTag()};
       const auto ubo = Text::TemplateRt(layout, textureNumber, type, name);
 
       // Add texture to each stage it is used in                        
@@ -424,7 +424,7 @@ void Material::GenerateInputs() {
          auto vkt = Node::DecayToGLSLType(input.GetType());
          if (not vkt) {
             Logger::Error("Unsupported base for shader attribute ", 
-               input.GetTrait(), ": ", vkt, " (decayed from ", 
+               input.GetTag(), ": ", vkt, " (decayed from ", 
                input.GetType(), ")"
             );
             LANGULUS_THROW(Material,
@@ -464,7 +464,7 @@ void Material::GenerateOutputs() {
          auto vkt = Node::DecayToGLSLType(output.GetType());
          if (not vkt) {
             Logger::Error("Unsupported base for shader output ",
-               output.GetTrait(), ": ", vkt, " (decayed from ",
+               output.GetTag(), ": ", vkt, " (decayed from ",
                output.GetType(), ")"
             );
             LANGULUS_THROW(Material,
@@ -544,6 +544,6 @@ void Material::InitializeFromShadertoy(const GLSL& code) {
    )shader");
 
    // Add output color per pixel                                        
-   auto output = AddOutput(Rate::Pixel, Traits::Color::OfType<Vec4>(), false);
+   auto output = AddOutput(Rate::Pixel, Tags::Color::OfType<Vec4>(), false);
    Commit(Rate::Pixel, ShaderToken::Colorize, output + " = ShadertoyMain();");
 }

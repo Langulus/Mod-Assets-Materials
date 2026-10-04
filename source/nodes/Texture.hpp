@@ -20,13 +20,13 @@ namespace Nodes
    /// of all kinds, solid colors, etc.                                       
    ///                                                                        
    struct Texture final : Node {
-      LANGULUS(ABSTRACT) false;
+      using CTTI_Abstract = No;
       LANGULUS_BASES(Node);
 
    private:
       Temporal mKeyframes;
       Index mTextureId = IndexNone;
-      Ref<A::Image> mTexture;
+      Ref<Things::Image> mTexture;
 
    public:
       Texture(Describe);
@@ -35,7 +35,7 @@ namespace Nodes
       auto Generate() -> const Symbol&;
 
    private:
-      auto CreateTexture(Many const&) -> Ref<A::Image>;
+      auto CreateTexture(Many const&) -> Ref<Things::Image>;
       auto GenerateKeyframe(const Temporal&) -> GLSL;
    };
 

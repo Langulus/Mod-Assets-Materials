@@ -7,8 +7,8 @@
 ///                                                                           
 #include "Scene.hpp"
 #include "../Material.hpp"
-#include <Langulus/Mesh.hpp>
-#include <Langulus/Colors/TColor.hpp>
+#include <Langulus/CppAPI/Mesh.hpp>
+#include <Langulus/Color.hpp>
 #include <Langulus/Vectors/TNormal.hpp>
 #include <Langulus/Vectors/TSampler.hpp>
 
@@ -44,7 +44,7 @@ const Symbol& Scene::GenerateLines() {
 
    // Get the lines of each geometry construct                          
    mDescriptor.ForEachConstruct([&](const Construct& c) {
-      if (not c.CastsTo<A::Mesh>())
+      if (not c.CastsTo<Things::Mesh>())
          return;
 
       // By default, geometry doesn't generate vertex positions         
@@ -57,7 +57,7 @@ const Symbol& Scene::GenerateLines() {
 
       // Get the generated geometry asset                               
       Verbs::Create creator {geometryDescriptor};
-      const auto geometry = mMaterial->RunIn(creator)->As<A::Mesh*>();
+      const auto geometry = mMaterial->RunIn(creator)->As<Things::Mesh*>();
       const auto count = geometry->GetLineCount();
       for (size_t i = 0; i < count; ++i) {
          // Extract each line, and convert it to shader code            
@@ -68,9 +68,9 @@ const Symbol& Scene::GenerateLines() {
          if (not position.template CastsTo<Vec3>(1))
             TODO();
 
-         auto color = geometry->GetLineTrait<Traits::Color>(i);
+         auto color = geometry->GetLineTrait<Tags::Color>(i);
          LANGULUS_ASSERT(color, Material,
-            "Can't rasterize a line without Traits::Color");
+            "Can't rasterize a line without Tags::Color");
 
          if (not color.template CastsTo<Vec4>(1))
             TODO();
@@ -118,7 +118,7 @@ const Symbol& Scene::GenerateSDF() {
 
    // Get the SDF code for each geometry construct                      
    mDescriptor.ForEachConstruct([&](const Construct& c) {
-      if (not c.CastsTo<A::Mesh>())
+      if (not c.CastsTo<Things::Mesh>())
          return;
 
       auto element = InterpretAsSDF(c, *mMaterial);
@@ -153,7 +153,7 @@ const Symbol& Scene::GenerateTriangles() {
 
    // Get the triangles of each geometry construct                      
    mDescriptor.ForEachConstruct([&](const Construct& c) {
-      if (not c.CastsTo<A::Mesh>())
+      if (not c.CastsTo<Things::Mesh>())
          return;
 
       // By default, geometry doesn't generate vertex positions         
@@ -167,7 +167,7 @@ const Symbol& Scene::GenerateTriangles() {
 
       // Get the generated geometry asset                               
       Verbs::Create creator {geometryDescriptor};
-      const auto geometry = mMaterial->RunIn(creator)->As<A::Mesh*>();
+      const auto geometry = mMaterial->RunIn(creator)->As<Things::Mesh*>();
       const auto count = geometry->GetTriangleCount();
       for (size_t i = 0; i < count; ++i) {
          auto position = geometry->template GetTriangleTrait<Traits::Place>(i);

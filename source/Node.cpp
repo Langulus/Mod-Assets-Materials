@@ -10,8 +10,8 @@
 #include "MaterialLibrary.hpp"
 #include "nodes/Value.hpp"
 #include <Langulus/Randomness/SimplexNoise.hpp>
-#include <Langulus/Graphics.hpp>
-#include <Langulus/Platform.hpp>
+#include <Langulus/CppAPI/Graphics.hpp>
+#include <Langulus/CppAPI/Platform.hpp>
 
 
 /// Material node construction for Nodes::Root                                
@@ -163,7 +163,7 @@ void Node::Select(Verb& verb) {
          [&](DMeta t) noexcept { dataFilter = t; },
          [&](const Tag& trait) noexcept {
             dataFilter  = trait.GetType();
-            traitFilter = trait.GetTrait();
+            traitFilter = trait.GetTag();
          }
       );
    });
@@ -268,7 +268,7 @@ void Node::Randomize(Verb& verb) {
    Text method = "simplex";
    verb.ForEachDeep([&](Many const& group) {
       group.ForEach(
-         [&](const Text& token) { method = token; },
+         [&](Text const& token) { method = token; },
          [&](const DMeta& t)    { otype = t; }
       );
    });
@@ -483,7 +483,7 @@ Node::DefaultTrait Node::GetDefaultTrait(TMeta trait) {
          DefaultTrait {MetaOf<Mat4>(), Rate::Level});
 
       properties.Insert(MetaOf<Traits::Image>(),
-         DefaultTrait {MetaOf<A::Image>(), Rate::Renderable});
+         DefaultTrait {MetaOf<Things::Image>(), Rate::Renderable});
 
       properties.Insert(MetaOf<Traits::Transform>(),
          DefaultTrait {MetaOf<Mat4>(), Rate::Instance});
@@ -494,7 +494,7 @@ Node::DefaultTrait Node::GetDefaultTrait(TMeta trait) {
          DefaultTrait {MetaOf<Vec2>(), Rate::Vertex});
       properties.Insert(MetaOf<Traits::Aim>(),
          DefaultTrait {MetaOf<Vec3>(), Rate::Vertex});
-      properties.Insert(MetaOf<Traits::Color>(),
+      properties.Insert(MetaOf<Tags::Color>(),
          DefaultTrait {MetaOf<Vec4>(), Rate::Vertex});
    }
 

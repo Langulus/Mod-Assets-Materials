@@ -16,7 +16,7 @@ namespace Nodes
    ///   Light material node                                                  
    ///                                                                        
    struct Light final : Node {
-      LANGULUS(ABSTRACT) false;
+      using CTTI_Abstract = No;
       LANGULUS_BASES(Node);
 
       Light(Describe&&);

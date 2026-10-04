@@ -16,7 +16,7 @@ namespace Nodes
    ///   Raytracing material node                                             
    ///                                                                        
    struct Raytrace final : Node {
-      LANGULUS(ABSTRACT) false;
+      using CTTI_Abstract = No;
       LANGULUS_BASES(Node);
 
       Raytrace(Describe);

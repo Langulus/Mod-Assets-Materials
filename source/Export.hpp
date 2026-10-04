@@ -6,7 +6,7 @@
 /// SPDX-License-Identifier: GPL-3.0-or-later                                 
 ///                                                                           
 #pragma once
-#include <Langulus/Material.hpp>
+#include <Langulus/CppAPI/Material.hpp>
 
 using namespace Langulus;
 using namespace Math;

@@ -20,7 +20,7 @@ namespace Nodes
    /// interface - you can execute verbs with time/frequency charge           
    ///                                                                        
    struct Value final : Node {
-      LANGULUS(ABSTRACT) false;
+      using CTTI_Abstract = No;
       LANGULUS_BASES(Node);
 
    private:

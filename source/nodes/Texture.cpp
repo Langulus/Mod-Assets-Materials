@@ -8,8 +8,8 @@
 #include "Texture.hpp"
 #include "../Material.hpp"
 #include "../MaterialLibrary.hpp"
-#include <Langulus/Image.hpp>
-#include <Langulus/IO.hpp>
+#include <Langulus/CppAPI/Image.hpp>
+#include <Langulus/CppAPI/IO.hpp>
 
 using namespace Nodes;
 
@@ -36,7 +36,7 @@ Texture::Texture(Describe describe)
    
    // Create texture generators from sub-constructs                     
    mDescriptor.ForEachConstruct([&](const Construct& c) {
-      if (c.CastsTo<A::Image>() or c.CastsTo<A::File>()) {
+      if (c.CastsTo<Things::Image>() or c.CastsTo<A::File>()) {
          mTexture = CreateTexture(c);
          VERBOSE_NODE("Texture generator changed to: ", mTexture);
       }
@@ -45,9 +45,9 @@ Texture::Texture(Describe describe)
    
    // Consider all other provided data                                  
    mDescriptor.ForEachTail([&](Many const& data) {
-      if (data.CastsTo<A::Image>()) {
+      if (data.CastsTo<Things::Image>()) {
          // Reuse a texture generator directly                          
-         mTexture = data.As<A::Image*>();
+         mTexture = data.As<Things::Image*>();
          VERBOSE_NODE("Texture generator changed to: ", mTexture);
       }
       else if (data.CastsTo<Text>() and not data.CastsTo<Code>()) {
@@ -74,11 +74,11 @@ void Texture::Detach() {
 /// Create a texture from the provided descriptor                             
 ///   @param descriptor - the descriptor for the texture                      
 ///   @return the produced texture                                            
-auto Texture::CreateTexture(Many const& descriptor) -> Ref<A::Image> {
-   auto local = Construct::From<A::Image>(descriptor);
+auto Texture::CreateTexture(Many const& descriptor) -> Ref<Things::Image> {
+   auto local = Construct::From<Things::Image>(descriptor);
    local << Traits::Parent {this}; // Ref {this}
    Verbs::Create creator {&local};
-   return GetMaterial()->RunIn(creator)->As<A::Image*>();
+   return GetMaterial()->RunIn(creator)->As<Things::Image*>();
 }
 
 /// Assembles a GLSL texture(...) function                                    
@@ -115,7 +115,7 @@ auto Texture::GenerateKeyframe(const Temporal&) -> GLSL {
             usingChannelId = true;
             channelId = static_cast<size_t>(id);
          },
-         [&](const Code& code) {
+         [&](Code const& code) {
             // Generate keyframe from GASM code                         
             auto uvNode = Nodes::Value::Local(
                this, Tag::From<Traits::Sampler, Vec2>(), mRate, 
@@ -258,7 +258,7 @@ auto Texture::Generate() -> const Symbol& {
       code += GenerateDefinition(&mKeyframesGlobal, "");
 
       Commit(ShaderToken::Texturize, "vec4 texturized = " + code + ";\n");
-      Expose<Traits::Color, Vec4>("texturized");
+      Expose<Tags::Color, Vec4>("texturized");
       return;
    }
 
@@ -300,7 +300,7 @@ auto Texture::Generate() -> const Symbol& {
       // A single texture channel                                       
       const GLSL define = "vec4 texturized = Texturize(" + uv + ");\n\n";
       Commit(ShaderToken::Texturize, define);
-      Expose<Traits::Color, vec4>("texturized");
+      Expose<Tags::Color, vec4>("texturized");
       return;
    }
 
@@ -309,7 +309,7 @@ auto Texture::Generate() -> const Symbol& {
    LANGULUS_ASSERT(!channel.IsEmpty(), Material, "No texture channel available")
    const GLSL define = "vec4 texturized = Texturize(" + channel + ", " + uv + ");\n\n";
    Commit(ShaderToken::Texturize, define);
-   Expose<Traits::Color, Vec4>("texturized");*/
+   Expose<Tags::Color, Vec4>("texturized");*/
    TODO();
    return NoSymbol;
 }

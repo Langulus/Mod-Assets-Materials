@@ -15,7 +15,7 @@ namespace Nodes
    ///   Raymarch material node                                               
    ///                                                                        
    struct Raymarch final : Node {
-      LANGULUS(ABSTRACT) false;
+      using CTTI_Abstract = No;
       LANGULUS_BASES(Node);
 
    private:

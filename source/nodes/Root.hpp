@@ -16,7 +16,7 @@ namespace Nodes
    ///   Root node                                                            
    ///                                                                        
    struct Root final : Node {
-      LANGULUS(ABSTRACT) false;
+      using CTTI_Abstract = No;
       LANGULUS_BASES(Node);
 
       Root(Material*, Many const&);

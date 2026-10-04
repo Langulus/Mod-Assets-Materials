@@ -19,7 +19,7 @@ namespace Nodes
    /// by adding signed distance field functions, or triangles/lines          
    ///                                                                        
    struct Scene final : Node {
-      LANGULUS(ABSTRACT) false;
+      using CTTI_Abstract = No;
       LANGULUS_BASES(Node);
 
       Scene(Describe&&);
