@@ -122,7 +122,7 @@ public:
    
 protected:
    void InnerCreate();
-   auto NodeFromConstruct(const Construct&) -> Node*;
+   auto NodeFromConstruct(Recipe const&) -> Node*;
 
    Text DebugBegin() const;
    Text DebugEnd() const;

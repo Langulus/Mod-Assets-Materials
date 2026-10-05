@@ -35,7 +35,7 @@ Texture::Texture(Describe describe)
    }
    
    // Create texture generators from sub-constructs                     
-   mDescriptor.ForEachConstruct([&](const Construct& c) {
+   mDescriptor.ForEachConstruct([&](Recipe const& c) {
       if (c.CastsTo<Things::Image>() or c.CastsTo<A::File>()) {
          mTexture = CreateTexture(c);
          VERBOSE_NODE("Texture generator changed to: ", mTexture);
@@ -75,7 +75,7 @@ void Texture::Detach() {
 ///   @param descriptor - the descriptor for the texture                      
 ///   @return the produced texture                                            
 auto Texture::CreateTexture(Many const& descriptor) -> Ref<Things::Image> {
-   auto local = Construct::From<Things::Image>(descriptor);
+   auto local = Recipe::From<Things::Image>(descriptor);
    local << Traits::Parent {this}; // Ref {this}
    Verbs::Create creator {&local};
    return GetMaterial()->RunIn(creator)->As<Things::Image*>();
@@ -102,7 +102,7 @@ auto GetPixel(const GLSL& sampler, const GLSL& uv, DMeta result) -> GLSL {
 ///   @param keyIdx - the index of the keyframe                               
 ///   @param uv - the texture coordinate symbol                               
 ///   @return the generated GLSL code                                         
-auto Texture::GenerateKeyframe(const Temporal&) -> GLSL {
+auto Texture::GenerateKeyframe(Temporal const&) -> GLSL {
    GLSL symbol;
 
    // Scan the keyframe verb                                            
@@ -128,7 +128,7 @@ auto Texture::GenerateKeyframe(const Temporal&) -> GLSL {
             // Generate keyframe from a static color                    
             symbol += color;
          },
-         [&](const Construct& construct) {
+         [&](Recipe const& construct) {
             bool relevantConstruct = false;
             if (construct.CastsTo<A::File>()) {
                // Generate keyframe from a texture file                 

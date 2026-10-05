@@ -64,7 +64,7 @@ GLSL Transform::GetPosition(size_t idx, bool& runtime) {
          symbol = input.GetOutputSymbol();
          runtime = true;
       });
-      group.ForEach([&](const Construct& construct) {
+      group.ForEach([&](Recipe const& construct) {
          symbol = CodeFromConstruct(construct);
          runtime = true;
       });
@@ -107,7 +107,7 @@ GLSL Transform::GetInterpolator(size_t idx) {
    size_t progress = 0;
    for (const auto& keyframe : mKeyframes.Values()) {
       keyframe.ForEachDeep([&](const Block& group) {
-         group.ForEach([&](const Tag& trait) {
+         group.ForEach([&](Tag const& trait) {
             if (trait.TraitIs<Traits::Interpolator>())
                interpolator = trait.AsCast<VerbID>();
          });
@@ -133,7 +133,7 @@ GLSL Transform::GetTimer(size_t idx) {
    pcptr progress = 0;
    for (const auto& keyframe : mKeyframes.Values()) {
       keyframe.ForEachDeep([&](const Block& group) {
-         group.ForEach([&](const Tag& trait) {
+         group.ForEach([&](Tag const& trait) {
             if (trait.TraitIs<Traits::Time>())
                timer = static_cast<Many const&>(trait);
          });
@@ -183,7 +183,7 @@ void Transform::GenerateDefinition() {
 
    const auto animationStart = mKeyframes.GetKey(0).SecondsReal();
    const auto animationEnd = mKeyframes.Keys().Last().SecondsReal();
-   mKeyframes.ForEach([&](const PCTime& time, const Verb& data) {
+   mKeyframes.ForEach([&](const PCTime& time, Verb const& data) {
       keyframeTime += time.SecondsReal();
       if (&data != &mKeyframes.Values().Last())
          keyframeTime += ", ";

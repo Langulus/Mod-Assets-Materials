@@ -24,13 +24,13 @@ Material::Material(Things::AssetModule* producer, Many const& desc)
       desc.ExtractData(mDefaultRate);
 
    // Scan descriptor for Traits::Input and Traits::Output              
-   desc.ForEachDeep([&](const Tag& trait) {
+   desc.ForEachDeep([&](Tag const& trait) {
       auto commonRate = Rate::Auto;
 
       trait.ForEachDeep([&](Many const& part) {
          part.ForEach(
             [&](RefreshRate  i) noexcept { commonRate = i; },
-            [&](const Tag& i) noexcept {
+            [&](Tag const& i) noexcept {
                // Add material input/output                             
                if (trait.IsTrait<Traits::Input>())
                   AddInput(commonRate, i, true);
@@ -186,7 +186,7 @@ void Material::ForEachStage(auto&& call) {
 ///   @param t - the input to add                                             
 ///   @param allowDuplicates - whether multiple such traits are allowed       
 ///   @return the generated symbol name                                       
-GLSL Material::AddInput(RefreshRate rate, const Tag& t, bool allowDuplicates) {
+GLSL Material::AddInput(RefreshRate rate, Tag const& t, bool allowDuplicates) {
    // Get local rate and type, if any                                   
    DMeta type;
    t.ForEachDeep(
@@ -229,7 +229,7 @@ GLSL Material::AddInput(RefreshRate rate, const Tag& t, bool allowDuplicates) {
 ///   @param t - the output to add                                            
 ///   @param allowDuplicates - whether multiple such traits are allowed       
 ///   @return the generated symbol name                                       
-GLSL Material::AddOutput(RefreshRate rate, const Tag& t, bool allowDuplicates) {
+GLSL Material::AddOutput(RefreshRate rate, Tag const& t, bool allowDuplicates) {
    // Get local rate and type, if any                                   
    DMeta type;
    t.ForEachDeep(
@@ -273,7 +273,7 @@ void Material::AddDefine(RefreshRate rate, Token const& name, const GLSL& code) 
 ///   @param rate - the rate at which the input is declared                   
 ///   @param trait - the trait tag for the input                              
 ///   @return the variable name to access the input                           
-GLSL Material::GenerateInputName(RefreshRate rate, const Tag& trait) const {
+GLSL Material::GenerateInputName(RefreshRate rate, Tag const& trait) const {
    if (trait.IsTrait<Traits::Image>()) {
       // Samplers are handled differently                               
       return {trait.GetTag(), mConsumedSamplers};
@@ -293,7 +293,7 @@ GLSL Material::GenerateInputName(RefreshRate rate, const Tag& trait) const {
 ///   @param rate - the rate at which the output is declared                  
 ///   @param trait - the trait tag for the output                             
 ///   @return the variable name to access the output                          
-GLSL Material::GenerateOutputName(RefreshRate rate, const Tag& trait) const {
+GLSL Material::GenerateOutputName(RefreshRate rate, Tag const& trait) const {
    LANGULUS_ASSERT(rate.IsShaderStage(), Material,
       "Can't have an output outside a shader stage rate");
    return {"out", trait.GetTag()};
@@ -505,7 +505,7 @@ void Material::InitializeFromShadertoy(const GLSL& code) {
       "#define iFragment vec2(gl_FragCoord.x, iResolution.y - gl_FragCoord.y)");
 
    // Maps a code token to an input trait by using a macro              
-   auto integrate = [&](const Tag& trait, Token const& keyword) {
+   auto integrate = [&](Tag const& trait, Token const& keyword) {
       if (not code.FindKeyword(keyword))
          return;
 

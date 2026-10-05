@@ -62,13 +62,13 @@ public:
 
    void ForEachStage(auto&&);
    void Commit   (RefreshRate, Token const&, Token const&);
-   GLSL AddInput (RefreshRate, const Tag&, bool allowDuplicates);
-   GLSL AddOutput(RefreshRate, const Tag&, bool allowDuplicates);
+   GLSL AddInput (RefreshRate, Tag const&, bool allowDuplicates);
+   GLSL AddOutput(RefreshRate, Tag const&, bool allowDuplicates);
    void AddDefine(RefreshRate, Token const&, const GLSL&);
 
 private:
-   GLSL GenerateInputName (RefreshRate, const Tag&) const;
-   GLSL GenerateOutputName(RefreshRate, const Tag&) const;
+   GLSL GenerateInputName (RefreshRate, Tag const&) const;
+   GLSL GenerateOutputName(RefreshRate, Tag const&) const;
    void GenerateUniforms();
    void GenerateInputs();
    void GenerateOutputs();

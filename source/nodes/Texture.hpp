@@ -36,7 +36,7 @@ namespace Nodes
 
    private:
       auto CreateTexture(Many const&) -> Ref<Things::Image>;
-      auto GenerateKeyframe(const Temporal&) -> GLSL;
+      auto GenerateKeyframe(Temporal const&) -> GLSL;
    };
 
 } // namespace Nodes

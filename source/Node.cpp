@@ -80,7 +80,7 @@ void Node::InnerCreate() {
    }
 
    // Create all sub constructs                                         
-   mDescriptor.ForEachConstruct([&](const Construct& c) {
+   mDescriptor.ForEachConstruct([&](Recipe const& c) {
       NodeFromConstruct(c);
    });
    
@@ -104,7 +104,7 @@ void Node::InnerCreate() {
 /// Create a child node from a construct                                      
 ///   @param construct - the construct to satisfy                             
 ///   @return a pointer to the child node                                     
-auto Node::NodeFromConstruct(const Construct& construct) -> Node* {
+auto Node::NodeFromConstruct(Recipe const& construct) -> Node* {
    if (not construct.CastsTo<Node>()) {
       Logger::Warning(Self(), "Ignored construct: ", construct);
       return {};
@@ -112,7 +112,7 @@ auto Node::NodeFromConstruct(const Construct& construct) -> Node* {
 
    // Create a child node                                               
    VERBOSE_NODE_TAB("Adding node: ", construct);
-   Construct local {construct};
+   Recipe local {construct};
    local << Traits::Parent {this};
 
    auto newInstance = Many::FromMeta(construct.GetType());
@@ -132,9 +132,9 @@ void Node::Create(Verb& verb) {
    verb.ForEachDeep([&](Many const& group) {
       group.ForEach(
          [&](DMeta type) {
-            verb << NodeFromConstruct(Construct {type});
+            verb << NodeFromConstruct(Recipe {type});
          },
-         [&](const Construct& content) {
+         [&](Recipe const& content) {
             verb << NodeFromConstruct(content);
          }
       );
@@ -161,7 +161,7 @@ void Node::Select(Verb& verb) {
          [&](Real  i) noexcept { index = static_cast<Index>(i); },
          [&](TMeta t) noexcept { traitFilter = t; },
          [&](DMeta t) noexcept { dataFilter = t; },
-         [&](const Tag& trait) noexcept {
+         [&](Tag const& trait) noexcept {
             dataFilter  = trait.GetType();
             traitFilter = trait.GetTag();
          }
@@ -366,7 +366,7 @@ Text Node::DebugEnd() const {
 ///   @param as - the type to convert to                                      
 ///   @param filler - number for filling empty stuff                          
 ///   @return the new symbol                                                  
-GLSL ConvertSymbol(const Tag& trait, const GLSL& symbol, DMeta as, Real filler) {
+GLSL ConvertSymbol(Tag const& trait, const GLSL& symbol, DMeta as, Real filler) {
    auto from = trait.GetType();
    if (from->CastsTo(as))
       return symbol;
