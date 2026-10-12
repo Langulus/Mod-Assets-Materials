@@ -145,7 +145,7 @@ GLSL GLSL::Type() {
 inline GLSL GLSL::Type(DMeta meta) {
    meta = meta->GetMostConcrete();
 
-   if (meta->CastsTo<A::Number>()) {
+   if (meta->CastsTo<Math::Number>()) {
       // Scalars, vectors, matrices, quaternions, all based on numbers  
       Letter prefix {};
       RTTI::Base base;
@@ -177,7 +177,7 @@ inline GLSL GLSL::Type(DMeta meta) {
 
       // If this is reached, then we have a vector/matrix/quaternion    
       Text token = prefix;
-      if (meta->CastsTo<A::Matrix>()) {
+      if (meta->CastsTo<Math::Matrix>()) {
          // Find the number of columns in the matrix                    
          RTTI::Base matbase;
          size_t columns {};
@@ -208,7 +208,7 @@ inline GLSL GLSL::Type(DMeta meta) {
             token += Text {rows};
          }
       }
-      else if (meta->CastsTo<A::Vector>()) {
+      else if (meta->CastsTo<Math::Vector>()) {
          token += "vec";
          token += Text {base.mCount};
       }
