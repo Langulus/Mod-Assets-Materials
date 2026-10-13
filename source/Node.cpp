@@ -269,7 +269,7 @@ void Node::Randomize(Verb& verb) {
    verb.ForEachDeep([&](Many const& group) {
       group.ForEach(
          [&](Text const& token) { method = token; },
-         [&](const DMeta& t)    { otype = t; }
+         [&](DMeta const& t)    { otype = t; }
       );
    });
 
