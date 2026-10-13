@@ -24,11 +24,11 @@ Texture::Texture(Describe describe)
    InnerCreate();
 
    // Extract texture id, decides to which texture slot to bind         
-   if (mDescriptor.ExtractTrait<Traits::Image>(mTextureId))
+   if (mDescriptor.ExtractTag<Tags::Image>(mTextureId))
       VERBOSE_NODE("Texture id changed to: ", mTextureId);
 
-   // Extract Traits::File, if any                                      
-   Many file; mDescriptor.ExtractTrait<Traits::Path>(file);
+   // Extract Tags::File, if any                                      
+   Many file; mDescriptor.ExtractTag<Tags::Path>(file);
    if (file) {
       mTexture = CreateTexture(file);
       VERBOSE_NODE("Texture generator changed to: ", mTexture);
@@ -76,7 +76,7 @@ void Texture::Detach() {
 ///   @return the produced texture                                            
 auto Texture::CreateTexture(Many const& descriptor) -> Ref<Things::Image> {
    auto local = Recipe::From<Things::Image>(descriptor);
-   local << Traits::Parent {this}; // Ref {this}
+   local << Tags::Parent {this}; // Ref {this}
    Verbs::Create creator {&local};
    return GetMaterial()->RunIn(creator)->As<Things::Image*>();
 }
@@ -118,7 +118,7 @@ auto Texture::GenerateKeyframe(Temporal const&) -> GLSL {
          [&](Code const& code) {
             // Generate keyframe from GASM code                         
             auto uvNode = Nodes::Value::Local(
-               this, Tag::From<Traits::Sampler, Vec2>(), mRate, 
+               this, Tag::From<Tags::Sampler, Vec2>(), mRate, 
                uv.IsEmpty() ? GetTextureCoordinates() : uv
             );
             uvNode.DoGASM(code);
@@ -137,7 +137,7 @@ auto Texture::GenerateKeyframe(Temporal const&) -> GLSL {
                Verb::ExecuteVerb(environment, creator);
                creator->ForEachDeep([&](A::Texture* t) {
                   t->Generate();
-                  auto uniform = GetProducer()->AddInput(Rate::Auto, Tag::From<Traits::Texture>(t), true);
+                  auto uniform = GetProducer()->AddInput(Rate::Auto, Tag::From<Tags::Texture>(t), true);
                   symbol = GetPixel(
                      uniform,
                      uv.IsEmpty() ? GetTextureCoordinates() : uv,
@@ -158,12 +158,12 @@ auto Texture::GenerateKeyframe(Temporal const&) -> GLSL {
 
    // Fallback for when only channel ID is available                    
    if (symbol.IsEmpty() && usingChannelId) {
-      const auto texture = GetValue<Traits::Texture>();
-      const auto& trait = texture.GetOutputTrait();
+      const auto texture = GetValue<Tags::Texture>();
+      const auto& tag = texture.GetOutputTrait();
       symbol = GetPixel(
          texture.GetOutputSymbol(), 
          uv.IsEmpty() ? GetTextureCoordinates() : uv, 
-         trait.GetMeta()
+         tag.GetMeta()
       );
    }*/
 
@@ -305,7 +305,7 @@ auto Texture::Generate() -> const Symbol& {
    }
 
    // Multiple texture channels                                         
-   auto channel = GetSymbol<Traits::Texture>(GetRate(), false);
+   auto channel = GetSymbol<Tags::Texture>(GetRate(), false);
    LANGULUS_ASSERT(!channel.IsEmpty(), Material, "No texture channel available")
    const GLSL define = "vec4 texturized = Texturize(" + channel + ", " + uv + ");\n\n";
    Commit(ShaderToken::Texturize, define);

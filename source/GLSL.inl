@@ -65,14 +65,14 @@ LANGULUS(INLINED)
 GLSL::GLSL(DMeta meta)
    : GLSL {GLSL::Type(meta)} {}
 
-/// Meta trait -> GLSL serializer                                             
-///   @param trait - trait to serialize                                       
+/// Meta tag -> GLSL serializer                                             
+///   @param tag - tag to serialize                                       
 LANGULUS(INLINED)
 GLSL::GLSL(TMeta meta)
-   : Text {"trait", meta.GetToken()} {}
+   : Text {"tag", meta.GetToken()} {}
 
 /// Meta constant -> GLSL serializer                                          
-///   @param trait - trait to serialize                                       
+///   @param tag - tag to serialize                                       
 LANGULUS(INLINED)
 GLSL::GLSL(CMeta) {
    TODO(); //expand the constant

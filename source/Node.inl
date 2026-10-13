@@ -74,8 +74,8 @@ size_t Node::ForEachChild(F&& call) {
    return counter;
 }
 
-/// Add a local variable to the node, with a specific trait and initial value 
-///   @tparam T - type of trait to associate with the value                   
+/// Add a local variable to the node, with a specific tag and initial value 
+///   @tparam T - type of tag to associate with the value                   
 ///   @tparam D - data type of the value (deducible)                          
 ///   @param value - the value itself                                         
 ///   @param variable - optional name for the variable; if not name is given  
@@ -88,8 +88,8 @@ auto Node::AddLocal(D&& value, Token const& variable) -> const Symbol& {
    return mLocalsT[meta].Last();
 }
 
-/// Add a literal to the node, with a specific trait and value                
-///   @tparam T - type of trait to associate with the value                   
+/// Add a literal to the node, with a specific tag and value                
+///   @tparam T - type of tag to associate with the value                   
 ///   @tparam D - data type of the value (deducible)                          
 ///   @param value - the value itself                                         
 ///   @return reference to the symbol that corresponds to the input           
@@ -119,7 +119,7 @@ auto Node::ExposeData(Token const& pattern, ARGS&&... a) -> Symbol& {
 ///   @tparam ...ARGS - optional arguments, if symbol is a function template  
 ///                     these arguments can be DMetas, or TMetas, or both by  
 ///                     providing a Tag with a given type                   
-///   @tparam T - the trait type of the output                                
+///   @tparam T - the tag type of the output                                
 ///   @tparam D - the data type of the output (or return type of function)    
 ///   @param pattern - the symbol name/function template                      
 ///   @param a... - parameters, in case pattern is a function template        
@@ -134,7 +134,7 @@ auto Node::ExposeTrait(Token const& pattern, ARGS&&... a) -> Symbol& {
 /// Select a symbol from the node hierarchy (const)                           
 /// Checks local symbols first, then climbs up the hierarchy up to Root,      
 /// where it starts selecting global material inputs/constants                
-///   @param t - trait type filter                                            
+///   @param t - tag type filter                                            
 ///   @param d - data type filter                                             
 ///   @param r - rate filter                                                  
 ///   @param i - index filter                                                 
@@ -147,7 +147,7 @@ auto Node::GetSymbol(TMeta t, DMeta d, RefreshRate r, Index i) const -> const Sy
 /// Select a symbol from the node hierarchy                                   
 /// Checks local symbols first, then climbs up the hierarchy up to Root,      
 /// where it starts selecting global material inputs/constants                
-///   @tparam T - trait type filter (use void to disable)                     
+///   @tparam T - tag type filter (use void to disable)                     
 ///   @tparam D - data type filter (use void to disable)                      
 ///   @param r - rate filter                                                  
 ///   @param i - index filter                                                 
@@ -155,7 +155,7 @@ auto Node::GetSymbol(TMeta t, DMeta d, RefreshRate r, Index i) const -> const Sy
 template<class T, class D> LANGULUS(INLINED)
 auto Node::GetSymbol(RefreshRate r, Index i) -> Symbol* {
    static_assert(CT::Void<T> or CT::Tag<T>,
-      "T must be either trait, or void");
+      "T must be either tag, or void");
    static_assert(CT::Void<D> or CT::Data<D>,
       "D must be either data type, or void");
 
@@ -165,7 +165,7 @@ auto Node::GetSymbol(RefreshRate r, Index i) -> Symbol* {
 /// Select a symbol from the node hierarchy (const)                           
 /// Checks local symbols first, then climbs up the hierarchy up to Root,      
 /// where it starts selecting global material inputs/constants                
-///   @tparam T - trait type filter (use void to disable)                     
+///   @tparam T - tag type filter (use void to disable)                     
 ///   @tparam D - data type filter (use void to disable)                      
 ///   @param r - rate filter                                                  
 ///   @param i - index filter                                                 

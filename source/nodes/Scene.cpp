@@ -61,9 +61,9 @@ const Symbol& Scene::GenerateLines() {
       const auto count = geometry->GetLineCount();
       for (size_t i = 0; i < count; ++i) {
          // Extract each line, and convert it to shader code            
-         auto position = geometry->GetLineTrait<Traits::Place>(i);
+         auto position = geometry->GetLineTrait<Tags::Place>(i);
          LANGULUS_ASSERT(position, Material,
-            "Can't rasterize a line without Traits::Place");
+            "Can't rasterize a line without Tags::Place");
 
          if (not position.template CastsTo<Vec3>(1))
             TODO();
@@ -142,7 +142,7 @@ const Symbol& Scene::GenerateSDF() {
    AddDefine("Scene", Text::TemplateRt(SceneFunction, scene));
 
    // Expose scene usage                                                
-   return ExposeTrait<Traits::D, float>("Scene({})", Traits::Place::OfType<Vec3>());
+   return ExposeTrait<Tags::D, float>("Scene({})", Tags::Place::OfType<Vec3>());
 }
 
 /// Generate scene code                                                       
@@ -170,23 +170,23 @@ const Symbol& Scene::GenerateTriangles() {
       const auto geometry = mMaterial->RunIn(creator)->As<Things::Mesh*>();
       const auto count = geometry->GetTriangleCount();
       for (size_t i = 0; i < count; ++i) {
-         auto position = geometry->template GetTriangleTrait<Traits::Place>(i);
+         auto position = geometry->template GetTriangleTrait<Tags::Place>(i);
          LANGULUS_ASSERT(position, Material,
-            "Can't rasterize a triangle without Traits::Place");
+            "Can't rasterize a triangle without Tags::Place");
 
          if (not position.template CastsTo<Vec3>(1))
             TODO();
 
-         auto normal = geometry->template GetTriangleTrait<Traits::Aim>(i);
+         auto normal = geometry->template GetTriangleTrait<Tags::Aim>(i);
          LANGULUS_ASSERT(normal, Material,
-            "Can't rasterize a triangle without Traits::Aim");
+            "Can't rasterize a triangle without Tags::Aim");
 
          if (not normal.template CastsTo<Vec3>(1))
             TODO();
 
-         auto texture = geometry->GetTriangleTrait<Traits::Sampler>(i);
+         auto texture = geometry->GetTriangleTrait<Tags::Sampler>(i);
          LANGULUS_ASSERT(texture, Material,
-            "Can't rasterize a triangle without Traits::Sampler");
+            "Can't rasterize a triangle without Tags::Sampler");
 
          if (not texture.template CastsTo<Vec2>(1))
             TODO();

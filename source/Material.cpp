@@ -20,21 +20,21 @@ Material::Material(Things::AssetModule* producer, Many const& desc)
    Logger::Verbose(Self(), "Initializing...");
 
    // Extract default rate if any                                       
-   if (not desc.ExtractTrait<Traits::Rate>(mDefaultRate))
+   if (not desc.ExtractTag<Tags::Rate>(mDefaultRate))
       desc.ExtractData(mDefaultRate);
 
-   // Scan descriptor for Traits::Input and Traits::Output              
-   desc.ForEachDeep([&](Tag const& trait) {
+   // Scan descriptor for Tags::Input and Tags::Output              
+   desc.ForEachDeep([&](Tag const& tag) {
       auto commonRate = Rate::Auto;
 
-      trait.ForEachDeep([&](Many const& part) {
+      tag.ForEachDeep([&](Many const& part) {
          part.ForEach(
             [&](RefreshRate  i) noexcept { commonRate = i; },
             [&](Tag const& i) noexcept {
                // Add material input/output                             
-               if (trait.IsTrait<Traits::Input>())
+               if (tag.IsTrait<Tags::Input>())
                   AddInput(commonRate, i, true);
-               else if (trait.IsTrait<Traits::Output>())
+               else if (tag.IsTrait<Tags::Output>())
                   AddOutput(commonRate, i, true);
                else
                   TODO(); // Add constants?
@@ -61,19 +61,19 @@ void Material::Create(Verb& verb) {
 }
 
 /// Generate shaders                                                          
-///   @param trait - the trait to generate                                    
-///   @param index - trait group to generate                                  
+///   @param tag - the tag to generate                                    
+///   @param index - tag group to generate                                  
 ///   @return true if data was generated                                      
-bool Material::Generate(TMeta trait, size_t) {
-   const auto found = mDataListMap.FindIt(trait);
+bool Material::Generate(TMeta tag, size_t) {
+   const auto found = mDataListMap.FindIt(tag);
    if (found)
       return true;
 
    // Reserve shader stages inside the Asset's data list map, in the    
-   // Traits::Shader bucket. This marks that this material has been     
+   // Tags::Shader bucket. This marks that this material has been     
    // generated from now on, even if a specific stage doesn't exist.    
-   mDataListMap.Insert(trait);
-   mDataListMap[trait].New(ShaderStage::Counter, GLSL {});
+   mDataListMap.Insert(tag);
+   mDataListMap[tag].New(ShaderStage::Counter, GLSL {});
 
    // If a vertex shader is missing, add a default one                  
    GLSL& vs = GetStage(ShaderStage::Vertex);
@@ -141,7 +141,7 @@ void Material::Commit(RefreshRate rate, Token const& place, Token const& additio
 ///   @param stage - the stage index                                          
 ///   @return the code associated with the stage                              
 GLSL& Material::GetStage(size_t stage) {
-   auto stages = GetDataList<Traits::Shader>();
+   auto stages = GetDataList<Tags::Shader>();
    LglsAssumeDev(stages,
       "No data inside material");
    LglsAssumeDev(stage < ShaderStage::Counter,
@@ -181,7 +181,7 @@ void Material::ForEachStage(auto&& call) {
    }
 }
 
-/// Add an external input trait                                               
+/// Add an external input tag                                               
 ///   @param rate - the rate at which the input will be refreshed             
 ///   @param t - the input to add                                             
 ///   @param allowDuplicates - whether multiple such traits are allowed       
@@ -216,7 +216,7 @@ GLSL Material::AddInput(RefreshRate rate, Tag const& t, bool allowDuplicates) {
    // Add the new input                                                 
    inputs << proto;
    const auto symbol = GenerateInputName(rate, proto);
-   if (t.IsTrait<Traits::Image>())
+   if (t.IsTrait<Tags::Image>())
       ++mConsumedSamplers;
 
    VERBOSE_NODE("Added input ", Logger::Cyan, proto.GetTag(),
@@ -271,32 +271,32 @@ void Material::AddDefine(RefreshRate rate, Token const& name, const GLSL& code) 
 
 /// Generate input name                                                       
 ///   @param rate - the rate at which the input is declared                   
-///   @param trait - the trait tag for the input                              
+///   @param tag - the tag tag for the input                              
 ///   @return the variable name to access the input                           
-GLSL Material::GenerateInputName(RefreshRate rate, Tag const& trait) const {
-   if (trait.IsTrait<Traits::Image>()) {
+GLSL Material::GenerateInputName(RefreshRate rate, Tag const& tag) const {
+   if (tag.IsTrait<Tags::Image>()) {
       // Samplers are handled differently                               
-      return {trait.GetTag(), mConsumedSamplers};
+      return {tag.GetTag(), mConsumedSamplers};
    }
    else if (not rate.IsUniform()) {
       // Name is for a vertex attribute or varying                      
-      return {"in", trait.GetTag()};
+      return {"in", tag.GetTag()};
    }
 
    // Uniform name inside a uniform buffer                              
    auto rateTxt = static_cast<Text>(rate);
    auto lastns = rateTxt.Find<true>(':');
-   return Text::TemplateRt("Per{}.{}", rateTxt.Select(lastns + 1), trait.GetTag());
+   return Text::TemplateRt("Per{}.{}", rateTxt.Select(lastns + 1), tag.GetTag());
 }
 
 /// Generate output name                                                      
 ///   @param rate - the rate at which the output is declared                  
-///   @param trait - the trait tag for the output                             
+///   @param tag - the tag tag for the output                             
 ///   @return the variable name to access the output                          
-GLSL Material::GenerateOutputName(RefreshRate rate, Tag const& trait) const {
+GLSL Material::GenerateOutputName(RefreshRate rate, Tag const& tag) const {
    LANGULUS_ASSERT(rate.IsShaderStage(), Material,
       "Can't have an output outside a shader stage rate");
-   return {"out", trait.GetTag()};
+   return {"out", tag.GetTag()};
 }
 
 /// Generate uniform buffer descriptions for all shader stages                
@@ -310,7 +310,7 @@ void Material::GenerateUniforms() {
          continue;
 
       // Define the rate-dedicated uniform buffer, if there's at least  
-      // one trait available                                            
+      // one tag available                                            
       //    @param {0} - set index, should be 0 for static uniforms,    
       //                 and 1 for dynamic uniforms                     
       //    @param {1} - binding index, derived from                    
@@ -329,20 +329,20 @@ void Material::GenerateUniforms() {
       // Generate the list of uniform variables inside the buffer       
       GLSL body;
       TMany<GLSL> names;
-      for (auto& trait : traits) {
+      for (auto& tag : traits) {
          // Skip textures for now                                       
-         if (trait.IsTrait<Traits::Image>())
+         if (tag.IsTrait<Tags::Image>())
             continue;
 
-         LANGULUS_ASSERT(trait.IsTyped(),  Material,
+         LANGULUS_ASSERT(tag.IsTyped(),  Material,
             "Uniform is not typed");
-         LANGULUS_ASSERT(trait.GetTag(), Material,
-            "Uniform has undefined trait");
+         LANGULUS_ASSERT(tag.GetTag(), Material,
+            "Uniform has undefined tag");
 
-         const GLSL type {trait.GetType()};
-         const GLSL name {trait.GetTag()};
+         const GLSL type {tag.GetType()};
+         const GLSL name {tag.GetTag()};
          body += Text::TemplateRt("{} {};", type, name);
-         if (&trait != &traits.Last())
+         if (&tag != &traits.Last())
             body += '\n';
          names << name;
       }
@@ -380,23 +380,23 @@ void Material::GenerateUniforms() {
    // Samplers always use layout set #2 for now                         
    size_t textureNumber = 0;
    auto& traits = GetInputs(Rate::Renderable);
-   for (auto& trait : traits) {
+   for (auto& tag : traits) {
       // Skip anything BUT textures                                     
-      if (not trait.IsTrait<Traits::Image>())
+      if (not tag.IsTrait<Tags::Image>())
          continue;
 
       // Define each sampler using this layout                          
       //    @param {0} - binding index, each unique texture view should 
       //                 get a unique index                             
-      //    @param {1} - sampler type, deduced from the trait data type 
-      //    @param {2} - the trait name, extracted from trait id        
+      //    @param {1} - sampler type, deduced from the tag data type 
+      //    @param {2} - the tag name, extracted from tag id        
       constexpr auto layout = R"shader(
          layout(set = 2, binding = {0})
          uniform {1} {2}{0};
       )shader";
 
-      const GLSL type {trait.GetType()};
-      const GLSL name {trait.GetTag()};
+      const GLSL type {tag.GetType()};
+      const GLSL name {tag.GetTag()};
       const auto ubo = Text::TemplateRt(layout, textureNumber, type, name);
 
       // Add texture to each stage it is used in                        
@@ -504,12 +504,12 @@ void Material::InitializeFromShadertoy(const GLSL& code) {
    Commit(Rate::Pixel, ShaderToken::Defines,
       "#define iFragment vec2(gl_FragCoord.x, iResolution.y - gl_FragCoord.y)");
 
-   // Maps a code token to an input trait by using a macro              
-   auto integrate = [&](Tag const& trait, Token const& keyword) {
+   // Maps a code token to an input tag by using a macro              
+   auto integrate = [&](Tag const& tag, Token const& keyword) {
       if (not code.FindKeyword(keyword))
          return;
 
-      const auto input = AddInput(Rate::Pixel, trait, false);
+      const auto input = AddInput(Rate::Pixel, tag, false);
       constexpr auto layout = R"shader(
          #define {1} {2}
       )shader";
@@ -519,20 +519,20 @@ void Material::InitializeFromShadertoy(const GLSL& code) {
    };
 
    // Satisfy traits                                                    
-   integrate(Traits::Time  {}, "iTime");
-   integrate(Traits::Size  {}, "iResolution");
-   integrate(Traits::Image {}, "iChannel0");
-   integrate(Traits::View  {}, "iView");
+   integrate(Tags::Time  {}, "iTime");
+   integrate(Tags::Size  {}, "iResolution");
+   integrate(Tags::Image {}, "iChannel0");
+   integrate(Tags::View  {}, "iView");
 
    /*TODO
-   for snippets that are not from shadertoy, search trait symbols
-   integrate(Tag::From<Traits::ViewProjectTransformInverted>());
-   integrate(Tag::From<Traits::ViewProjectTransform>());
-   integrate(Tag::From<Traits::ViewTransformInverted>());
-   integrate(Tag::From<Traits::ViewTransform>());
-   integrate(Tag::From<Traits::Resolution>());
-   integrate(Tag::From<Traits::Time>());
-   integrate(Tag::From<Traits::FOV>());*/
+   for snippets that are not from shadertoy, search tag symbols
+   integrate(Tag::From<Tags::ViewProjectTransformInverted>());
+   integrate(Tag::From<Tags::ViewProjectTransform>());
+   integrate(Tag::From<Tags::ViewTransformInverted>());
+   integrate(Tag::From<Tags::ViewTransform>());
+   integrate(Tag::From<Tags::Resolution>());
+   integrate(Tag::From<Tags::Time>());
+   integrate(Tag::From<Tags::FOV>());*/
 
    // Wrap the shadertoy's mainImage function in our own ShadertoyMain  
    Commit(Rate::Pixel, ShaderToken::Functions, R"shader(

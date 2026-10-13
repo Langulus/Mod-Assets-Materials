@@ -19,11 +19,11 @@ Raster::Raster(Describe&& descriptor)
    : Resolvable {this}
    , Node {*descriptor} {
    // Extract settings                                                  
-   mDescriptor.ExtractTrait<Tags::Bilateral>(mBilateral);
-   mDescriptor.ExtractTrait<Tags::Signed>(mSigned);
-   mDescriptor.ExtractTrait<Tags::Topology>(mTopology);
-   mDescriptor.ExtractTrait<Tags::Min>(mDepth.mMin);
-   mDescriptor.ExtractTrait<Tags::Max>(mDepth.mMax);
+   mDescriptor.ExtractTag<Tags::Bilateral>(mBilateral);
+   mDescriptor.ExtractTag<Tags::Signed>(mSigned);
+   mDescriptor.ExtractTag<Tags::Topology>(mTopology);
+   mDescriptor.ExtractTag<Tags::Min>(mDepth.mMin);
+   mDescriptor.ExtractTag<Tags::Max>(mDepth.mMax);
 
    // Extract rasterizer body                                           
    //mDescriptor.ExtractData(mCode);
@@ -78,7 +78,7 @@ const Symbol& Raster::GeneratePerPixel() {
 /// the default hardware rasterizer. Exposes symbols PerPixel as a result     
 ///   @return NoSymbol, as functionality is in the fixed-pipeline             
 const Symbol& Raster::GeneratePerVertex() {
-   auto position = GetSymbol<Traits::Place>(Rate::Vertex);
+   auto position = GetSymbol<Tags::Place>(Rate::Vertex);
    (void)position;
 
    AddDefine("gl_PerVertex",
@@ -92,9 +92,9 @@ const Symbol& Raster::GeneratePerVertex() {
    );
 
    // We expose the built-in pixel shader inputs                        
-   ExposeTrait<Traits::Place, Vec4>("gl_FragCoord");
-   ExposeTrait<Traits::Place, Vec2>("gl_PointCoord");
-   ExposeTrait<Traits::Signed, bool>("gl_FrontFacing");
+   ExposeTrait<Tags::Place, Vec4>("gl_FragCoord");
+   ExposeTrait<Tags::Place, Vec2>("gl_PointCoord");
+   ExposeTrait<Tags::Signed, bool>("gl_FrontFacing");
    return NoSymbol;
 }
 

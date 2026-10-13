@@ -53,7 +53,7 @@ constexpr Token FBMTemplate = R"shader(
 )shader";
 
 /// FBM octave template                                                       
-///   @param {0} - mass trait for the current octave                          
+///   @param {0} - mass tag for the current octave                          
 ///   @param {1} - octave code to execute                                     
 constexpr Token FBMOctave = R"shader(
       f += {0} * {1};

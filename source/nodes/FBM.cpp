@@ -18,12 +18,12 @@ FBM::FBM(Describe&& descriptor)
    : Resolvable {this}
    , Node {*descriptor} {
    // Extract number of octaves                                         
-   mDescriptor.ExtractTrait<Traits::Count>(mOctaveCount);
+   mDescriptor.ExtractTag<Tags::Count>(mOctaveCount);
    LANGULUS_ASSERT(mOctaveCount >= 1, Material,
       "Bad FBM cycle count", mOctaveCount);
 
    // Extract base weight                                               
-   mDescriptor.ExtractTrait<Traits::Mass>(mBaseWeight);
+   mDescriptor.ExtractTag<Tags::Mass>(mBaseWeight);
    LANGULUS_ASSERT(mBaseWeight != 0, Material,
       "Base weight is zero", mOctaveCount);
 
@@ -58,9 +58,9 @@ const Symbol& FBM::Generate() {
       Nodes::Value temporary {this};
 
       // Update inputs for each octave, octave code might use them      
-      temporary.template AddLiteral<Traits::Index>(i);
-      temporary.template AddLiteral<Traits::Mass>(f);
-      temporary.template AddLocal<Traits::Place>(Vec2 {}, "uv");
+      temporary.template AddLiteral<Tags::Index>(i);
+      temporary.template AddLiteral<Tags::Mass>(f);
+      temporary.template AddLocal<Tags::Place>(Vec2 {}, "uv");
 
       // Run octave code for this node                                  
       temporary.Run(mCode);
@@ -77,5 +77,5 @@ const Symbol& FBM::Generate() {
    AddDefine("FBM", Text::TemplateRt(FBMTemplate, "", "", octaves));
 
    // Expose the FBM function template for use by the other nodes       
-   return ExposeData<Real>("FBM({})", Traits::Place::OfType<Vec2>());
+   return ExposeData<Real>("FBM({})", Tags::Place::OfType<Vec2>());
 }

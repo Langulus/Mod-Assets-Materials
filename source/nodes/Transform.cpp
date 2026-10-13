@@ -107,9 +107,9 @@ GLSL Transform::GetInterpolator(size_t idx) {
    size_t progress = 0;
    for (const auto& keyframe : mKeyframes.Values()) {
       keyframe.ForEachDeep([&](const Block& group) {
-         group.ForEach([&](Tag const& trait) {
-            if (trait.TraitIs<Traits::Interpolator>())
-               interpolator = trait.AsCast<VerbID>();
+         group.ForEach([&](Tag const& tag) {
+            if (tag.TraitIs<Tags::Interpolator>())
+               interpolator = tag.AsCast<VerbID>();
          });
       });
 
@@ -133,9 +133,9 @@ GLSL Transform::GetTimer(size_t idx) {
    pcptr progress = 0;
    for (const auto& keyframe : mKeyframes.Values()) {
       keyframe.ForEachDeep([&](const Block& group) {
-         group.ForEach([&](Tag const& trait) {
-            if (trait.TraitIs<Traits::Time>())
-               timer = static_cast<Many const&>(trait);
+         group.ForEach([&](Tag const& tag) {
+            if (tag.TraitIs<Tags::Time>())
+               timer = static_cast<Many const&>(tag);
          });
       });
 
@@ -562,7 +562,7 @@ void Transform::GenerateDefinition() {
    {
       define += "vec4 Transform(in vec3 point) {\n   return ";
       if (timerCode.IsEmpty()) {
-         auto time = GetSymbol<Traits::Time>(RRate::PerTick);
+         auto time = GetSymbol<Tags::Time>(RRate::PerTick);
          define += "Animate(" + time + ")";
       }
       else define += "Animate(" + timerCode + ")";

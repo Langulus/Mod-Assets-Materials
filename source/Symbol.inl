@@ -30,7 +30,7 @@ Symbol Symbol::Function(RefreshRate rate, Token const& pattern, ARGS&&... argume
 }
 
 /// Create a symbol for a literal constant                                    
-///   @tparam T - type of the trait associated with the literal               
+///   @tparam T - type of the tag associated with the literal               
 ///   @tparam D - type of data (deducible)                                    
 ///   @param rate - the refresh rate of the symbol                            
 ///   @param value - the value of the literal                                 
@@ -46,7 +46,7 @@ Symbol Symbol::Literal(RefreshRate rate, D&& value) {
 }
 
 /// Create a symbol for a variable                                            
-///   @tparam T - type of the trait associated with the variable              
+///   @tparam T - type of the tag associated with the variable              
 ///   @tparam D - type of data (deducible)                                    
 ///   @param rate - the refresh rate of the symbol                            
 ///   @param value - the initial value of the variable                        

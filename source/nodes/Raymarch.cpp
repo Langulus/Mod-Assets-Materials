@@ -18,7 +18,7 @@ Raymarch::Raymarch(Describe&& descriptor)
    : Resolvable {this}
    , Node {*descriptor} {
    // Extract RaymarchConfig.mDetail                                    
-   mDescriptor.ExtractTrait<Traits::Count>(mDetail);
+   mDescriptor.ExtractTag<Tags::Count>(mDetail);
    LANGULUS_ASSERT(mDetail > 0, Material,
       "Bad raymarch iterations", mDetail);
 
@@ -27,7 +27,7 @@ Raymarch::Raymarch(Describe&& descriptor)
    //         RaymarchConfig.mFarStride                                 
    //         RaymarchConfig.mBaseStride                                
    //         RaymarchConfig.mMinStep                                   
-   mDescriptor.ExtractTrait<Traits::Input>(
+   mDescriptor.ExtractTag<Tags::Input>(
       mPrecision, mFarMax, mFarStride, mBaseStride, mMinStep
    );
    LANGULUS_ASSERT(mPrecision > 0, Material,

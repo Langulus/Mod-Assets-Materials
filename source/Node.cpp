@@ -41,7 +41,7 @@ Node::Node(Many const& descriptor)
    , mDescriptor {descriptor} {
    // Add the Node to the hierarchy                                     
    Node* owner {};
-   if (descriptor.ExtractTrait<Traits::Parent>(owner) and owner)
+   if (descriptor.ExtractTag<Tags::Parent>(owner) and owner)
       owner->AddChild(this);
 }
 
@@ -75,8 +75,8 @@ void Node::InnerCreate() {
 
    // Save the rate                                                     
    mRate = GetMaterial()->GetDefaultRate();
-   if (mDescriptor.ExtractTrait<Traits::Rate>(mRate)) {
-      VERBOSE_NODE("Rate changed (via trait) to: ", mRate);
+   if (mDescriptor.ExtractTag<Tags::Rate>(mRate)) {
+      VERBOSE_NODE("Rate changed (via tag) to: ", mRate);
    }
 
    // Create all sub constructs                                         
@@ -113,7 +113,7 @@ auto Node::NodeFromConstruct(Recipe const& construct) -> Node* {
    // Create a child node                                               
    VERBOSE_NODE_TAB("Adding node: ", construct);
    Recipe local {construct};
-   local << Traits::Parent {this};
+   local << Tags::Parent {this};
 
    auto newInstance = Many::FromMeta(construct.GetType());
    newInstance.Emplace(IndexBack, local.GetDescriptor());
@@ -142,7 +142,7 @@ void Node::Create(Verb& verb) {
 }
 
 /// Select symbols/nodes inside the node hierarchy                            
-/// You can filter based on data/node type, trait, index, and rate            
+/// You can filter based on data/node type, tag, index, and rate            
 ///   @param verb - the selection verb                                        
 void Node::Select(Verb& verb) {
    if (verb.GetMass() <= 0)
@@ -161,9 +161,9 @@ void Node::Select(Verb& verb) {
          [&](Real  i) noexcept { index = static_cast<Index>(i); },
          [&](TMeta t) noexcept { traitFilter = t; },
          [&](DMeta t) noexcept { dataFilter = t; },
-         [&](Tag const& trait) noexcept {
-            dataFilter  = trait.GetType();
-            traitFilter = trait.GetTag();
+         [&](Tag const& tag) noexcept {
+            dataFilter  = tag.GetType();
+            traitFilter = tag.GetTag();
          }
       );
    });
@@ -361,13 +361,13 @@ Text Node::DebugEnd() const {
 }
 
 /// Convert a symbol from one type to another in GLSL                         
-///   @param trait - the trait to convert                                     
-///   @param symbol - the symbol for the original trait                       
+///   @param tag - the tag to convert                                     
+///   @param symbol - the symbol for the original tag                       
 ///   @param as - the type to convert to                                      
 ///   @param filler - number for filling empty stuff                          
 ///   @return the new symbol                                                  
-GLSL ConvertSymbol(Tag const& trait, const GLSL& symbol, DMeta as, Real filler) {
-   auto from = trait.GetType();
+GLSL ConvertSymbol(Tag const& tag, const GLSL& symbol, DMeta as, Real filler) {
+   auto from = tag.GetType();
    if (from->CastsTo(as))
       return symbol;
    
@@ -453,56 +453,56 @@ GLSL ConvertSymbol(Tag const& trait, const GLSL& symbol, DMeta as, Real filler) 
          return symbol;
    }
 
-   LANGULUS_OOPS(Material, "Can't convert symbol `", trait, "` to `", as, '`');
+   LANGULUS_OOPS(Material, "Can't convert symbol `", tag, "` to `", as, '`');
    return {};
 }
 
 /// Get a default type of each of the standard traits                         
-///   @param trait - the trait definition                                     
-///   @return the default trait properties                                    
-Node::DefaultTrait Node::GetDefaultTrait(TMeta trait) {
+///   @param tag - the tag definition                                     
+///   @return the default tag properties                                    
+Node::DefaultTrait Node::GetDefaultTrait(TMeta tag) {
    static TUnorderedMap<TMeta, DefaultTrait> properties;
 
    if (not properties) {
-      properties.Insert(MetaOf<Traits::Time>(),
+      properties.Insert(MetaOf<Tags::Time>(),
          DefaultTrait {MetaOf<Real>(), Rate::Tick});
 
-      properties.Insert(MetaOf<Traits::MousePosition>(),
+      properties.Insert(MetaOf<Tags::MousePosition>(),
          DefaultTrait {MetaOf<Vec2>(), Rate::Tick});
-      properties.Insert(MetaOf<Traits::MouseScroll>(),
+      properties.Insert(MetaOf<Tags::MouseScroll>(),
          DefaultTrait {MetaOf<Vec2>(), Rate::Tick});
 
-      properties.Insert(MetaOf<Traits::Size>(),
+      properties.Insert(MetaOf<Tags::Size>(),
          DefaultTrait {MetaOf<Vec2>(), Rate::Camera});
-      properties.Insert(MetaOf<Traits::Projection>(),
+      properties.Insert(MetaOf<Tags::Projection>(),
          DefaultTrait {MetaOf<Mat4>(), Rate::Camera});
-      properties.Insert(MetaOf<Traits::FOV>(),
+      properties.Insert(MetaOf<Tags::FOV>(),
          DefaultTrait {MetaOf<Real>(), Rate::Camera});
 
-      properties.Insert(MetaOf<Traits::View>(),
+      properties.Insert(MetaOf<Tags::View>(),
          DefaultTrait {MetaOf<Mat4>(), Rate::Level});
 
-      properties.Insert(MetaOf<Traits::Image>(),
+      properties.Insert(MetaOf<Tags::Image>(),
          DefaultTrait {MetaOf<Things::Image>(), Rate::Renderable});
 
-      properties.Insert(MetaOf<Traits::Transform>(),
+      properties.Insert(MetaOf<Tags::Transform>(),
          DefaultTrait {MetaOf<Mat4>(), Rate::Instance});
 
-      properties.Insert(MetaOf<Traits::Place>(),
+      properties.Insert(MetaOf<Tags::Place>(),
          DefaultTrait {MetaOf<Vec3>(), Rate::Vertex});
-      properties.Insert(MetaOf<Traits::Sampler>(),
+      properties.Insert(MetaOf<Tags::Sampler>(),
          DefaultTrait {MetaOf<Vec2>(), Rate::Vertex});
-      properties.Insert(MetaOf<Traits::Aim>(),
+      properties.Insert(MetaOf<Tags::Aim>(),
          DefaultTrait {MetaOf<Vec3>(), Rate::Vertex});
       properties.Insert(MetaOf<Tags::Color>(),
          DefaultTrait {MetaOf<Vec4>(), Rate::Vertex});
    }
 
-   auto found = properties.Find(trait);
+   auto found = properties.Find(tag);
    if (found)
       return properties.GetValue(found);
 
-   LANGULUS_OOPS(Material, "Undefined default trait: ", trait);
+   LANGULUS_OOPS(Material, "Undefined default tag: ", tag);
    return {};
 }
 
@@ -535,7 +535,7 @@ DMeta Node::DecayToGLSLType(DMeta meta) {
 /// Select a symbol from the node hierarchy                                   
 /// Checks local symbols first, then climbs up the hierarchy up to Root, where
 /// it starts selecting global material inputs/constants                      
-///   @param t - trait type filter                                            
+///   @param t - tag type filter                                            
 ///   @param d - data type filter                                             
 ///   @param r - rate filter                                                  
 ///   @param i - index filter                                                 
