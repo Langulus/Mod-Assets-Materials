@@ -70,7 +70,7 @@ SCENARIO("Shader generation", "[materials]") {
 
       #if LANGULUS_FEATURE(MANAGED_REFLECTION)
          WHEN("The material is created via tokens") {
-            auto producedMaterial = root.CreateUnitToken("Material", Code(MaterialCode));
+            auto producedMaterial = root.CreatePartToken("Material", Code(MaterialCode));
             
             // Update once                                              
             root.Update({});
