@@ -42,7 +42,7 @@ namespace Langulus::CT
 ///   GLSL code container & tools                                             
 ///                                                                           
 struct GLSL : Text {
-   LANGULUS(NAME) "GLSL";
+   using CTTI_Named = Yes<"GLSL";
    LANGULUS(ACT_AS) GLSL;
    LANGULUS_BASES(Text);
 

@@ -20,7 +20,7 @@ GLSL::GLSL(Text const& other)
 ///   @param other - text container to move                                   
 LANGULUS(INLINED)
 GLSL::GLSL(Text&& other)
-   : Text {Forward<Text>(other)} {}
+   : Text {LglsFwd(other)} {}
 
 /// Convert a block to GLSL code                                              
 ///   @param block - the block to convert to GLSL                             
@@ -240,7 +240,7 @@ inline GLSL GLSL::Type(DMeta meta) {
 ///   @return the concatenated text container                                 
 template<class T> requires CT::ConvertibleToGLSL<Deint<T>> LANGULUS(INLINED)
 GLSL GLSL::operator + (T&& rhs) const {
-   return Text::ConcatInner<GLSL>(Forward<T>(rhs));
+   return Text::ConcatInner<GLSL>(LglsFwd(rhs));
 }
 
 /// Concatenate (destructively) text containers                               
@@ -248,5 +248,5 @@ GLSL GLSL::operator + (T&& rhs) const {
 ///   @return a reference to this container                                   
 template<class T> requires CT::ConvertibleToGLSL<Deint<T>> LANGULUS(INLINED)
 GLSL& GLSL::operator += (T&& rhs) {
-   return Text::ConcatRelativeInner<GLSL>(Forward<T>(rhs));
+   return Text::ConcatRelativeInner<GLSL>(LglsFwd(rhs));
 }

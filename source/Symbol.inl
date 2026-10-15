@@ -25,7 +25,7 @@ Symbol Symbol::Function(RefreshRate rate, Token const& pattern, ARGS&&... argume
    s.mRate = rate;
    s.mTrait.SetType<T>();
    s.mCode = pattern;
-   (s.PushArgument(Forward<ARGS>(arguments)), ...);
+   (s.PushArgument(LglsFwd(arguments)), ...);
    return s;
 }
 
@@ -41,7 +41,7 @@ Symbol Symbol::Literal(RefreshRate rate, D&& value) {
 
    Symbol s;
    s.mRate = rate;
-   s.mTrait = T {Forward<D>(value)};
+   s.mTrait = T {LglsFwd(value)};
    return s;
 }
 
@@ -58,7 +58,7 @@ Symbol Symbol::Variable(RefreshRate rate, D&& value, Token const& name) {
 
    Symbol s;
    s.mRate = rate;
-   s.mTrait = T {Forward<D>(value)};
+   s.mTrait = T {LglsFwd(value)};
    s.mCode = name;
    return s;
 }
@@ -86,5 +86,5 @@ void Symbol::PushArgument(TMeta&& type) {
 
 LANGULUS(INLINED)
 void Symbol::PushArgument(Tag&& type) {
-   mArguments << Forward<Tag>(type);
+   mArguments << LglsFwd(type);
 }

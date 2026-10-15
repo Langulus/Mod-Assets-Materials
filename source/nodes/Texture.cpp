@@ -36,7 +36,7 @@ Texture::Texture(Describe describe)
    
    // Create texture generators from sub-constructs                     
    mDescriptor.ForEachConstruct([&](Recipe const& c) {
-      if (c.CastsTo<Things::Image>() or c.CastsTo<A::File>()) {
+      if (c.CastsTo<Things::Image>() or c.CastsTo<Things::File>()) {
          mTexture = CreateTexture(c);
          VERBOSE_NODE("Texture generator changed to: ", mTexture);
       }
@@ -130,7 +130,7 @@ auto Texture::GenerateKeyframe(Temporal const&) -> GLSL {
          },
          [&](Recipe const& construct) {
             bool relevantConstruct = false;
-            if (construct.CastsTo<A::File>()) {
+            if (construct.CastsTo<Things::File>()) {
                // Generate keyframe from a texture file                 
                Verbs::Create creator {&construct};
                Many environment = mProducer->GetOwners();

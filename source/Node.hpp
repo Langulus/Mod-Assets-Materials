@@ -33,13 +33,13 @@ protected:
 
    // Local variables, usually used by selection verbs, when executing  
    // Code in the context of the Node                                   
-   TUnorderedMap<TMeta, Symbols> mLocalsT;
-   TUnorderedMap<DMeta, Symbols> mLocalsD;
+   TMapUnsorted<TMeta, Symbols> mLocalsT;
+   TMapUnsorted<DMeta, Symbols> mLocalsD;
 
    // The outputs this Node exposes                                     
    // They can be Selected from the hierarchy                           
-   TUnorderedMap<TMeta, Symbols> mOutputsT;
-   TUnorderedMap<DMeta, Symbols> mOutputsD;
+   TMapUnsorted<TMeta, Symbols> mOutputsT;
+   TMapUnsorted<DMeta, Symbols> mOutputsD;
 
    // Whether or not this node's code has already been generated        
    // Protects against infinite dependency loops                        

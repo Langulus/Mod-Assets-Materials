@@ -461,7 +461,7 @@ GLSL ConvertSymbol(Tag const& tag, const GLSL& symbol, DMeta as, Real filler) {
 ///   @param tag - the tag definition                                     
 ///   @return the default tag properties                                    
 Node::DefaultTrait Node::GetDefaultTrait(TMeta tag) {
-   static TUnorderedMap<TMeta, DefaultTrait> properties;
+   static TMapUnsorted<TMeta, DefaultTrait> properties;
 
    if (not properties) {
       properties.Insert(MetaOf<Tags::Time>(),

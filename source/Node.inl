@@ -68,9 +68,9 @@ size_t Node::RemoveChild(Node* node) {
 ///   @return the number of successulf executions of the call                 
 template<class F>
 size_t Node::ForEachChild(F&& call) {
-   auto counter = mChildren.ForEach(Forward<F>(call));
+   auto counter = mChildren.ForEach(LglsFwd(call));
    for (auto child : mChildren)
-      counter += child->ForEachChild(Forward<F>(call));
+      counter += child->ForEachChild(LglsFwd(call));
    return counter;
 }
 
@@ -84,7 +84,7 @@ size_t Node::ForEachChild(F&& call) {
 template<CT::Tag T, CT::NotVoid D>
 auto Node::AddLocal(D&& value, Token const& variable) -> const Symbol& {
    const auto meta = MetaOf<T>();
-   mLocalsT[meta] << Symbol::Variable<T>(mRate, Forward<D>(value), variable);
+   mLocalsT[meta] << Symbol::Variable<T>(mRate, LglsFwd(value), variable);
    return mLocalsT[meta].Last();
 }
 
@@ -96,7 +96,7 @@ auto Node::AddLocal(D&& value, Token const& variable) -> const Symbol& {
 template<CT::Tag T, CT::NotVoid D>
 auto Node::AddLiteral(D&& value) -> const Symbol& {
    const auto meta = MetaOf<T>();
-   mLocalsT[meta] << Symbol::Literal<T>(mRate, Forward<D>(value));
+   mLocalsT[meta] << Symbol::Literal<T>(mRate, LglsFwd(value));
    return mLocalsT[meta].Last();
 }
 
@@ -111,7 +111,7 @@ auto Node::AddLiteral(D&& value) -> const Symbol& {
 template<CT::NotVoid T, class... ARGS>
 auto Node::ExposeData(Token const& pattern, ARGS&&... a) -> Symbol& {
    const auto meta = MetaOf<T>();
-   mLocalsD[meta] << Symbol::Function<T>(mRate, pattern, Forward<ARGS>(a)...);
+   mLocalsD[meta] << Symbol::Function<T>(mRate, pattern, LglsFwd(a)...);
    return mLocalsD[meta].Last();
 }
 
@@ -127,7 +127,7 @@ auto Node::ExposeData(Token const& pattern, ARGS&&... a) -> Symbol& {
 template<CT::Tag T, CT::NotVoid D, class... ARGS>
 auto Node::ExposeTrait(Token const& pattern, ARGS&&... a) -> Symbol& {
    const auto meta = MetaOf<T>();
-   mLocalsT[meta] << Symbol::Function<D>(mRate, pattern, Forward<ARGS>(a)...);
+   mLocalsT[meta] << Symbol::Function<D>(mRate, pattern, LglsFwd(a)...);
    return mLocalsT[meta].Last();
 }
 
