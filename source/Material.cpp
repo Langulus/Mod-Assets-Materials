@@ -184,7 +184,7 @@ void Material::ForEachStage(auto&& call) {
 /// Add an external input tag                                               
 ///   @param rate - the rate at which the input will be refreshed             
 ///   @param t - the input to add                                             
-///   @param allowDuplicates - whether multiple such traits are allowed       
+///   @param allowDuplicates - whether multiple such tags are allowed       
 ///   @return the generated symbol name                                       
 GLSL Material::AddInput(RefreshRate rate, Tag const& t, bool allowDuplicates) {
    // Get local rate and type, if any                                   
@@ -227,7 +227,7 @@ GLSL Material::AddInput(RefreshRate rate, Tag const& t, bool allowDuplicates) {
 /// Add an output to the material                                             
 ///   @param rate - the rate at which the output is refreshed                 
 ///   @param t - the output to add                                            
-///   @param allowDuplicates - whether multiple such traits are allowed       
+///   @param allowDuplicates - whether multiple such tags are allowed       
 ///   @return the generated symbol name                                       
 GLSL Material::AddOutput(RefreshRate rate, Tag const& t, bool allowDuplicates) {
    // Get local rate and type, if any                                   
@@ -305,8 +305,8 @@ void Material::GenerateUniforms() {
    // Tick, Pass, Camera, Level, Renderable, Instance                   
    for (size_t i = 0; i < RefreshRate::UniformCount; ++i) {
       const RefreshRate rate = i + RefreshRate::UniformBegin;
-      auto& traits = GetInputs(i);
-      if (not traits)
+      auto& tags = GetInputs(i);
+      if (not tags)
          continue;
 
       // Define the rate-dedicated uniform buffer, if there's at least  
@@ -329,7 +329,7 @@ void Material::GenerateUniforms() {
       // Generate the list of uniform variables inside the buffer       
       GLSL body;
       TMany<GLSL> names;
-      for (auto& tag : traits) {
+      for (auto& tag : tags) {
          // Skip textures for now                                       
          if (tag.IsTrait<Tags::Image>())
             continue;
@@ -342,7 +342,7 @@ void Material::GenerateUniforms() {
          const GLSL type {tag.GetType()};
          const GLSL name {tag.GetTag()};
          body += Text::TemplateRt("{} {};", type, name);
-         if (&tag != &traits.Last())
+         if (&tag != &tags.Last())
             body += '\n';
          names << name;
       }
@@ -365,7 +365,7 @@ void Material::GenerateUniforms() {
 
       // Add the uniform buffer to each stage it is used in             
       ForEachStage([&](GLSL& code) {
-         for (const auto& name : names) {
+         for (auto const& name : names) {
             if (not code.Find(name))
                continue;
 
@@ -379,8 +379,8 @@ void Material::GenerateUniforms() {
    // Textures are always updated per renderable for now                
    // Samplers always use layout set #2 for now                         
    size_t textureNumber = 0;
-   auto& traits = GetInputs(Rate::Renderable);
-   for (auto& tag : traits) {
+   auto& tags = GetInputs(Rate::Renderable);
+   for (auto& tag : tags) {
       // Skip anything BUT textures                                     
       if (not tag.IsTrait<Tags::Image>())
          continue;
@@ -415,7 +415,7 @@ void Material::GenerateUniforms() {
 void Material::GenerateInputs() {
    for (size_t i = 0; i < ShaderStage::Counter; ++i) {
       const RefreshRate rate = RefreshRate::StagesBegin + i;
-      const auto& inputs = GetInputs(rate);
+      auto const& inputs = GetInputs(rate);
       size_t location = 0;
 
       //TODO make sure that correct amount of locations are used,
@@ -455,7 +455,7 @@ void Material::GenerateInputs() {
 void Material::GenerateOutputs() {
    for (size_t i = 0; i < ShaderStage::Counter; ++i) {
       const RefreshRate rate = RefreshRate::StagesBegin + i;
-      const auto& outputs = GetOutputs(rate);
+      auto const& outputs = GetOutputs(rate);
       size_t location = 0;
 
       //TODO make sure that correct amount of locations are used,
@@ -518,7 +518,7 @@ void Material::InitializeFromShadertoy(const GLSL& code) {
          Text::TemplateRt(layout, keyword, input));
    };
 
-   // Satisfy traits                                                    
+   // Satisfy tags                                                    
    integrate(Tags::Time  {}, "iTime");
    integrate(Tags::Size  {}, "iResolution");
    integrate(Tags::Image {}, "iChannel0");

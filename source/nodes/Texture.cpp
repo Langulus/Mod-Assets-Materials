@@ -159,7 +159,7 @@ auto Texture::GenerateKeyframe(Temporal const&) -> GLSL {
    // Fallback for when only channel ID is available                    
    if (symbol.IsEmpty() && usingChannelId) {
       const auto texture = GetValue<Tags::Texture>();
-      const auto& tag = texture.GetOutputTrait();
+      auto const& tag = texture.GetOutputTrait();
       symbol = GetPixel(
          texture.GetOutputSymbol(), 
          uv.IsEmpty() ? GetTextureCoordinates() : uv, 
@@ -272,7 +272,7 @@ auto Texture::Generate() -> const Symbol& {
 
    for (size_t i = 0; i < mKeyframes.GetCount(); ++i) {
       // Generate a branch for each channel                             
-      const auto& id = mKeyframes.GetKey(i);
+      auto const& id = mKeyframes.GetKey(i);
       if (id != mKeyframes.Keys()[0])
          texturize += "   else \n";
 

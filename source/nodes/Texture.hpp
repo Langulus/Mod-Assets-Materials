@@ -15,7 +15,7 @@ namespace Nodes
    ///                                                                        
    ///   Texture node                                                         
    ///                                                                        
-   /// Utilizes available sampler traits, sets up uniform samplers and loads  
+   /// Utilizes available sampler tags, sets up uniform samplers and loads  
    /// or generates static textures if required. Supports texture animations  
    /// of all kinds, solid colors, etc.                                       
    ///                                                                        

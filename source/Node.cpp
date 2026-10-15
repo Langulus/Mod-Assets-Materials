@@ -68,7 +68,7 @@ Node::~Node() {
    Detach();
 }
 
-/// Parse the normalized descriptor and create subnodes, apply traits         
+/// Parse the normalized descriptor and create subnodes, apply tags         
 /// This is a common parser used in all nodes' constructors                   
 void Node::InnerCreate() {
    VERBOSE_NODE_TAB("Creating node...");
@@ -88,7 +88,7 @@ void Node::InnerCreate() {
    mDescriptor.ForEachTail([&](Many const& data) {
       if (data.CastsTo<Code>()) {
          // Execute code snippet                                        
-         const auto& subcode = data.Get<Code>();
+         auto const& subcode = data.Get<Code>();
          VERBOSE_NODE_TAB("Executing subcode: ", subcode);
          Run(subcode);
       }
@@ -457,7 +457,7 @@ GLSL ConvertSymbol(Tag const& tag, const GLSL& symbol, DMeta as, Real filler) {
    return {};
 }
 
-/// Get a default type of each of the standard traits                         
+/// Get a default type of each of the standard tags                         
 ///   @param tag - the tag definition                                     
 ///   @return the default tag properties                                    
 Node::DefaultTrait Node::GetDefaultTrait(TMeta tag) {
@@ -544,7 +544,7 @@ auto Node::GetSymbol(TMeta t, DMeta d, RefreshRate r, Index i) -> Symbol* {
    size_t nth = i.IsSpecial() ? 0 : i.GetOffsetUnsafe();
 
    if (t) {
-      // Filter by traits                                               
+      // Filter by tags                                               
       const auto foundt = mLocalsT.Find(t);
       if (foundt) {
          auto& candidates = mLocalsT.GetValue(foundt);

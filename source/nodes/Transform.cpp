@@ -102,10 +102,10 @@ GLSL Transform::GetAim(size_t idx, bool&) {
 ///   @param idx - the index of the keyframe                                  
 ///   @return the generated GLSL code                                         
 GLSL Transform::GetInterpolator(size_t idx) {
-   // Scan for interpolator traits up to the requested keyframe idx     
+   // Scan for interpolator tags up to the requested keyframe idx     
    auto interpolator = Verbs::Lerp::ID;
    size_t progress = 0;
-   for (const auto& keyframe : mKeyframes.Values()) {
+   for (auto const& keyframe : mKeyframes.Values()) {
       keyframe.ForEachDeep([&](const Block& group) {
          group.ForEach([&](Tag const& tag) {
             if (tag.TraitIs<Tags::Interpolator>())
@@ -128,10 +128,10 @@ GLSL Transform::GetInterpolator(size_t idx) {
 ///   @param idx - the index of the keyframe                                  
 ///   @return the generated GLSL code                                         
 GLSL Transform::GetTimer(size_t idx) {
-   // Scan for interpolator traits up to the requested keyframe idx     
+   // Scan for interpolator tags up to the requested keyframe idx     
    Many timer;
    pcptr progress = 0;
-   for (const auto& keyframe : mKeyframes.Values()) {
+   for (auto const& keyframe : mKeyframes.Values()) {
       keyframe.ForEachDeep([&](const Block& group) {
          group.ForEach([&](Tag const& tag) {
             if (tag.TraitIs<Tags::Time>())

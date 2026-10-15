@@ -25,7 +25,7 @@ auto Camera::Generate() -> const Symbol& {
    Descend();
    AddDefine("CameraResult", CameraResult);
 
-   // Check traits in descriptor to figure out what kind of camera we   
+   // Check tags in descriptor to figure out what kind of camera we   
    // are creating                                                      
    bool explicitCamera = false;
    mDescriptor.ForEachDeep([&](const Tags::View& view) {
