@@ -18,8 +18,8 @@ using namespace Nodes;
 /// Scene node descriptor-constructor                                         
 ///   @param desc - the node descriptor                                       
 Scene::Scene(Describe&& descriptor)
-   : Resolvable {this}
-   , Node {*descriptor} {
+   : /*Resolvable {this}
+   ,*/ Node {*descriptor} {
    // Notice how we don't satisfy the rest of the descriptor            
    // How the scene is generated depends on whether we're rasterizing,  
    // raymarching, raytracing, etc.                                     
@@ -61,16 +61,14 @@ const Symbol& Scene::GenerateLines() {
       const auto count = geometry->GetLineCount();
       for (size_t i = 0; i < count; ++i) {
          // Extract each line, and convert it to shader code            
-         auto position = geometry->GetLineTrait<Tags::Place>(i);
-         LANGULUS_ASSERT(position, Material,
-            "Can't rasterize a line without Tags::Place");
+         auto position = geometry->GetLineTag<Tags::Place>(i);
+         LglsAssert(position, "Can't rasterize a line without Tags::Place");
 
          if (not position.template CastsTo<Vec3>(1))
             TODO();
 
-         auto color = geometry->GetLineTrait<Tags::Color>(i);
-         LANGULUS_ASSERT(color, Material,
-            "Can't rasterize a line without Tags::Color");
+         auto color = geometry->GetLineTag<Tags::Color>(i);
+         LglsAssert(color, "Can't rasterize a line without Tags::Color");
 
          if (not color.template CastsTo<Vec4>(1))
             TODO();
@@ -90,7 +88,7 @@ const Symbol& Scene::GenerateLines() {
       }
    });
 
-   LANGULUS_ASSERT(countCombined, Material, "No lines available");
+   LglsAssert(countCombined, Material, "No lines available");
 
    // Aggregate all lines in an array:                                  
    // const Line cLines[N] = Line[N](                                   
@@ -136,7 +134,7 @@ const Symbol& Scene::GenerateSDF() {
       scene = Text::TemplateRt(SDFUnionUsage, scene, element);
    });
 
-   LANGULUS_ASSERT(scene, Material, "SDF scene is empty");
+   LglsAssert(scene, "SDF scene is empty");
 
    // Define the scene function                                         
    AddDefine("Scene", Text::TemplateRt(SceneFunction, scene));
@@ -170,23 +168,20 @@ const Symbol& Scene::GenerateTriangles() {
       const auto geometry = mMaterial->RunIn(creator)->As<Things::Mesh*>();
       const auto count = geometry->GetTriangleCount();
       for (size_t i = 0; i < count; ++i) {
-         auto position = geometry->template GetTriangleTrait<Tags::Place>(i);
-         LANGULUS_ASSERT(position, Material,
-            "Can't rasterize a triangle without Tags::Place");
+         auto position = geometry->template GetTriangleTag<Tags::Place>(i);
+         LglsAssert(position, "Can't rasterize a triangle without Tags::Place");
 
          if (not position.template CastsTo<Vec3>(1))
             TODO();
 
-         auto normal = geometry->template GetTriangleTrait<Tags::Aim>(i);
-         LANGULUS_ASSERT(normal, Material,
-            "Can't rasterize a triangle without Tags::Aim");
+         auto normal = geometry->template GetTriangleTag<Tags::Aim>(i);
+         LglsAssert(normal, "Can't rasterize a triangle without Tags::Aim");
 
          if (not normal.template CastsTo<Vec3>(1))
             TODO();
 
-         auto texture = geometry->GetTriangleTrait<Tags::Sampler>(i);
-         LANGULUS_ASSERT(texture, Material,
-            "Can't rasterize a triangle without Tags::Sampler");
+         auto texture = geometry->GetTriangleTag<Tags::Sampler>(i);
+         LglsAssert(texture, "Can't rasterize a triangle without Tags::Sampler");
 
          if (not texture.template CastsTo<Vec2>(1))
             TODO();
@@ -212,7 +207,7 @@ const Symbol& Scene::GenerateTriangles() {
       }
    });
 
-   LANGULUS_ASSERT(countCombined, Material, "No triangles available");
+   LglsAssert(countCombined, "No triangles available");
 
    // Aggregate all triangles in an array:                              
    // const Triangle cTriangles[N] = Triangle[N](                       
