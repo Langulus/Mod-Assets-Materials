@@ -87,13 +87,13 @@ auto Texture::CreateTexture(Many const& descriptor) -> Ref<Things::Image> {
 ///   @param result - the resulting color format                              
 ///   @return generated texture call                                          
 auto GetPixel(const GLSL& sampler, const GLSL& uv, DMeta result) -> GLSL {
-   LANGULUS_ASSERT(result, Material, "Unknown texture format");
+   LglsAssert(result, "Unknown texture format");
    const auto pixel = Text::TemplateRt(GetPixelFunction, sampler, uv);
    switch (result->GetMemberCount()) {
    case 1:           return pixel + ".rrrr";
    case 2:           return pixel + ".rgrg";
    case 3: case 4:   return pixel;
-   default: LANGULUS_THROW(Material, "Unsupported texture format");
+   default: throw Exception("Unsupported texture format");
    }
 }
 
@@ -151,7 +151,7 @@ auto Texture::GenerateKeyframe(Temporal const&) -> GLSL {
                TODO();
             }
 
-            LANGULUS_ASSERT(relevantConstruct, Material, "Irrelevant keyframe construct");
+            LglsAssert(relevantConstruct, "Irrelevant keyframe construct");
          }
       );
    });
@@ -167,7 +167,7 @@ auto Texture::GenerateKeyframe(Temporal const&) -> GLSL {
       );
    }*/
 
-   LANGULUS_ASSERT(symbol, Material, "Bad keyframe symbol");
+   LglsAssert(symbol, "Bad keyframe symbol");
    return symbol;
 }
 
@@ -306,7 +306,7 @@ auto Texture::Generate() -> const Symbol& {
 
    // Multiple texture channels                                         
    auto channel = GetSymbol<Tags::Texture>(GetRate(), false);
-   LANGULUS_ASSERT(!channel.IsEmpty(), Material, "No texture channel available")
+   LglsAssert(!channel.IsEmpty(), "No texture channel available")
    const GLSL define = "vec4 texturized = Texturize(" + channel + ", " + uv + ");\n\n";
    Commit(ShaderToken::Texturize, define);
    Expose<Tags::Color, Vec4>("texturized");*/

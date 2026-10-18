@@ -19,19 +19,17 @@ FBM::FBM(Describe&& descriptor)
    , Node {*descriptor} {
    // Extract number of octaves                                         
    mDescriptor.ExtractTag<Tags::Count>(mOctaveCount);
-   LANGULUS_ASSERT(mOctaveCount >= 1, Material,
-      "Bad FBM cycle count", mOctaveCount);
+   LglsAssert(mOctaveCount >= 1, "Bad FBM cycle count", mOctaveCount);
 
    // Extract base weight                                               
    mDescriptor.ExtractTag<Tags::Mass>(mBaseWeight);
-   LANGULUS_ASSERT(mBaseWeight != 0, Material,
-      "Base weight is zero", mOctaveCount);
+   LglsAssert(mBaseWeight != 0, "Base weight is zero", mOctaveCount);
 
    // Extract octave code                                               
    // That code also contains all required variables in the form of     
    // selection verbs                                                   
    mDescriptor.ExtractData(mCode);
-   //LANGULUS_ASSERT(mCode, Material, "No FBM octave code"); //TODO
+   //LglsAssert(mCode, "No FBM octave code"); //TODO
 }
 
 /// For logging                                                               

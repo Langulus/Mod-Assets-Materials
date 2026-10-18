@@ -237,9 +237,10 @@ GLSL Material::AddOutput(RefreshRate rate, Tag const& t, bool allowDuplicates) {
       [&](DMeta       r) noexcept { type = r; }
    );
 
-   LANGULUS_ASSERT(rate.IsShaderStage(), Material,
+   LglsAssert(rate.IsShaderStage(),
       "Can't add material outputs to rates, "
-      "that don't correspond to shader stages");
+      "that don't correspond to shader stages"
+   );
 
    if (not type)
       type = Node::GetDefaultTrait(t.GetTag()).mType;
@@ -294,8 +295,7 @@ GLSL Material::GenerateInputName(RefreshRate rate, Tag const& tag) const {
 ///   @param tag - the tag tag for the output                             
 ///   @return the variable name to access the output                          
 GLSL Material::GenerateOutputName(RefreshRate rate, Tag const& tag) const {
-   LANGULUS_ASSERT(rate.IsShaderStage(), Material,
-      "Can't have an output outside a shader stage rate");
+   LglsAssert(rate.IsShaderStage(), "Can't have an output outside a shader stage rate");
    return {"out", tag.GetTag()};
 }
 
@@ -334,10 +334,8 @@ void Material::GenerateUniforms() {
          if (tag.IsTrait<Tags::Image>())
             continue;
 
-         LANGULUS_ASSERT(tag.IsTyped(),  Material,
-            "Uniform is not typed");
-         LANGULUS_ASSERT(tag.GetTag(), Material,
-            "Uniform has undefined tag");
+         LglsAssert(tag.IsTyped(), "Uniform is not typed");
+         LglsAssert(tag.GetTag(), "Uniform has undefined tag");
 
          const GLSL type {tag.GetType()};
          const GLSL name {tag.GetTag()};
@@ -361,7 +359,7 @@ void Material::GenerateUniforms() {
             1, rate.GetDynamicUniformIndex(), GLSL {rate}, body
          );
       }
-      else LANGULUS_OOPS(Material, "Uniform rate neither static, nor dynamic");
+      else LglsError("Uniform rate neither static, nor dynamic");
 
       // Add the uniform buffer to each stage it is used in             
       ForEachStage([&](GLSL& code) {

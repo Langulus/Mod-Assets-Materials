@@ -19,8 +19,7 @@ Raymarch::Raymarch(Describe&& descriptor)
    , Node {*descriptor} {
    // Extract RaymarchConfig.mDetail                                    
    mDescriptor.ExtractTag<Tags::Count>(mDetail);
-   LANGULUS_ASSERT(mDetail > 0, Material,
-      "Bad raymarch iterations", mDetail);
+   LglsAssert(mDetail > 0, "Bad raymarch iterations", mDetail);
 
    // Extract RaymarchConfig.mPrecision                                 
    //         RaymarchConfig.mFarMax                                    
@@ -30,16 +29,11 @@ Raymarch::Raymarch(Describe&& descriptor)
    mDescriptor.ExtractTag<Tags::Input>(
       mPrecision, mFarMax, mFarStride, mBaseStride, mMinStep
    );
-   LANGULUS_ASSERT(mPrecision > 0, Material,
-      "Bad raymarching precision", mPrecision);
-   LANGULUS_ASSERT(mFarMax > 0, Material,
-      "Bad raymarching far plane", mFarMax);
-   LANGULUS_ASSERT(mFarStride > 0, Material,
-      "Bad raymarching far stride", mFarStride);
-   LANGULUS_ASSERT(mBaseStride > 0, Material,
-      "Bad raymarching base stride", mBaseStride);
-   LANGULUS_ASSERT(mMinStep > 0, Material,
-      "Bad raymarching min step", mMinStep);
+   LglsAssert(mPrecision  > 0, "Bad raymarching precision", mPrecision);
+   LglsAssert(mFarMax     > 0, "Bad raymarching far plane", mFarMax);
+   LglsAssert(mFarStride  > 0, "Bad raymarching far stride", mFarStride);
+   LglsAssert(mBaseStride > 0, "Bad raymarching base stride", mBaseStride);
+   LglsAssert(mMinStep    > 0, "Bad raymarching min step", mMinStep);
 }
 
 /// Generate raymarcher code                                                  
@@ -54,7 +48,7 @@ const Symbol& Raymarch::Generate() {
       scenes << scene.GenerateSDF();
    });
 
-   LANGULUS_ASSERT(scenes, Material, "No scenes available for raymarcher");
+   LglsAssert(scenes, "No scenes available for raymarcher");
 
    if (scenes.GetCount() > 1)
       TODO(); // another SDFUnion indirection required here

@@ -453,7 +453,7 @@ GLSL ConvertSymbol(Tag const& tag, const GLSL& symbol, DMeta as, Real filler) {
          return symbol;
    }
 
-   LANGULUS_OOPS(Material, "Can't convert symbol `", tag, "` to `", as, '`');
+   LglsError("Can't convert symbol `", tag, "` to `", as, '`');
    return {};
 }
 
@@ -502,7 +502,7 @@ Node::DefaultTrait Node::GetDefaultTrait(TMeta tag) {
    if (found)
       return properties.GetValue(found);
 
-   LANGULUS_OOPS(Material, "Undefined default tag: ", tag);
+   LglsError("Undefined default tag: ", tag);
    return {};
 }
 
@@ -528,7 +528,7 @@ DMeta Node::DecayToGLSLType(DMeta meta) {
    else if (meta->template CastsTo<Float>(1) or meta->template CastsTo<A::Number>(1))
       return MetaOf<Float>();
 
-   LANGULUS_OOPS(Material, "Can't decay type: ", meta);
+   LglsError("Can't decay type: ", meta);
    return nullptr;
 }
 

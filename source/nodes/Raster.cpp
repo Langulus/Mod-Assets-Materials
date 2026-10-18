@@ -27,7 +27,7 @@ Raster::Raster(Describe&& descriptor)
 
    // Extract rasterizer body                                           
    //mDescriptor.ExtractData(mCode);
-   //LANGULUS_ASSERT(!mCode.IsEmpty(), Material, "No rasterizer code");
+   //LglsAssert(!mCode.IsEmpty(), "No rasterizer code");
 
    if (not mTopology) {
       // Rasterizing triangles by default                               
@@ -48,7 +48,7 @@ const Symbol& Raster::GeneratePerPixel() {
       scenes << scene.GenerateTriangles();
    });
 
-   LANGULUS_ASSERT(scenes, Material, "No scenes available for rasterizer");
+   LglsAssert(scenes, "No scenes available for rasterizer");
 
    if (scenes.GetCount() > 1)
       TODO(); // multiple triangle lists
