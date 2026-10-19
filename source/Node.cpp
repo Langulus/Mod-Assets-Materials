@@ -80,7 +80,7 @@ void Node::InnerCreate() {
    }
 
    // Create all sub constructs                                         
-   mDescriptor.ForEachConstruct([&](Recipe const& c) {
+   mDescriptor.ForEachRecipe([&](Recipe const& c) {
       NodeFromConstruct(c);
    });
    

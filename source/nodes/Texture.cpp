@@ -35,7 +35,7 @@ Texture::Texture(Describe describe)
    }
    
    // Create texture generators from sub-constructs                     
-   mDescriptor.ForEachConstruct([&](Recipe const& c) {
+   mDescriptor.ForEachRecipe([&](Recipe const& c) {
       if (c.CastsTo<Things::Image>() or c.CastsTo<Things::File>()) {
          mTexture = CreateTexture(c);
          VERBOSE_NODE("Texture generator changed to: ", mTexture);

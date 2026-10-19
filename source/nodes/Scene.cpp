@@ -43,7 +43,7 @@ const Symbol& Scene::GenerateLines() {
    size_t countCombined = 0;
 
    // Get the lines of each geometry construct                          
-   mDescriptor.ForEachConstruct([&](Recipe const& c) {
+   mDescriptor.ForEachRecipe([&](Recipe const& c) {
       if (not c.CastsTo<Things::Mesh>())
          return;
 
@@ -115,7 +115,7 @@ const Symbol& Scene::GenerateSDF() {
    GLSL scene;
 
    // Get the SDF code for each geometry construct                      
-   mDescriptor.ForEachConstruct([&](Recipe const& c) {
+   mDescriptor.ForEachRecipe([&](Recipe const& c) {
       if (not c.CastsTo<Things::Mesh>())
          return;
 
@@ -150,7 +150,7 @@ const Symbol& Scene::GenerateTriangles() {
    size_t countCombined = 0;
 
    // Get the triangles of each geometry construct                      
-   mDescriptor.ForEachConstruct([&](Recipe const& c) {
+   mDescriptor.ForEachRecipe([&](Recipe const& c) {
       if (not c.CastsTo<Things::Mesh>())
          return;
 
