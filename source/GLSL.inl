@@ -12,7 +12,7 @@
 
 /// Construct by copying text                                                 
 ///   @param other - text container to shallow-copy                           
-LANGULUS(INLINED)
+/*LANGULUS(INLINED)
 GLSL::GLSL(Text const& other)
    : Text {other} {}
 
@@ -20,10 +20,10 @@ GLSL::GLSL(Text const& other)
 ///   @param other - text container to move                                   
 LANGULUS(INLINED)
 GLSL::GLSL(Text&& other)
-   : Text {LglsFwd(other)} {}
+   : Text {LglsFwd(other)} {}*/
 
 /// Convert a block to GLSL code                                              
-///   @param block - the block to convert to GLSL                             
+///   @param block the block to convert to GLSL                               
 GLSL::GLSL(const CT::Deep auto& block) : Text {} {
    if (block.IsOr())
       LANGULUS_THROW(GLSL, "GLSL doesn't support OR blocks");
@@ -60,19 +60,19 @@ GLSL::GLSL(const CT::Deep auto& block) : Text {} {
 }
 
 /// Meta data -> GLSL serializer                                              
-///   @param type - type to serialize                                         
+///   @param type type to serialize                                           
 LANGULUS(INLINED)
 GLSL::GLSL(DMeta meta)
    : GLSL {GLSL::Type(meta)} {}
 
-/// Meta tag -> GLSL serializer                                             
-///   @param tag - tag to serialize                                       
+/// Meta tag -> GLSL serializer                                               
+///   @param tag tag to serialize                                             
 LANGULUS(INLINED)
 GLSL::GLSL(TMeta meta)
    : Text {"tag", meta.GetToken()} {}
 
 /// Meta constant -> GLSL serializer                                          
-///   @param tag - tag to serialize                                       
+///   @param tag tag to serialize                                             
 LANGULUS(INLINED)
 GLSL::GLSL(CMeta) {
    TODO(); //expand the constant
@@ -116,8 +116,8 @@ GLSL::GLSL(const TMatrix<T, C, R>& matrix) {
 }
 
 /// Quaternion -> GLSL serializer                                             
-///   @tparam T - quaternion type (deducible)                                 
-///   @param quaternion - quaternion to serialize                             
+///   @tparam T quaternion type (deducible)                                   
+///   @param quaternion quaternion to serialize                               
 template<CT::Number T> LANGULUS(INLINED)
 GLSL::GLSL(const TQuaternion<T>& quaternion) {
    *this += GLSL::template Type<TQuaternion<T>>();
@@ -140,79 +140,91 @@ GLSL GLSL::Type() {
 }
 
 /// GLSL type string conversion                                               
-///   @param meta - the type                                                  
+///   @param meta the type                                                    
 ///   @return the GLSL string                                                 
 inline GLSL GLSL::Type(DMeta meta) {
-   meta = meta->GetMostConcrete();
+   meta = meta.GetMostConcrete();
 
-   if (meta->CastsTo<Math::Number>()) {
-      // Scalars, vectors, matrices, quaternions, all based on numbers  
-      Letter prefix {};
-      RTTI::Base base;
-      if (meta->GetBase<Float>(0, base)) {
-         if (base.mCount == 1)
+   // Scalars, vectors, matrices, quaternions, all based on numbers.    
+   // All we do here is decide the prefix, or early-return if scalar.   
+   if (meta.CastsTo<Math::Number>()) {
+      char prefix;
+      size_t scalar_size;
+
+      RTTI::DefinitionData::Base base;
+      if (meta.GetBase<float>(0, base)) {
+         scalar_size = sizeof(float);
+         if (meta.GetSize() == sizeof(float))
             return "float";   // Scalar                                 
       }
-      else if (meta->GetBase<Double>(0, base)) {
-         if (base.mCount == 1)
+      else if (meta.GetBase<double>(0, base)) {
+         scalar_size = sizeof(double);
+         if (meta.GetSize() == sizeof(double))
             return "double";  // Scalar                                 
          prefix = 'd';
       }
-      else if (meta->GetBase<uint32_t>(0, base)) {
-         if (base.mCount == 1)
+      else if (meta.GetBase<uint32_t>(0, base)) {
+         scalar_size = sizeof(uint32_t);
+         if (meta.GetSize() == sizeof(uint32_t))
             return "uint";    // Scalar                                 
          prefix = 'u';
       }
-      else if (meta->GetBase<int32_t>(0, base)) {
-         if (base.mCount == 1)
+      else if (meta.GetBase<int32_t>(0, base)) {
+         scalar_size = sizeof(int32_t);
+         if (meta.GetSize() == sizeof(int32_t))
             return "int";     // Scalar                                 
          prefix = 'i';
       }
-      else if (meta->GetBase<bool>(0, base)) {
-         if (base.mCount == 1)
+      else if (meta.GetBase<bool>(0, base)) {
+         scalar_size = sizeof(bool);
+         if (meta.GetSize() == sizeof(bool))
             return "bool";    // Scalar                                 
          prefix = 'b';
       }
-      else LANGULUS_THROW(GLSL, "Unsupported GLSL type");
+      else throw Exception("Unsupported GLSL type");
 
+      //                                                                
       // If this is reached, then we have a vector/matrix/quaternion    
       Text token = prefix;
-      if (meta->CastsTo<Math::Matrix>()) {
+      if (meta.CastsTo<Math::Matrix>()) {
          // Find the number of columns in the matrix                    
-         RTTI::Base matbase;
-         size_t columns {};
-         size_t rows {};
+         size_t cols = 0;
+         size_t rows = 0;
 
-         if (meta->GetBase<A::Vector>(0, matbase)) {
-            if (matbase.mCount == 1) {
-               // Single column, so return as vector                    
-               token += "vec";
-               token += Text {base.mCount};
-               return token;
-            }
-
-            columns = matbase.mCount;
-            rows = base.mCount / columns;
+         RTTI::DefinitionData::Base matbase;
+         if (meta.GetBase<Math::MatrixOfColumns<1>>(0, matbase)) {
+            // Single column, so return as vector                       
+            token += "vec";
+            token += meta.GetSize() / scalar_size;
+            return token;
          }
+         else if (meta.GetBase<Math::MatrixOfColumns<2>>(0, matbase))
+            cols = 2;
+         else if (meta.GetBase<Math::MatrixOfColumns<3>>(0, matbase))
+            cols = 3;
+         else if (meta.GetBase<Math::MatrixOfColumns<4>>(0, matbase))
+            cols = 4;
+         else throw Exception("Matrix has too many columns");
 
          // If reached, then we have a matrix                           
+         rows = meta.GetSize() / (cols * scalar_size);
          token += "mat";
-         if (columns == rows) {
+         if (cols == rows) {
             // Square matrix, so only one suffix number                 
-            token += Text {columns};
+            token += cols;
          }
          else {
             // Non-square matrix, so two suffix numbers                 
-            token += Text {columns};
+            token += cols;
             token += 'x';
-            token += Text {rows};
+            token += rows;
          }
       }
-      else if (meta->CastsTo<Math::Vector>()) {
+      else if (meta.CastsTo<Math::Vector>()) {
          token += "vec";
-         token += Text {base.mCount};
+         token += meta.GetSize() / scalar_size;
       }
-      else LANGULUS_THROW(GLSL, "Unsupported GLSL type");
+      else throw Exception("Unsupported GLSL type");
 
       return token;
    }
@@ -232,13 +244,13 @@ inline GLSL GLSL::Type(DMeta meta) {
       //gsampler2DMSArray   GL_TEXTURE_2D_MULTISAMPLE_ARRAY   Multisample Array Texture
    }
 
-   LANGULUS_THROW(GLSL, "Unsupported GLSL type");
+   throw Exception("Unsupported GLSL type");
 }
 
 /// Concatenate two text containers                                           
 ///   @param rhs - right hand side                                            
 ///   @return the concatenated text container                                 
-template<class T> requires CT::ConvertibleToGLSL<Deint<T>> LANGULUS(INLINED)
+/*template<class T> requires CT::ConvertibleToGLSL<Deint<T>> LANGULUS(INLINED)
 GLSL GLSL::operator + (T&& rhs) const {
    return Text::ConcatInner<GLSL>(LglsFwd(rhs));
 }
@@ -249,4 +261,4 @@ GLSL GLSL::operator + (T&& rhs) const {
 template<class T> requires CT::ConvertibleToGLSL<Deint<T>> LANGULUS(INLINED)
 GLSL& GLSL::operator += (T&& rhs) {
    return Text::ConcatRelativeInner<GLSL>(LglsFwd(rhs));
-}
+}*/

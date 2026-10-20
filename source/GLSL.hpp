@@ -8,10 +8,7 @@
 #pragma once
 #include "Export.hpp"
 
-LANGULUS_EXCEPTION(GLSL);
-
-struct GLSL;
-
+/*struct GLSL;
 
 namespace Langulus::CT
 {
@@ -35,16 +32,21 @@ namespace Langulus::CT
    concept ConvertibleToGLSL = ((
            Inner::ConvertibleToGLSLByOperator<T>
         or Inner::ConvertibleToGLSLByConstructor<T>) and ...);
-}
+}*/
 
 
 ///                                                                           
 ///   GLSL code container & tools                                             
 ///                                                                           
-struct GLSL : Text {
-   using CTTI_Named = Yes<"GLSL";
-   LANGULUS(ACT_AS) GLSL;
-   LANGULUS_BASES(Text);
+struct GLSL : Annies::Text {
+   using CTTI_ReflectAs = GLSL;
+   using CTTI_Named     = Yes<"GLSL">;
+   using CTTI_Bases     = Annies::Text;
+   
+   using DMeta          = RTTI::DMeta;
+   using TMeta          = RTTI::TMeta;
+   using CMeta          = RTTI::CMeta;
+   using VMeta          = RTTI::VMeta;
 
 private:
    /// GLSL template for each programmable shader stage                       
@@ -135,8 +137,8 @@ public:
    using Text::Text;
    using Text::operator ==;
 
-   GLSL(Text const&);
-   GLSL(Text&&);
+   //GLSL(Text const&);
+   //GLSL(Text&&);
 
    explicit GLSL(const CT::Deep auto&);
    explicit GLSL(DMeta);
@@ -166,17 +168,16 @@ public:
    ///                                                                        
    ///   Concatenation                                                        
    ///                                                                        
-   template<class T> requires CT::ConvertibleToGLSL<Deint<T>>
+   /*template<class T> requires CT::ConvertibleToGLSL<Deint<T>>
    GLSL operator + (T&&) const;
 
    template<class T> requires CT::ConvertibleToGLSL<Deint<T>>
-   GLSL& operator += (T&&);
+   GLSL& operator += (T&&);*/
 };
 
 namespace Langulus
 {
    /// Make a GLSL literal                                                    
-   LANGULUS(INLINED)
    GLSL operator ""_glsl(const char* text, ::std::size_t size) {
       return Annies::Text::From(text, size);
    }
