@@ -109,7 +109,7 @@ bool Material::Generate(TMeta tag, size_t) {
 /// Get material adapter for lower or higher level of detail                  
 ///   @param lod - the level-of-detail state                                  
 ///   @return a pointer to the material generator                             
-auto Material::GetLOD(const LOD&) const -> Ref<A::Material> {
+auto Material::GetLOD(const LOD&) const -> Ref<Things::Material> {
    TODO();
    return {};
 }

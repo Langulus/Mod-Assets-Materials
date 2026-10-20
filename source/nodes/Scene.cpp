@@ -8,7 +8,7 @@
 #include "Scene.hpp"
 #include "../Material.hpp"
 #include <Langulus/CppAPI/Mesh.hpp>
-#include <Langulus/Color.hpp>
+#include <Langulus/Math/Color.hpp>
 #include <Langulus/Vectors/TNormal.hpp>
 #include <Langulus/Vectors/TSampler.hpp>
 
@@ -42,7 +42,7 @@ const Symbol& Scene::GenerateLines() {
    GLSL lines;
    size_t countCombined = 0;
 
-   // Get the lines of each geometry construct                          
+   // Get the lines of each geometry recipe                          
    mDescriptor.ForEachRecipe([&](Recipe const& c) {
       if (not c.CastsTo<Things::Mesh>())
          return;
@@ -100,8 +100,8 @@ const Symbol& Scene::GenerateLines() {
    return ExposeData<Scene>("cLines");
 }
 
-/// Interpret a construct as an SDF function                                  
-///   @param what - the construct to reinterpret                              
+/// Interpret a recipe as an SDF function                                  
+///   @param what - the recipe to reinterpret                              
 ///   @param global - place where global definitions go                       
 ///   @return the generated scene function call                               
 GLSL InterpretAsSDF(Recipe const&, Material&) {
@@ -114,7 +114,7 @@ GLSL InterpretAsSDF(Recipe const&, Material&) {
 const Symbol& Scene::GenerateSDF() {
    GLSL scene;
 
-   // Get the SDF code for each geometry construct                      
+   // Get the SDF code for each geometry recipe                      
    mDescriptor.ForEachRecipe([&](Recipe const& c) {
       if (not c.CastsTo<Things::Mesh>())
          return;
@@ -149,7 +149,7 @@ const Symbol& Scene::GenerateTriangles() {
    GLSL triangles;
    size_t countCombined = 0;
 
-   // Get the triangles of each geometry construct                      
+   // Get the triangles of each geometry recipe                      
    mDescriptor.ForEachRecipe([&](Recipe const& c) {
       if (not c.CastsTo<Things::Mesh>())
          return;

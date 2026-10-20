@@ -56,14 +56,14 @@ SCENARIO("Shader generation", "[materials]") {
          );
          
          WHEN("The material is created via abstractions") {
-            auto producedMaterial = root.CreateUnit<A::Material>(Code(MaterialCode));
+            auto producedMaterial = root.CreateUnit<Things::Material>(Code(MaterialCode));
 
             // Update once                                              
             root.Update({});
             root.DumpHierarchy();
 
             REQUIRE(producedMaterial.GetCount() == 1);
-            REQUIRE(producedMaterial.CastsTo<A::Material>(1));
+            REQUIRE(producedMaterial.CastsTo<Things::Material>(1));
             REQUIRE(producedMaterial.IsSparse());
             REQUIRE(root.GetUnits().GetCount() == 1);
          }
@@ -77,7 +77,7 @@ SCENARIO("Shader generation", "[materials]") {
             root.DumpHierarchy();
 
             REQUIRE(producedMaterial.GetCount() == 1);
-            REQUIRE(producedMaterial.CastsTo<A::Material>(1));
+            REQUIRE(producedMaterial.CastsTo<Things::Material>(1));
             REQUIRE(producedMaterial.IsSparse());
             REQUIRE(root.GetUnits().GetCount() == 1);
          }

@@ -34,13 +34,13 @@ Texture::Texture(Describe describe)
       VERBOSE_NODE("Texture generator changed to: ", mTexture);
    }
    
-   // Create texture generators from sub-constructs                     
+   // Create texture generators from sub-recipes                     
    mDescriptor.ForEachRecipe([&](Recipe const& c) {
       if (c.CastsTo<Things::Image>() or c.CastsTo<Things::File>()) {
          mTexture = CreateTexture(c);
          VERBOSE_NODE("Texture generator changed to: ", mTexture);
       }
-      else Logger::Warning(Self(), "Ignored construct: ", c);
+      else Logger::Warning(Self(), "Ignored recipe: ", c);
    });
    
    // Consider all other provided data                                  
@@ -128,11 +128,11 @@ auto Texture::GenerateKeyframe(Temporal const&) -> GLSL {
             // Generate keyframe from a static color                    
             symbol += color;
          },
-         [&](Recipe const& construct) {
+         [&](Recipe const& recipe) {
             bool relevantConstruct = false;
-            if (construct.CastsTo<Things::File>()) {
+            if (recipe.CastsTo<Things::File>()) {
                // Generate keyframe from a texture file                 
-               Verbs::Create creator {&construct};
+               Verbs::Create creator {&recipe};
                Many environment = mProducer->GetOwners();
                Verb::ExecuteVerb(environment, creator);
                creator->ForEachDeep([&](A::Texture* t) {
@@ -147,11 +147,11 @@ auto Texture::GenerateKeyframe(Temporal const&) -> GLSL {
                });
             }
             else {
-               //TODO support other kinds of constructs?
+               //TODO support other kinds of recipes?
                TODO();
             }
 
-            LglsAssert(relevantConstruct, "Irrelevant keyframe construct");
+            LglsAssert(relevantConstruct, "Irrelevant keyframe recipe");
          }
       );
    });

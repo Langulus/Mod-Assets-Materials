@@ -79,7 +79,7 @@ void Node::InnerCreate() {
       VERBOSE_NODE("Rate changed (via tag) to: ", mRate);
    }
 
-   // Create all sub constructs                                         
+   // Create all sub recipes                                         
    mDescriptor.ForEachRecipe([&](Recipe const& c) {
       NodeFromConstruct(c);
    });
@@ -101,21 +101,21 @@ void Node::InnerCreate() {
    });
 }
 
-/// Create a child node from a construct                                      
-///   @param construct - the construct to satisfy                             
+/// Create a child node from a recipe                                      
+///   @param recipe - the recipe to satisfy                             
 ///   @return a pointer to the child node                                     
-auto Node::NodeFromConstruct(Recipe const& construct) -> Node* {
-   if (not construct.CastsTo<Node>()) {
-      Logger::Warning(Self(), "Ignored construct: ", construct);
+auto Node::NodeFromConstruct(Recipe const& recipe) -> Node* {
+   if (not recipe.CastsTo<Node>()) {
+      Logger::Warning(Self(), "Ignored recipe: ", recipe);
       return {};
    }
 
    // Create a child node                                               
-   VERBOSE_NODE_TAB("Adding node: ", construct);
-   Recipe local {construct};
+   VERBOSE_NODE_TAB("Adding node: ", recipe);
+   Recipe local {recipe};
    local << Tags::Parent {this};
 
-   auto newInstance = Many::FromMeta(construct.GetType());
+   auto newInstance = Many::FromMeta(recipe.GetType());
    newInstance.Emplace(IndexBack, local.GetDescriptor());
    return newInstance.As<Node*>();
 }

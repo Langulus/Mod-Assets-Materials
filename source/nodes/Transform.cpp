@@ -64,8 +64,8 @@ GLSL Transform::GetPosition(size_t idx, bool& runtime) {
          symbol = input.GetOutputSymbol();
          runtime = true;
       });
-      group.ForEach([&](Recipe const& construct) {
-         symbol = CodeFromConstruct(construct);
+      group.ForEach([&](Recipe const& recipe) {
+         symbol = CodeFromConstruct(recipe);
          runtime = true;
       });
    });
