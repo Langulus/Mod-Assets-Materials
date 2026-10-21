@@ -27,7 +27,7 @@ Node::Node(Material* material, Many const& descriptor)
 ///   @param parent - the parent node                                         
 ///   @param descriptor - the node descriptor                                 
 Node::Node(Node* parent, Many const& descriptor)
-   : Resolvable  {this}
+   : Downcastable  {this}
    , mDescriptor {descriptor} {
    // Add the Node to the hierarchy                                     
    if (parent)
@@ -37,7 +37,7 @@ Node::Node(Node* parent, Many const& descriptor)
 /// Material node construction used in the rest of the Nodes                  
 ///   @param descriptor - the node descriptor                                 
 Node::Node(Many const& descriptor)
-   : Resolvable  {this}
+   : Downcastable  {this}
    , mDescriptor {descriptor} {
    // Add the Node to the hierarchy                                     
    Node* owner {};

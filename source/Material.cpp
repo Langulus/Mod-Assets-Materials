@@ -14,7 +14,7 @@
 ///   @param producer - the producer                                          
 ///   @param desc - instructions for configuring the material                 
 Material::Material(Things::AssetModule* producer, Many const& desc)
-   : Resolvable   {this}
+   : Downcastable   {this}
    , ProducedFrom {producer, desc}
    , mRoot        {this, desc} {
    Logger::Verbose(Self(), "Initializing...");

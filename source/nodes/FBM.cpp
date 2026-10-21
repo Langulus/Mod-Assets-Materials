@@ -15,7 +15,7 @@ using namespace Nodes;
 /// FBM node descriptor-constructor                                           
 ///   @param desc - node descriptor                                           
 FBM::FBM(Describe&& descriptor)
-   : Resolvable {this}
+   : Downcastable {this}
    , Node {*descriptor} {
    // Extract number of octaves                                         
    mDescriptor.ExtractTag<Tags::Count>(mOctaveCount);

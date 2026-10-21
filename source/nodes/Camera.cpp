@@ -15,7 +15,7 @@ using namespace Nodes;
 /// Camera node descriptor-constructor                                        
 ///   @param desc - the camera node descriptor                                
 Camera::Camera(Describe descriptor)
-   : Resolvable {this}
+   : Downcastable {this}
    , Node       {*descriptor} { }
 
 /// Generate the camera code                                                  

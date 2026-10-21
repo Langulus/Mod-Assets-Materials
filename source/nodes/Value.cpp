@@ -14,7 +14,7 @@ using namespace Nodes;
 /// Value node constructor                                                    
 ///   @param parent - the node's parent                                       
 Value::Value(Node* parent)
-   : Resolvable {this}
+   : Downcastable {this}
    , Node {parent, {}} {}
 
 /// Generate code for the value - turn any verbs executed on it to their GLSL 

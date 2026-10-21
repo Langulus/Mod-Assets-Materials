@@ -16,7 +16,7 @@ using namespace Nodes;
 /// Rasterizer node creation                                                  
 ///   @param desc - the rasterizer descriptor                                 
 Raster::Raster(Describe&& descriptor)
-   : Resolvable {this}
+   : Downcastable {this}
    , Node {*descriptor} {
    // Extract settings                                                  
    mDescriptor.ExtractTag<Tags::Bilateral>(mBilateral);

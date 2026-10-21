@@ -13,7 +13,7 @@ using namespace Nodes;
 /// Light node creation                                                       
 ///   @param desc - descriptor for the node                                   
 Light::Light(Describe&& descriptor)
-   : Resolvable {this}
+   : Downcastable {this}
    , Node {*descriptor} { }
 
 /// Generate the light functionality                                          

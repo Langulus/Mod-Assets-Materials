@@ -15,7 +15,7 @@ using namespace Nodes;
 /// Raymarcher node descriptor-constructor                                    
 ///   @param desc - raymarch descriptor                                       
 Raymarch::Raymarch(Describe&& descriptor)
-   : Resolvable {this}
+   : Downcastable {this}
    , Node {*descriptor} {
    // Extract RaymarchConfig.mDetail                                    
    mDescriptor.ExtractTag<Tags::Count>(mDetail);

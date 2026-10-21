@@ -13,7 +13,7 @@ using namespace Nodes;
 /// Raycaster node descriptor-constructor                                     
 ///   @param desc - raycast descriptor                                        
 Raycast::Raycast(Describe&& descriptor)
-   : Resolvable {this}
+   : Downcastable {this}
    , Node {*descriptor} { }
 
 /// Generate the raycaster code                                               

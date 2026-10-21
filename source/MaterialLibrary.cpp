@@ -44,7 +44,7 @@ LANGULUS_DEFINE_MODULE(
 ///   @param runtime - the runtime that owns the module                       
 ///   @param descriptor - instructions for configuring the module             
 MaterialLibrary::MaterialLibrary(Runtime* runtime, Many const&)
-   : Resolvable {this}
+   : Downcastable {this}
    , Module     {runtime} {
    Logger::Verbose(Self(), "Initializing...");
    Math::RegisterNormals();

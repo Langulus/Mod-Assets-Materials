@@ -15,7 +15,7 @@ using namespace Nodes;
 ///   @param producer - the producer material                                 
 ///   @param desc - the node descriptor                                       
 Root::Root(Material* producer, Many const& desc)
-   : Resolvable {this}
+   : Downcastable {this}
    , Node       {producer, desc} {
    // Satisfy the rest of the descriptor                                
    // This is just a root node, so we can safely create anything in it  
