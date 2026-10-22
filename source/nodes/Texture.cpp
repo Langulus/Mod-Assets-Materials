@@ -110,7 +110,7 @@ auto Texture::GenerateKeyframe(Temporal const&) -> GLSL {
    size_t channelId {};
    keyframe.ForEachDeep([&](const Block& group) {
       group.ForEach(
-         [&](const Real& id) {
+         [&](Real const& id) {
             // Get a channel ID                                         
             usingChannelId = true;
             channelId = static_cast<size_t>(id);

@@ -38,7 +38,7 @@ Transform::operator Debug() const {
    }
 
    // Combine the keyframes                                             
-   mKeyframes[time].GetArgument() << verb.GetArgument();
+   mKeyframes[time].GetRHS() << verb.GetRHS();
    verb << this;
 }*/
 
