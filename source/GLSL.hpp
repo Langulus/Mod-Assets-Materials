@@ -34,6 +34,8 @@ namespace Langulus::CT
         or Inner::ConvertibleToGLSLByConstructor<T>) and ...);
 }*/
 
+using namespace Things;
+
 
 ///                                                                           
 ///   GLSL code container & tools                                             
@@ -137,18 +139,19 @@ public:
    using Text::Text;
    using Text::operator ==;
 
-   //GLSL(Text const&);
-   //GLSL(Text&&);
-
-   explicit GLSL(const CT::Deep auto&);
-   explicit GLSL(DMeta);
-   explicit GLSL(TMeta);
-   explicit GLSL(CMeta);
+   explicit GLSL(CT::Deep auto const&);
+   explicit GLSL(DMeta) : GLSL {GLSL::Type(meta)} {}
+   explicit GLSL(TMeta) : Text {"tag", meta.GetToken()} {}
+   explicit GLSL(CMeta) {
+      TODO(); //expand the constant
+   }
 
    template<CT::Number T, size_t C>
    explicit GLSL(const TVector<T, C>&);
+
    template<CT::Number T, size_t C, size_t R>
    explicit GLSL(const TMatrix<T, C, R>&);
+
    template<CT::Number T>
    explicit GLSL(const TQuaternion<T>&);
 
@@ -158,21 +161,12 @@ public:
    static GLSL Type();
 
    bool IsDefined(Token const&) const;
-   Index FindKeyword(Text const&) const;
+   auto FindKeyword(Text const&) const -> size_t;
    Text Pretty() const;
    static GLSL Type(DMeta);
 
    GLSL& Define(Token const&);
    GLSL& SetVersion(Token const&);
-
-   ///                                                                        
-   ///   Concatenation                                                        
-   ///                                                                        
-   /*template<class T> requires CT::ConvertibleToGLSL<Deint<T>>
-   GLSL operator + (T&&) const;
-
-   template<class T> requires CT::ConvertibleToGLSL<Deint<T>>
-   GLSL& operator += (T&&);*/
 };
 
 namespace Langulus

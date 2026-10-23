@@ -10,23 +10,11 @@
 #include <Langulus/CppAPI/Image.hpp>
 
 
-/// Construct by copying text                                                 
-///   @param other - text container to shallow-copy                           
-/*LANGULUS(INLINED)
-GLSL::GLSL(Text const& other)
-   : Text {other} {}
-
-/// Construct by moving text                                                  
-///   @param other - text container to move                                   
-LANGULUS(INLINED)
-GLSL::GLSL(Text&& other)
-   : Text {LglsFwd(other)} {}*/
-
 /// Convert a block to GLSL code                                              
 ///   @param block the block to convert to GLSL                               
 GLSL::GLSL(const CT::Deep auto& block) : Text {} {
    if (block.IsOr())
-      LANGULUS_THROW(GLSL, "GLSL doesn't support OR blocks");
+      throw Exception("GLSL doesn't support OR blocks");
 
    const auto count = block.GetCount();
    if (block.IsDeep()) {
@@ -59,29 +47,8 @@ GLSL::GLSL(const CT::Deep auto& block) : Text {} {
    }
 }
 
-/// Meta data -> GLSL serializer                                              
-///   @param type type to serialize                                           
-LANGULUS(INLINED)
-GLSL::GLSL(DMeta meta)
-   : GLSL {GLSL::Type(meta)} {}
-
-/// Meta tag -> GLSL serializer                                               
-///   @param tag tag to serialize                                             
-LANGULUS(INLINED)
-GLSL::GLSL(TMeta meta)
-   : Text {"tag", meta.GetToken()} {}
-
-/// Meta constant -> GLSL serializer                                          
-///   @param tag tag to serialize                                             
-LANGULUS(INLINED)
-GLSL::GLSL(CMeta) {
-   TODO(); //expand the constant
-}
-
 /// Vector -> GLSL serializer                                                 
-///   @tparam T - vector type (deducible)                                     
-///   @tparam C - vector size (deducible)                                     
-///   @param vector - vector to serialize                                     
+///   @param vector vector to serialize                                       
 template<CT::Number T, size_t C> LANGULUS(INLINED)
 GLSL::GLSL(const TVector<T, C>& vector) {
    if constexpr (C == 1)
@@ -99,10 +66,7 @@ GLSL::GLSL(const TVector<T, C>& vector) {
 }
 
 /// Matrix -> GLSL serializer                                                 
-///   @tparam T - matrix type (deducible)                                     
-///   @tparam C - matrix columns (deducible)                                  
-///   @tparam R - matrix rows (deducible)                                     
-///   @param matrix - matrix to serialize                                     
+///   @param matrix matrix to serialize                                       
 template<CT::Number T, size_t C, size_t R> LANGULUS(INLINED)
 GLSL::GLSL(const TMatrix<T, C, R>& matrix) {
    *this += GLSL::template Type<TMatrix<T, C, R>>();
@@ -116,7 +80,6 @@ GLSL::GLSL(const TMatrix<T, C, R>& matrix) {
 }
 
 /// Quaternion -> GLSL serializer                                             
-///   @tparam T quaternion type (deducible)                                   
 ///   @param quaternion quaternion to serialize                               
 template<CT::Number T> LANGULUS(INLINED)
 GLSL::GLSL(const TQuaternion<T>& quaternion) {
@@ -228,7 +191,7 @@ inline GLSL GLSL::Type(DMeta meta) {
 
       return token;
    }
-   else if (meta->CastsTo<Things::Image>()) {
+   else if (meta.CastsTo<Things::Image>()) {
       return "sampler2D";
       //TODO distinguish these:
       //gsampler1D   GL_TEXTURE_1D   1D texture
@@ -246,19 +209,3 @@ inline GLSL GLSL::Type(DMeta meta) {
 
    throw Exception("Unsupported GLSL type");
 }
-
-/// Concatenate two text containers                                           
-///   @param rhs - right hand side                                            
-///   @return the concatenated text container                                 
-/*template<class T> requires CT::ConvertibleToGLSL<Deint<T>> LANGULUS(INLINED)
-GLSL GLSL::operator + (T&& rhs) const {
-   return Text::ConcatInner<GLSL>(LglsFwd(rhs));
-}
-
-/// Concatenate (destructively) text containers                               
-///   @param rhs - right hand side                                            
-///   @return a reference to this container                                   
-template<class T> requires CT::ConvertibleToGLSL<Deint<T>> LANGULUS(INLINED)
-GLSL& GLSL::operator += (T&& rhs) {
-   return Text::ConcatRelativeInner<GLSL>(LglsFwd(rhs));
-}*/

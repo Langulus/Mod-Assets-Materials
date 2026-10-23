@@ -16,9 +16,9 @@
 ///                                                                           
 /// Manages and produces Material(s)                                          
 ///                                                                           
-struct MaterialLibrary final : Things::AssetModule {
+struct MaterialLibrary final : Things::ArtModule {
    using CTTI_Abstract  = No;
-   using CTTI_Bases     = Things::AssetModule;
+   using CTTI_Bases     = Things::ArtModule;
    using CTTI_Ability   = Verbs::Create;
 
 private:
