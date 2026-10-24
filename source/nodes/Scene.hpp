@@ -24,10 +24,10 @@ namespace Nodes
 
       Scene(Describe&&);
 
-      const Symbol& Generate();
-      const Symbol& GenerateSDF();
-      const Symbol& GenerateLines();
-      const Symbol& GenerateTriangles();
+      Symbol const& Generate();
+      Symbol const& GenerateSDF();
+      Symbol const& GenerateLines();
+      Symbol const& GenerateTriangles();
    };
 
 } // namespace Nodes

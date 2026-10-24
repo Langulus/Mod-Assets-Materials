@@ -43,7 +43,7 @@ FBM::operator Text() const {
 
 /// Generate the FBM function                                                 
 ///   @return the FBM function template                                       
-const Symbol& FBM::Generate() {
+Symbol const& FBM::Generate() {
    // Generate children first                                           
    Descend();
 

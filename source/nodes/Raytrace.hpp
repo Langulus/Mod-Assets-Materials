@@ -20,7 +20,7 @@ namespace Nodes
       LANGULUS_BASES(Node);
 
       Raytrace(Describe);
-      const Symbol& Generate();
+      Symbol const& Generate();
    };
 
 } // namespace Nodes

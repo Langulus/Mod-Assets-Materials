@@ -460,7 +460,7 @@ GLSL ConvertSymbol(Tag const& tag, const GLSL& symbol, DMeta as, Real filler) {
 /// Get a default type of each of the standard tags                         
 ///   @param tag - the tag definition                                     
 ///   @return the default tag properties                                    
-Node::DefaultTrait Node::GetDefaultTrait(TMeta tag) {
+Node::DefaultTrait Node::GetDefaultTag(TMeta tag) {
    static TMapUnsorted<TMeta, DefaultTrait> properties;
 
    if (not properties) {
@@ -529,77 +529,5 @@ DMeta Node::DecayToGLSLType(DMeta meta) {
       return MetaOf<Float>();
 
    LglsError("Can't decay type: ", meta);
-   return nullptr;
-}
-
-/// Select a symbol from the node hierarchy                                   
-/// Checks local symbols first, then climbs up the hierarchy up to Root, where
-/// it starts selecting global material inputs/constants                      
-///   @param t - tag type filter                                            
-///   @param d - data type filter                                             
-///   @param r - rate filter                                                  
-///   @param i - index filter                                                 
-///   @return a pointer to the symbol, or nullptr if not found                
-auto Node::GetSymbol(TMeta t, DMeta d, RefreshRate r, Index i) -> Symbol* {
-   size_t nth = i.IsSpecial() ? 0 : i.GetOffsetUnsafe();
-
-   if (t) {
-      // Filter by tags                                               
-      const auto foundt = mLocalsT.Find(t);
-      if (foundt) {
-         auto& candidates = mLocalsT.GetValue(foundt);
-         if (i and i.IsSpecial()) {
-            // Pick a special index                                     
-            auto& candidate = candidates[i];
-            if (candidate.MatchesFilter(d, r))
-               return &candidate;
-         }
-         else {
-            // Pick specific match from all candidates                  
-            for (auto& candidate : candidates) {
-               if (candidate.MatchesFilter(d, r)) {
-                  if (0 == nth)
-                     return &candidate;
-                  --nth;
-               }
-            }
-         }
-      }
-   }
-   else if (d) {
-      // Filter by data type                                            
-      for (auto pair : mLocalsD) {
-         if (not pair.GetKey()->CastsTo(d))
-            continue;
-
-         auto& candidates = pair.GetValue();
-         if (i and i.IsSpecial()) {
-            // Pick a special index                                     
-            auto& candidate = candidates[i];
-            if (candidate.MatchesFilter(d, r))
-               return &candidate;
-         }
-         else {
-            // Pick specific match from all candidates                  
-            for (auto& candidate : candidates) {
-               if (candidate.MatchesFilter(d, r)) {
-                  if (0 == nth)
-                     return &candidate;
-                  --nth;
-               }
-            }
-         }
-      }
-   }
-   else if (r != Rate::Auto) {
-      // Filter by rate                                                 
-      TODO();
-   }
-   else if (i) {
-      // Just return the nth (filter by index only)                     
-      TODO();
-   }
-
-   // Nothing was found                                                 
    return nullptr;
 }

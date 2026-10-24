@@ -38,7 +38,7 @@ Raster::Raster(Describe&& descriptor)
 /// Generate rasterizer definition code                                       
 /// This is a 'fake' per-pixel rasterizer - very suboptimal, but useful in    
 /// various scenarios                                                         
-const Symbol& Raster::GeneratePerPixel() {
+Symbol const& Raster::GeneratePerPixel() {
    // Generate children first                                           
    Descend();
 
@@ -77,7 +77,7 @@ const Symbol& Raster::GeneratePerPixel() {
 /// Uses the scene provided from the geometry shader, and rasterizes it using 
 /// the default hardware rasterizer. Exposes symbols PerPixel as a result     
 ///   @return NoSymbol, as functionality is in the fixed-pipeline             
-const Symbol& Raster::GeneratePerVertex() {
+Symbol const& Raster::GeneratePerVertex() {
    auto position = GetSymbol<Tags::Place>(Rate::Vertex);
    (void)position;
 
@@ -92,15 +92,15 @@ const Symbol& Raster::GeneratePerVertex() {
    );
 
    // We expose the built-in pixel shader inputs                        
-   ExposeTrait<Tags::Place, Vec4>("gl_FragCoord");
-   ExposeTrait<Tags::Place, Vec2>("gl_PointCoord");
-   ExposeTrait<Tags::Signed, bool>("gl_FrontFacing");
+   ExposeTag<Tags::Place, Vec4>("gl_FragCoord");
+   ExposeTag<Tags::Place, Vec2>("gl_PointCoord");
+   ExposeTag<Tags::Signed, bool>("gl_FrontFacing");
    return NoSymbol;
 }
 
 /// Generate the rasterizer code                                              
 ///   @return the rasterizer function template                                
-const Symbol& Raster::Generate() {
+Symbol const& Raster::Generate() {
    Descend();
 
    if (mRate == Rate::Vertex or mRate == Rate::Primitive)

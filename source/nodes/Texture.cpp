@@ -239,7 +239,7 @@ auto Texture::GenerateKeyframe(Temporal const&) -> GLSL {
 }*/
 
 /// Generate the shader stages                                                
-auto Texture::Generate() -> const Symbol& {
+auto Texture::Generate() -> Symbol const& {
    Descend();
 
    /*size_t totalKeyframeCount {};

@@ -8,12 +8,13 @@
 #include "GLSL.hpp"
 #include <Langulus/Edit.hpp>
 #include <Langulus/Verbs/Catenate.hpp>
+#include <Langulus/Utils/ASCII.hpp>
 
 #define GLSL_VERBOSE(a) LANGULUS(NOOP)
 
 
 /// Create GLSL from shader template                                          
-///   @param stage - the shader stage to use as template                      
+///   @param stage the shader stage to use as template                        
 ///   @return the GLSL code                                                   
 GLSL GLSL::Template(size_t stage) {
    LglsAssumeDev(stage < ShaderStage::Counter, "Bad index");
@@ -21,9 +22,9 @@ GLSL GLSL::Template(size_t stage) {
 }
 
 /// Check if a character is blank space                                       
-///   @param c - the character to test                                        
+///   @param c the character to test                                          
 ///   @return true if character is space                                      
-bool GLSL::IsOperator(char c) {
+/*bool GLSL::IsOperator(char c) {
    switch (c) {
    case ';': case '.': case ',': case '!': case ':': case '?':
    case '+': case '-': case '*': case '/': case '=': case '|':
@@ -33,32 +34,35 @@ bool GLSL::IsOperator(char c) {
    default:
       return false;
    }
-}
+}*/
 
 /// Check if a #define exists for a symbol                                    
-///   @param symbol - the definition to search for                            
+///   @param symbol the definition to search for                              
 ///   @return true if definition exists                                       
 bool GLSL::IsDefined(Token const& symbol) const {
-   return FindKeyword(Text {"#define ", symbol}) != IndexNone;
+   return FindKeyword(Text {"#define "} + symbol) < GetCount();
 }
 
 /// Find an isolated token                                                    
-///   @param symbol - the definition to search for                            
-///   @return the index of the first match, or IndexNone if not found         
-Index GLSL::FindKeyword(Text const& symbol) const {
-   if (not symbol)
-      return IndexNone;
+///   @param symbol the definition to search for                              
+///   @return the index of the first match, or GetCount() if not found        
+size_t GLSL::FindKeyword(Text const& symbol) const {
+   size_t progress = 0;
+   do {
+      auto handle = FindRange(symbol, progress);
+      if (not handle)
+         break;
 
-   Index progress;
-   while ((progress = FindBlock(symbol, progress))) {
       // Match found                                                    
+      progress = handle - GetHandle();
+
       // For it to be keyword, its left side must be either the start,  
       // isspace, an operator, or:                                      
       //  - a number, if the symbol starts with a letter                
       if (progress == 0) {
          // LHS is valid, lets check RHS                                
          // For it to be keyword, its right must be either the end,     
-         // isspace, or an operator                                     
+         // space, or an operator                                       
          if (symbol.GetCount() >= GetCount()) {
             // Found                                                    
             return progress;
@@ -71,7 +75,7 @@ Index GLSL::FindKeyword(Text const& symbol) const {
       }
       else {
          const char lhs = (*this)[progress - 1];
-         if (IsSpace(lhs) or IsOperator(lhs) or (IsAlpha(symbol[0]) and IsDigit(lhs))) {
+         if (IsSpace(lhs) or IsOperator(lhs) or (IsAlphabetical(symbol[0]) and IsNumerical(lhs))) {
             // LHS is valid, lets check RHS                             
             // For it to be keyword, its right must be either the end,  
             // isspace, or an operator                                  
@@ -89,8 +93,9 @@ Index GLSL::FindKeyword(Text const& symbol) const {
 
       progress += symbol.GetCount();
    }
+   while(true);
 
-   return IndexNone;
+   return GetCount();
 }
 
 /// Generate a log-friendly pretty version of the code, with line             
@@ -143,7 +148,7 @@ Text GLSL::Pretty() const {
 }
 
 /// Add a definition to code                                                  
-///   @param definition - the definition to add                               
+///   @param definition the definition to add                                 
 ///   @return a reference to this code                                        
 GLSL& GLSL::Define(Token const& definition) {
    const Text defined {"#define ", definition, '\n'};
@@ -155,7 +160,7 @@ GLSL& GLSL::Define(Token const& definition) {
 }
 
 /// Set GLSL version for the code                                             
-///   @param version - the version string                                     
+///   @param version the version string                                       
 ///   @return a reference to this code                                        
 GLSL& GLSL::SetVersion(Token const& version) {
    const Text defined {"#version ", version, '\n'};

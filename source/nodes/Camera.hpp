@@ -20,7 +20,7 @@ namespace Nodes
       LANGULUS_BASES(Node);
 
       Camera(Describe);
-      auto Generate() -> const Symbol&;
+      auto Generate() -> Symbol const&;
    };
 
 } // namespace Nodes

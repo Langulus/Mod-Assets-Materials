@@ -24,7 +24,7 @@ Root::Root(Material* producer, Many const& desc)
 }
 
 /// Generate the shader stages                                                
-auto Root::Generate() -> const Symbol& {
+auto Root::Generate() -> Symbol const& {
    // Just generate children                                            
    Descend();
    TODO();

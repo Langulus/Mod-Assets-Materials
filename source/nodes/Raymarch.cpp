@@ -38,7 +38,7 @@ Raymarch::Raymarch(Describe&& descriptor)
 
 /// Generate raymarcher code                                                  
 ///   @return the output symbol                                               
-const Symbol& Raymarch::Generate() {
+Symbol const& Raymarch::Generate() {
    // Generate children first                                           
    Descend();
 

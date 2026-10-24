@@ -7,6 +7,7 @@
 ///                                                                           
 #pragma once
 #include "Symbol.hpp"
+#include <Langulus/Neat.hpp>
 #include <Langulus/Verbs/Add.hpp>
 #include <Langulus/Verbs/Multiply.hpp>
 #include <Langulus/Verbs/Modulate.hpp>
@@ -16,10 +17,11 @@
 
 ///                                                                           
 ///   Abstract material node                                                  
-///                                                                           
-struct Node : Part {
+//TODO much of the node hierarchy resemles an ordinary Thing hierarchy. think about how to just use Things for these nodes
+struct Node : Things::Part {
 protected:
-   friend struct Material;
+   using Material = ::Material;
+   friend struct ::Material;
    friend struct Nodes::FBM;
 
    // The children that this node leads to                              
@@ -60,7 +62,7 @@ protected:
 
 public:
    using CTTI_Producer = Node;
-   LANGULUS_VERBS(
+   using CTTI_Ability = Types<
       Verbs::Create,
       Verbs::Select,
       Verbs::Add,
@@ -68,7 +70,7 @@ public:
       Verbs::Modulate,
       Verbs::Exponent,
       Verbs::Randomize
-   );
+   >;
 
    Node(Material*, Many const&);
    Node(Node*, Many const&);
@@ -88,13 +90,13 @@ public:
 
    void Dump() const;
 
-   virtual const Symbol& Generate() = 0;
+   virtual Symbol const& Generate() = 0;
 
    auto GetRate() const noexcept -> RefreshRate;
    auto GetStage() const -> size_t;
    auto GetMaterial() const noexcept -> Material*;
    auto GetLibrary() const noexcept -> MaterialLibrary*;
-   static auto GetDefaultTrait(TMeta) -> DefaultTrait;
+   static auto GetDefaultTag(TMeta) -> DefaultTrait;
    static auto DecayToGLSLType(DMeta) -> DMeta;
 
    template<bool TWOSIDED = true>
@@ -107,13 +109,11 @@ public:
    template<class F>
    size_t ForEachChild(F&&);
 
-   auto GetSymbol(TMeta, DMeta = nullptr, RefreshRate = Rate::Auto, Index = IndexLast)       -> Symbol*;
-   auto GetSymbol(TMeta, DMeta = nullptr, RefreshRate = Rate::Auto, Index = IndexLast) const -> Symbol const*;
+   template<class C>
+   auto GetSymbol(this C&&, TMeta, DMeta = nullptr, RefreshRate = Rate::Auto, CT::Index auto = Index::Last) -> LglsMutIf(C, Symbol*);
 
-   template<class = void, class = void>
-   auto GetSymbol(RefreshRate = Rate::Auto, Index = IndexLast) -> Symbol*;
-   template<class = void, class = void>
-   auto GetSymbol(RefreshRate = Rate::Auto, Index = IndexLast) const -> Symbol const*;
+   template<class = void, class = void, class C>
+   auto GetSymbol(this C&&, RefreshRate = Rate::Auto, CT::Index auto = Index::Last) -> LglsMutIf(C, Symbol*);
 
    template<class F>
    size_t ForEachInput(F&&);
@@ -127,17 +127,17 @@ protected:
    Text DebugBegin() const;
    Text DebugEnd() const;
 
-   template<CT::Tag T, CT::NotVoid D>
-   auto AddLocal(D&&, Token const&) -> const Symbol&;
+   template<CT::DefineTag T, CT::NotVoid D>
+   auto AddLocal(D&&, Token const&) -> Symbol const&;
    
-   template<CT::Tag T, CT::NotVoid D>
-   auto AddLiteral(D&&) -> const Symbol&;
+   template<CT::DefineTag T, CT::NotVoid D>
+   auto AddLiteral(D&&) -> Symbol const&;
 
-   template<CT::NotVoid T, class... ARGS>
-   auto ExposeData(Token const&, ARGS&&...) -> Symbol&;
+   template<CT::NotVoid T>
+   auto ExposeData(Token const&, auto&&...) -> Symbol&;
 
-   template<CT::Tag T, CT::NotVoid D, class... ARGS>
-   auto ExposeTrait(Token const&, ARGS&&...) -> Symbol&;
+   template<CT::DefineTag T, CT::NotVoid D>
+   auto ExposeTag(Token const&, auto&&...) -> Symbol&;
 
    void AddDefine(Token const&, const GLSL&);
 

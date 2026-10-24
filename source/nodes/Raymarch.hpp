@@ -40,7 +40,7 @@ namespace Nodes
 
    public:
       Raymarch(Describe&&);
-      const Symbol& Generate();
+      Symbol const& Generate();
    };
 
 } // namespace Nodes

@@ -29,7 +29,7 @@ namespace Nodes
    public:
       Value(Node*);
 
-      const Symbol& Generate();
+      Symbol const& Generate();
    };
 
 } // namespace Nodes

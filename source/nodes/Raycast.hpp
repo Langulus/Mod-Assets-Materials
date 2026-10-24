@@ -20,7 +20,7 @@ namespace Nodes
       LANGULUS_BASES(Node);
 
       Raycast(Describe&&);
-      const Symbol& Generate();
+      Symbol const& Generate();
    };
 
 } // namespace Nodes

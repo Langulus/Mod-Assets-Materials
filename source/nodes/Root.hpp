@@ -21,7 +21,7 @@ namespace Nodes
 
       Root(Material*, Many const&);
 
-      auto Generate() -> const Symbol&;
+      auto Generate() -> Symbol const&;
    };
 
 } // namespace Nodes

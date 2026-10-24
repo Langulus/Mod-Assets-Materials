@@ -32,7 +32,7 @@ namespace Nodes
       Texture(Describe);
 
       void Detach();
-      auto Generate() -> const Symbol&;
+      auto Generate() -> Symbol const&;
 
    private:
       auto CreateTexture(Many const&) -> Ref<Things::Image>;

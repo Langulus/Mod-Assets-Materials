@@ -10,81 +10,74 @@
 
 
 /// Create a symbol for a function                                            
-///   @tparam T - return type of the function                                 
-///   @tparam ...ARGS - optional arguments for the function                   
-///   @param  rate - the refresh rate of the symbol                           
-///   @param  pattern - the template of the function (libfmt format string)   
-///   @param ... arguments - the arguments for the pattern                    
+///   @tparam T return type of the function                                   
+///   @param rate the refresh rate of the symbol                              
+///   @param pattern the template of the function (libfmt format string)      
+///   @param arguments... the arguments for the pattern                       
 ///   @return the symbol instance                                             
-template<CT::NotVoid T, class... ARGS>
-Symbol Symbol::Function(RefreshRate rate, Token const& pattern, ARGS&&... arguments) {
+template<CT::NotVoid T, class...ARGS>
+Symbol Symbol::Function(Rate rate, Token const& pattern, ARGS&&...arguments) {
    LglsAssumeDev(rate != Rate::Auto, "Rate should be resolved");
-   (void)Text::TemplateCheck(pattern, arguments...);
+   TemplateCheck(pattern, arguments...);
 
    Symbol s;
    s.mRate = rate;
-   s.mTrait.SetType<T>();
+   s.mTag.SetType<T>();
    s.mCode = pattern;
    (s.PushArgument(LglsFwd(arguments)), ...);
    return s;
 }
 
 /// Create a symbol for a literal constant                                    
-///   @tparam T - type of the tag associated with the literal               
-///   @tparam D - type of data (deducible)                                    
-///   @param rate - the refresh rate of the symbol                            
-///   @param value - the value of the literal                                 
+///   @tparam T type of the tag associated with the literal                   
+///   @param rate the refresh rate of the symbol                              
+///   @param value the value of the literal                                   
 ///   @return the symbol instance                                             
-template<CT::Tag T, CT::NotVoid D>
-Symbol Symbol::Literal(RefreshRate rate, D&& value) {
+template<CT::DefineTag T, CT::NotVoid D>
+Symbol Symbol::Literal(Rate rate, D&& value) {
    LglsAssumeDev(rate != Rate::Auto, "Rate should be resolved");
 
    Symbol s;
    s.mRate = rate;
-   s.mTrait = T {LglsFwd(value)};
+   s.mTag = T {LglsFwd(value)};
    return s;
 }
 
 /// Create a symbol for a variable                                            
-///   @tparam T - type of the tag associated with the variable              
-///   @tparam D - type of data (deducible)                                    
-///   @param rate - the refresh rate of the symbol                            
-///   @param value - the initial value of the variable                        
-///   @param name - the variable token                                        
+///   @tparam T type of the tag associated with the variable                  
+///   @param rate the refresh rate of the symbol                              
+///   @param value the initial value of the variable                          
+///   @param name the variable token                                          
 ///   @return the symbol instance                                             
-template<CT::Tag T, CT::NotVoid D>
-Symbol Symbol::Variable(RefreshRate rate, D&& value, Token const& name) {
+template<CT::DefineTag T, CT::NotVoid D>
+Symbol Symbol::Variable(Rate rate, D&& value, Token const& name) {
    LglsAssumeDev(rate != Rate::Auto, "Rate should be resolved");
 
    Symbol s;
    s.mRate = rate;
-   s.mTrait = T {LglsFwd(value)};
+   s.mTag = T {LglsFwd(value)};
    s.mCode = name;
    return s;
 }
 
 /// Check if symbol matches data and/or rate filter                           
-///   @param d - data type to be similar to (use nullptr for no filter)       
-///   @param r - the rate this symbol needs to be at (or lower)               
-///              use Rate::Auto for no filter                                 
+///   @param d data type to be similar to (use {} for no filter)              
+///   @param r the rate this symbol needs to be at (or lower)                 
+///      use Rate::Auto for no filter                                         
 ///   @return true if this symbol matches the filter requirements             
-LANGULUS(INLINED)
-bool Symbol::MatchesFilter(DMeta d, RefreshRate r) const noexcept {
+inline bool Symbol::MatchesFilter(DMeta d, Rate r) const noexcept {
    LglsAssumeDev(mRate != Rate::Auto, "Rate should be resolved");
-   return (!d || mTrait.CastsToMeta(d)) && (r == Rate::Auto || r <= mRate);
+   return (!d || mTag.CastsTo(d)) && (r == Rate::Auto || r <= mRate);
 }
 
-LANGULUS(INLINED)
-void Symbol::PushArgument(DMeta&& type) {
-   mArguments << Tag::FromMeta(nullptr, type);
+inline void Symbol::PushArgument(DMeta&& type) {
+   mArguments << Tag::Typed({}, type);
 }
 
-LANGULUS(INLINED)
-void Symbol::PushArgument(TMeta&& type) {
-   mArguments << Tag::FromMeta(type, nullptr);
+inline void Symbol::PushArgument(TMeta&& type) {
+   mArguments << Tag::Typed(type, {});
 }
 
-LANGULUS(INLINED)
-void Symbol::PushArgument(Tag&& type) {
+inline void Symbol::PushArgument(Tag&& type) {
    mArguments << LglsFwd(type);
 }

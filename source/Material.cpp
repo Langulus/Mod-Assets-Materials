@@ -109,7 +109,7 @@ bool Material::Generate(TMeta tag, size_t) {
 /// Get material adapter for lower or higher level of detail                  
 ///   @param lod - the level-of-detail state                                  
 ///   @return a pointer to the material generator                             
-auto Material::GetLOD(const LOD&) const -> Ref<Things::Material> {
+auto Material::GetLOD(LOD const&) const -> Ref<Things::Material> {
    TODO();
    return {};
 }
@@ -200,9 +200,9 @@ GLSL Material::AddInput(RefreshRate rate, Tag const& t, bool allowDuplicates) {
    // actual uniform will be updated PerTick. So this is                
    // where we step in to override any wrongly provided rate            
    if (rate == Rate::Auto)
-      rate = Node::GetDefaultTrait(t.GetTag()).mRate;
+      rate = Node::GetDefaultTag(t.GetTag()).mRate;
    if (not type)
-      type = Node::GetDefaultTrait(t.GetTag()).mType;
+      type = Node::GetDefaultTag(t.GetTag()).mType;
 
    // Find any matching available inputs                                
    auto& inputs = mInputs[rate.GetInputIndex()];
@@ -243,7 +243,7 @@ GLSL Material::AddOutput(RefreshRate rate, Tag const& t, bool allowDuplicates) {
    );
 
    if (not type)
-      type = Node::GetDefaultTrait(t.GetTag()).mType;
+      type = Node::GetDefaultTag(t.GetTag()).mType;
 
    auto& outputs = mOutputs[rate.GetInputIndex()];
    const auto proto = Tag::FromMeta(t.GetTag(), type);

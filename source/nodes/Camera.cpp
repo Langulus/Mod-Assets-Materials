@@ -20,7 +20,7 @@ Camera::Camera(Describe descriptor)
 
 /// Generate the camera code                                                  
 ///   @return the output symbol                                               
-auto Camera::Generate() -> const Symbol& {
+auto Camera::Generate() -> Symbol const& {
    // Generate children first                                           
    Descend();
    AddDefine("CameraResult", CameraResult);

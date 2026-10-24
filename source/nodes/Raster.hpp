@@ -34,11 +34,11 @@ namespace Nodes
    public:
       Raster(Describe&&);
 
-      const Symbol& Generate();
+      Symbol const& Generate();
 
    private:
-      const Symbol& GeneratePerPixel();
-      const Symbol& GeneratePerVertex();
+      Symbol const& GeneratePerPixel();
+      Symbol const& GeneratePerVertex();
    };
 }
 

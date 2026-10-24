@@ -9,6 +9,10 @@
 #include "GLSL.hpp"
 #include <Langulus/Rate.hpp>
 
+using RTTI::DMeta;
+using RTTI::TMeta;
+using Rate = RefreshRate;
+
 
 ///                                                                           
 ///   A shader code symbol                                                    
@@ -18,7 +22,7 @@
 ///                                                                           
 struct Symbol {
    // The rate at which this symbol is recomputed                       
-   RefreshRate mRate = Rate::Auto;
+   Rate mRate = Rate::Auto;
 
    // The tag (if any), the data type (if any), and the value (if       
    // the symbol is a constant/literal). If this symbol represents a    
@@ -44,31 +48,48 @@ struct Symbol {
 
 public:
    constexpr Symbol() = default;
-   Symbol(const Symbol& other)
-      : Symbol {Refer(other)} {}
-   Symbol(Symbol&& other) noexcept
-      : Symbol {Move(other)} {}
+   Symbol(Symbol const& other)     : Symbol {Refer(other)} {}
+   Symbol(Symbol&& other) noexcept : Symbol {Move(other)} {}
 
-   template<CT::Intent S> requires CT::Exact<TypeOf<S>, Symbol>
-   Symbol(S&& other)
-      : mRate {other->mRate}
-      , mTag {S::Nest(other->mTag)}
-      , mCode {S::Nest(other->mCode)}
-      , mCount {other->mCount}
-      , mArguments {S::Nest(other->mArguments)} {}
+   template<template<class> class S> requires CT::Intent<S<Symbol>>
+   Symbol(S<Symbol>&& other)
+      : mRate     {other->mRate}
+      , mTag      {NestIntentOf(other, other->mTag)}
+      , mCode     {NestIntentOf(other, other->mCode)}
+      , mCount    {other->mCount}
+      , mArguments{NestIntentOf(other, other->mArguments)} {}
 
    template<CT::NotVoid, class...ARGS>
-   static Symbol Function(RefreshRate, Token const&, ARGS&&...);
+   static Symbol Function(Rate, Token const&, ARGS&&...);
 
    template<CT::DefineTag, CT::NotVoid D>
-   static Symbol Literal(RefreshRate, D&&);
+   static Symbol Literal(Rate, D&&);
 
    template<CT::DefineTag, CT::NotVoid D>
-   static Symbol Variable(RefreshRate, D&&, Token const&);
+   static Symbol Variable(Rate, D&&, Token const&);
 
-   bool MatchesFilter(DMeta, RefreshRate) const noexcept;
+   bool MatchesFilter(DMeta, Rate) const noexcept;
 
    GLSL Generate(const Node*) const;
+
+   /// Should complain at compile-time if format string has mismatching       
+   /// number of arguments                                                    
+   template<::std::size_t...N> LANGULUS(INLINED)
+   static constexpr auto CheckPattern(const Token& f, ::std::index_sequence<N...>) {
+      return fmt::format_string<decltype(N)...> {fmt::runtime(f)};
+   }
+
+   /// Attempt filling the template, statically checking if argument count is 
+   /// satisfied, and other erroneous conditions. Since arguments contain     
+   /// unformattable data, that has more to do with seeking actual data from  
+   /// the node hierarchy later, arguments are substituted with an index      
+   /// sequence.                                                              
+   ///   @param format the template string                                    
+   ///   @param args... the arguments                                         
+   template<class...ARGS> LANGULUS(INLINED)
+   static constexpr auto TemplateCheck(const Token& f, ARGS&&...) {
+      return CheckPattern(f, ::std::make_index_sequence<sizeof...(ARGS)> {});
+   }
 
 protected:
    void PushArgument(DMeta&&);

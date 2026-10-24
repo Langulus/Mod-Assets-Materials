@@ -14,7 +14,6 @@
 ///                                                                           
 /// Capable of generating HLSL/GLSL code and meta data for shader compilation 
 /// by parsing a material descriptor                                          
-///                                                                           
 struct Material final : Things::Material {
 private:
    // Default material rate                                             
@@ -50,7 +49,7 @@ public:
    void Refresh() {}
    bool Generate(TMeta, size_t = 0);
 
-   auto GetLOD(const LOD&) const -> Ref<Things::Material>;
+   auto GetLOD(LOD const&) const -> Ref<Things::Material> override;
    auto GetDefaultRate() const noexcept -> RefreshRate;
    auto GetStage(size_t) -> GLSL&;
    auto GetStage(size_t) const -> GLSL const&;

@@ -20,7 +20,7 @@ namespace Nodes
       LANGULUS_BASES(Node);
 
       Light(Describe&&);
-      const Symbol& Generate();
+      Symbol const& Generate();
    };
 
 } // namespace Nodes

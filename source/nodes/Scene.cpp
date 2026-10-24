@@ -28,7 +28,7 @@ Scene::Scene(Describe&& descriptor)
 
 /// Generate scene code                                                       
 ///   @return the SDF scene function template symbol                          
-const Symbol& Scene::Generate() {
+Symbol const& Scene::Generate() {
    Descend();
 
    // Intentionally does nothing. It is generated on demand by a        
@@ -38,7 +38,7 @@ const Symbol& Scene::Generate() {
 
 /// Generate scene code                                                       
 ///   @return the array of lines symbol                                       
-const Symbol& Scene::GenerateLines() {
+Symbol const& Scene::GenerateLines() {
    GLSL lines;
    size_t countCombined = 0;
 
@@ -111,7 +111,7 @@ GLSL InterpretAsSDF(Recipe const&, Material&) {
 
 /// Generate scene code                                                       
 ///   @return the SDF scene function template symbol                          
-const Symbol& Scene::GenerateSDF() {
+Symbol const& Scene::GenerateSDF() {
    GLSL scene;
 
    // Get the SDF code for each geometry recipe                      
@@ -140,12 +140,12 @@ const Symbol& Scene::GenerateSDF() {
    AddDefine("Scene", Text::TemplateRt(SceneFunction, scene));
 
    // Expose scene usage                                                
-   return ExposeTrait<Tags::D, float>("Scene({})", Tags::Place::OfType<Vec3>());
+   return ExposeTag<Tags::D, float>("Scene({})", Tags::Place::OfType<Vec3>());
 }
 
 /// Generate scene code                                                       
 ///   @return the array of triangles symbol                                   
-const Symbol& Scene::GenerateTriangles() {
+Symbol const& Scene::GenerateTriangles() {
    GLSL triangles;
    size_t countCombined = 0;
 

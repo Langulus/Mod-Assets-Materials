@@ -40,10 +40,10 @@ using namespace Things;
 ///                                                                           
 ///   GLSL code container & tools                                             
 ///                                                                           
-struct GLSL : Annies::Text {
+struct GLSL : Text {
    using CTTI_ReflectAs = GLSL;
    using CTTI_Named     = Yes<"GLSL">;
-   using CTTI_Bases     = Annies::Text;
+   using CTTI_Bases     = Text;
    
    using DMeta          = RTTI::DMeta;
    using TMeta          = RTTI::TMeta;
@@ -54,30 +54,8 @@ private:
    /// GLSL template for each programmable shader stage                       
    static constexpr Token Templates[ShaderStage::Counter] = {
       // ShaderStage::Vertex                                            
-      R"shader(
-      //#VERSION
-
-      //#DEFINES
-
-      //#INPUT
-
-      //#OUTPUT
-
-      //#UNIFORM
-
-      //#FUNCTIONS
-
-      void main () {
-         //#TEXTURIZE
-
-         //#COLORIZE
-
-         //#TRANSFORM
-
-         //#POSITION
-
-      }
-      )shader",
+      #include "templates/VertexShaderTemplate.glsl"
+      ,
 
       // ShaderStage::Geometry                                          
       R"shader(
@@ -137,11 +115,18 @@ private:
 
 public:
    using Text::Text;
-   using Text::operator ==;
 
-   explicit GLSL(CT::Deep auto const&);
-   explicit GLSL(DMeta) : GLSL {GLSL::Type(meta)} {}
-   explicit GLSL(TMeta) : Text {"tag", meta.GetToken()} {}
+   /// Construction from any kind of text that is an Annies container         
+   template<CT::Text T> requires CT::Container<T>
+   constexpr GLSL(T&& text) {
+      this->Absorb(LglsFwd(text));
+   }
+
+   //using Text::operator ==;
+
+   /*explicit GLSL(CT::Deep auto const&);
+   explicit GLSL(DMeta meta) : GLSL {GLSL::Type(meta)} {}
+   explicit GLSL(TMeta meta) : Text {"tag", meta.GetName()} {}
    explicit GLSL(CMeta) {
       TODO(); //expand the constant
    }
@@ -153,10 +138,10 @@ public:
    explicit GLSL(const TMatrix<T, C, R>&);
 
    template<CT::Number T>
-   explicit GLSL(const TQuaternion<T>&);
+   explicit GLSL(const TQuaternion<T>&);*/
 
    static GLSL Template(size_t);
-   static bool IsOperator(char);
+   //static bool IsOperator(char);
    template<CT::NotVoid T>
    static GLSL Type();
 
@@ -164,17 +149,56 @@ public:
    auto FindKeyword(Text const&) const -> size_t;
    Text Pretty() const;
    static GLSL Type(DMeta);
+   static GLSL Scope(CT::Deep auto const&);
 
    GLSL& Define(Token const&);
    GLSL& SetVersion(Token const&);
 };
 
-namespace Langulus
+namespace Langulus::CTTI
+{
+   /// The presence of this structure makes GLSL a CT::Serializer             
+   template<>
+   struct Serializer<GLSL> : Serializer<Annies::Text> {
+      // GLSL serializer can't be lossy - it's isomorphic               
+      static constexpr bool CriticalFailure = true;
+      static constexpr bool SkipElements = false;
+   };
+
+   /// Rule for serializing GLSL to Text. Wraps it in GLSL"" symbols.         
+   template<>
+   struct SerializationRule<Annies::Text, GLSL> {
+      using S = Serializer<Annies::Text>;
+      using Context = typename S::Context;
+
+      static void Serialize(GLSL const& item, Annies::Text& out, Context*) {
+         out += "GLSL";
+         out += Serial::OpenString.Token;
+         out += item;
+         out += Serial::CloseString.Token;
+      }
+   };
+}
+
+/*namespace Langulus
 {
    /// Make a GLSL literal                                                    
    GLSL operator ""_glsl(const char* text, ::std::size_t size) {
-      return Annies::Text::From(text, size);
+      return Annies::Text::FromText(text, size);
    }
-}
+}*/
 
-#include "GLSL.inl"
+/// Convert bool -> GLSL                                                      
+LANGULUS_MORPHISM_CUSTOM(bool, { return from ? "true" : "false"; }, GLSL);
+
+/// Convert Deep -> GLSL                                                      
+LANGULUS_MORPHISM_CONCEPT_CUSTOM(CT::Deep, { return GLSL::Scope(from); }, GLSL);
+
+/// Convert DMeta -> GLSL                                                     
+LANGULUS_MORPHISM_CUSTOM(Langulus::RTTI::DMeta, { return GLSL::Type(from); }, GLSL);
+
+/// Convert TMeta -> GLSL                                                     
+LANGULUS_MORPHISM_CUSTOM(Langulus::RTTI::TMeta, { return Annies::Text("tag") + from.GetName(); }, GLSL);
+
+/// Convert CMeta -> GLSL                                                     
+LANGULUS_MORPHISM_CUSTOM(Langulus::RTTI::CMeta, { TODO(); return from.GetName(); }, GLSL);

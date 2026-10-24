@@ -31,7 +31,7 @@ namespace Nodes
    public:
       FBM(Describe&&);
 
-      const Symbol& Generate();
+      Symbol const& Generate();
       operator Text() const;
    };
 

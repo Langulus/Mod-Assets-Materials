@@ -19,7 +19,7 @@ Value::Value(Node* parent)
 
 /// Generate code for the value - turn any verbs executed on it to their GLSL 
 /// code equivalent, and add animation functions if such are needed.          
-const Symbol& Value::Generate() {
+Symbol const& Value::Generate() {
    Descend();
    TODO();
    return NoSymbol;
