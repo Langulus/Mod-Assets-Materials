@@ -12,6 +12,7 @@ using namespace Langulus;
 using namespace Math;
 
 namespace ShaderStage = Things::ShaderStage;
+namespace ShaderToken = Things::ShaderToken;
 
 struct MaterialLibrary;
 struct Material;

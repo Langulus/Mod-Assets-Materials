@@ -112,8 +112,8 @@ Text GLSL::Pretty() const {
    size_t lstart = 0;
    size_t lend = 0;
 
-   for (size_t i = 0; i <= mCount; ++i) {
-      if (i == mCount or (*this)[i] == '\n') {
+   for (size_t i = 0; i <= GetCount(); ++i) {
+      if (i == GetCount() or (*this)[i] == '\n') {
          const auto size = lend - lstart;
 
          // Insert line number                                          
@@ -143,7 +143,7 @@ Text GLSL::Pretty() const {
          ++lend;
    }
 
-   result.Last() = '\0';
+   //result.Last() = '\0';
    return result;
 }
 
@@ -151,7 +151,7 @@ Text GLSL::Pretty() const {
 ///   @param definition the definition to add                                 
 ///   @return a reference to this code                                        
 GLSL& GLSL::Define(Token const& definition) {
-   const Text defined {"#define ", definition, '\n'};
+   const auto defined = Text::Format("#define {} \n", definition);
    if (FindKeyword(defined))
       return *this;
 
@@ -163,7 +163,7 @@ GLSL& GLSL::Define(Token const& definition) {
 ///   @param version the version string                                       
 ///   @return a reference to this code                                        
 GLSL& GLSL::SetVersion(Token const& version) {
-   const Text defined {"#version ", version, '\n'};
+   const auto defined = Text::Format("#version {} \n", version);
    if (FindKeyword(defined))
       return *this;
 

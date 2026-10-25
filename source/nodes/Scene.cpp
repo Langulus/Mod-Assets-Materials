@@ -42,7 +42,7 @@ Symbol const& Scene::GenerateLines() {
    GLSL lines;
    size_t countCombined = 0;
 
-   // Get the lines of each geometry recipe                          
+   // Get the lines of each geometry recipe                             
    mDescriptor.ForEachRecipe([&](Recipe const& c) {
       if (not c.CastsTo<Things::Mesh>())
          return;
@@ -55,7 +55,7 @@ Symbol const& Scene::GenerateLines() {
       geometryDescriptor <<= MetaOf<Vec3>();
       geometryDescriptor <<= MetaOf<RGBA>();
 
-      // Get the generated geometry asset                               
+      // Get the generated geometry art                                 
       Verbs::Create creator {geometryDescriptor};
       const auto geometry = mMaterial->RunIn(creator)->As<Things::Mesh*>();
       const auto count = geometry->GetLineCount();
@@ -114,7 +114,7 @@ GLSL InterpretAsSDF(Recipe const&, Material&) {
 Symbol const& Scene::GenerateSDF() {
    GLSL scene;
 
-   // Get the SDF code for each geometry recipe                      
+   // Get the SDF code for each geometry recipe                         
    mDescriptor.ForEachRecipe([&](Recipe const& c) {
       if (not c.CastsTo<Things::Mesh>())
          return;
@@ -149,7 +149,7 @@ Symbol const& Scene::GenerateTriangles() {
    GLSL triangles;
    size_t countCombined = 0;
 
-   // Get the triangles of each geometry recipe                      
+   // Get the triangles of each geometry recipe                         
    mDescriptor.ForEachRecipe([&](Recipe const& c) {
       if (not c.CastsTo<Things::Mesh>())
          return;
@@ -163,7 +163,7 @@ Symbol const& Scene::GenerateTriangles() {
       geometryDescriptor <<= MetaOf<Normal>();
       geometryDescriptor <<= MetaOf<Sampler2>();
 
-      // Get the generated geometry asset                               
+      // Get the generated geometry art                               
       Verbs::Create creator {geometryDescriptor};
       const auto geometry = mMaterial->RunIn(creator)->As<Things::Mesh*>();
       const auto count = geometry->GetTriangleCount();

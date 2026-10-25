@@ -60,7 +60,8 @@ public:
       GLSL& code;
    };
 
-   void ForEachStage(auto&&);
+   template<class F>
+   void ForEachStage(F&&);
    void Commit   (RefreshRate, Token const&, Token const&);
    GLSL AddInput (RefreshRate, Tag const&, bool allowDuplicates);
    GLSL AddOutput(RefreshRate, Tag const&, bool allowDuplicates);

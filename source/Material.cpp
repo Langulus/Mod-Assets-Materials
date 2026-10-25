@@ -11,10 +11,10 @@
 
 
 /// Material construction                                                     
-///   @param producer - the producer                                          
-///   @param desc - instructions for configuring the material                 
+///   @param producer the producer                                            
+///   @param desc instructions for configuring the material                   
 Material::Material(Things::ArtModule* producer, Many const& desc)
-   : Downcastable   {this}
+   : Downcastable {this}
    , ProducedFrom {producer, desc}
    , mRoot        {this, desc} {
    Logger::Verbose(this, ": Initializing...");
@@ -23,14 +23,14 @@ Material::Material(Things::ArtModule* producer, Many const& desc)
    if (not desc.ExtractTag<Tags::Rate>(mDefaultRate))
       desc.ExtractData(mDefaultRate);
 
-   // Scan descriptor for Tags::Input and Tags::Output              
+   // Scan descriptor for Tags::Input and Tags::Output                  
    desc.ForEachDeep([&](Tag const& tag) {
       auto commonRate = Rate::Auto;
 
       tag.ForEachDeep([&](Many const& part) {
          part.ForEach(
-            [&](RefreshRate  i) noexcept { commonRate = i; },
-            [&](Tag const& i) noexcept {
+            [&](RefreshRate i) noexcept { commonRate = i; },
+            [&](Tag const&  i) noexcept {
                // Add material input/output                             
                if (tag.IsTag<Tags::Input>())
                   AddInput(commonRate, i, true);
@@ -48,32 +48,31 @@ Material::Material(Things::ArtModule* producer, Many const& desc)
 }
 
 /// Create nodes inside the material                                          
-///   @param verb - creation verb                                             
+///   @param verb creation verb                                               
 Material::~Material() {
    Logger::Verbose(this, ": Destroying...");
    mDescriptor.Reset();
 }
 
 /// Create nodes inside the material                                          
-///   @param verb - creation verb                                             
+///   @param verb creation verb                                               
 void Material::Create(Verb& verb) {
    mRoot.Create(verb);
 }
 
 /// Generate shaders                                                          
-///   @param tag - the tag to generate                                    
-///   @param index - tag group to generate                                  
+///   @param tag the tag to generate                                          
+///   @param index tag group to generate                                      
 ///   @return true if data was generated                                      
 bool Material::Generate(TMeta tag, size_t) {
-   const auto found = mDataListMap.FindIt(tag);
+   const auto found = mDataListMap.Find(tag);
    if (found)
       return true;
 
-   // Reserve shader stages inside the Asset's data list map, in the    
-   // Tags::Shader bucket. This marks that this material has been     
+   // Reserve shader stages inside the Art's data list map, in the      
+   // Tags::Shader bucket. This marks that this material has been       
    // generated from now on, even if a specific stage doesn't exist.    
-   mDataListMap.Insert(tag);
-   mDataListMap[tag].New(ShaderStage::Counter, GLSL {});
+   mDataListMap.Merge(tag, DataList {ShaderStage::Counter, GLSL {}});
 
    // If a vertex shader is missing, add a default one                  
    GLSL& vs = GetStage(ShaderStage::Vertex);
@@ -92,7 +91,7 @@ bool Material::Generate(TMeta tag, size_t) {
 
    // Finish all the stages, by writing shader versions to all of them, 
    // and other final touches                                           
-   ForEachStage([&](Stage stage) {
+   ForEachStage([this](Stage stage) {
       if (stage.code.IsEmpty())
          return;
 
@@ -107,7 +106,7 @@ bool Material::Generate(TMeta tag, size_t) {
 }
 
 /// Get material adapter for lower or higher level of detail                  
-///   @param lod - the level-of-detail state                                  
+///   @param lod the level-of-detail state                                    
 ///   @return a pointer to the material generator                             
 auto Material::GetLOD(LOD const&) const -> Ref<Things::Material> {
    TODO();
@@ -121,9 +120,9 @@ auto Material::GetDefaultRate() const noexcept -> RefreshRate {
 }
 
 /// Commit a code snippet to a specific stage and place                       
-///	@param stage - the shader stage to commit to                            
-///   @param place - the shader token to commit changes at                    
-///   @param addition - the code to commit                                    
+///	@param stage the shader stage to commit to                              
+///   @param place the shader token to commit changes at                      
+///   @param addition the code to commit                                      
 void Material::Commit(RefreshRate rate, Token const& place, Token const& addition) {
    const auto stage = rate.GetStageIndex();
    auto& code = GetStage(stage);
@@ -138,7 +137,7 @@ void Material::Commit(RefreshRate rate, Token const& place, Token const& additio
 }
 
 /// Get a GLSL stage                                                          
-///   @param stage - the stage index                                          
+///   @param stage the stage index                                            
 ///   @return the code associated with the stage                              
 GLSL& Material::GetStage(size_t stage) {
    auto stages = GetDataList<Tags::Shader>();
@@ -157,18 +156,18 @@ GLSL& Material::GetStage(size_t stage) {
 }
 
 /// Get a GLSL stage (const)                                                  
-///   @param stage - the stage index                                          
+///   @param stage the stage index                                            
 ///   @return the code associated with the stage                              
 const GLSL& Material::GetStage(size_t stage) const {
    return const_cast<Material*>(this)->GetStage(stage);
 }
 
 /// Execute a function for each stage                                         
-///   @param call - the lambda function to call (use GLSL for argument)       
-void Material::ForEachStage(auto&& call) {
-   using F = Deref<decltype(call)>;
+///   @param call the lambda function to call (use GLSL for argument)         
+template<class F>
+void Material::ForEachStage(F&& call) {
    using A = ArgumentOf<F>;
-   static_assert(Same<A, GLSL> or CT::Exact<A, Stage>,
+   static_assert(Same<A, GLSL> or Exact<A, Stage>,
       "Function argument must be of type GLSL");
 
    if constexpr (Same<A, GLSL>) {
@@ -181,10 +180,10 @@ void Material::ForEachStage(auto&& call) {
    }
 }
 
-/// Add an external input tag                                               
-///   @param rate - the rate at which the input will be refreshed             
-///   @param t - the input to add                                             
-///   @param allowDuplicates - whether multiple such tags are allowed       
+/// Add an external input tag                                                 
+///   @param rate the rate at which the input will be refreshed               
+///   @param t the input to add                                               
+///   @param allowDuplicates whether multiple such tags are allowed           
 ///   @return the generated symbol name                                       
 GLSL Material::AddInput(RefreshRate rate, Tag const& t, bool allowDuplicates) {
    // Get local rate and type, if any                                   
@@ -206,7 +205,7 @@ GLSL Material::AddInput(RefreshRate rate, Tag const& t, bool allowDuplicates) {
 
    // Find any matching available inputs                                
    auto& inputs = mInputs[rate.GetInputIndex()];
-   const auto proto = Tag::FromMeta(t.GetTag(), type);
+   const auto proto = Tag::Typed(t, type);
    if (not allowDuplicates) {
       auto found = inputs.Find(proto);
       if (found)
@@ -225,9 +224,9 @@ GLSL Material::AddInput(RefreshRate rate, Tag const& t, bool allowDuplicates) {
 }
 
 /// Add an output to the material                                             
-///   @param rate - the rate at which the output is refreshed                 
-///   @param t - the output to add                                            
-///   @param allowDuplicates - whether multiple such tags are allowed       
+///   @param rate the rate at which the output is refreshed                   
+///   @param t the output to add                                              
+///   @param allowDuplicates whether multiple such tags are allowed           
 ///   @return the generated symbol name                                       
 GLSL Material::AddOutput(RefreshRate rate, Tag const& t, bool allowDuplicates) {
    // Get local rate and type, if any                                   
@@ -246,7 +245,7 @@ GLSL Material::AddOutput(RefreshRate rate, Tag const& t, bool allowDuplicates) {
       type = Node::GetDefaultTag(t.GetTag()).mType;
 
    auto& outputs = mOutputs[rate.GetInputIndex()];
-   const auto proto = Tag::FromMeta(t.GetTag(), type);
+   const auto proto = Tag::Typed(t, type);
    if (not allowDuplicates) {
       auto found = outputs.Find(proto);
       if (found)
@@ -262,17 +261,17 @@ GLSL Material::AddOutput(RefreshRate rate, Tag const& t, bool allowDuplicates) {
 }
 
 /// Adds a code snippet                                                       
-///   @param rate - the shader stage to place code at                         
-///   @param name - the name of the definition (to check for duplicated)      
-///   @param code - the code to insert                                        
+///   @param rate the shader stage to place code at                           
+///   @param name the name of the definition (to check for duplicated)        
+///   @param code the code to insert                                          
 void Material::AddDefine(RefreshRate rate, Token const& name, const GLSL& code) {
    const auto stageIndex = rate.GetStageIndex();
    mDefinitions[stageIndex][name] << code;
 }
 
 /// Generate input name                                                       
-///   @param rate - the rate at which the input is declared                   
-///   @param tag - the tag tag for the input                              
+///   @param rate the rate at which the input is declared                     
+///   @param tag the tag tag for the input                                    
 ///   @return the variable name to access the input                           
 GLSL Material::GenerateInputName(RefreshRate rate, Tag const& tag) const {
    if (tag.IsTag<Tags::Image>()) {
@@ -287,12 +286,12 @@ GLSL Material::GenerateInputName(RefreshRate rate, Tag const& tag) const {
    // Uniform name inside a uniform buffer                              
    auto rateTxt = static_cast<Text>(rate);
    auto lastns = rateTxt.Find<true>(':');
-   return Text::TemplateRt("Per{}.{}", rateTxt.Select(lastns + 1), tag.GetTag());
+   return TemplateRt("Per{}.{}", rateTxt.Select(lastns + 1), tag.GetTag());
 }
 
 /// Generate output name                                                      
-///   @param rate - the rate at which the output is declared                  
-///   @param tag - the tag tag for the output                             
+///   @param rate the rate at which the output is declared                    
+///   @param tag the tag tag for the output                                   
 ///   @return the variable name to access the output                          
 GLSL Material::GenerateOutputName(RefreshRate rate, Tag const& tag) const {
    LglsAssert(rate.IsShaderStage(), "Can't have an output outside a shader stage rate");
@@ -310,15 +309,15 @@ void Material::GenerateUniforms() {
          continue;
 
       // Define the rate-dedicated uniform buffer, if there's at least  
-      // one tag available                                            
-      //    @param {0} - set index, should be 0 for static uniforms,    
-      //                 and 1 for dynamic uniforms                     
-      //    @param {1} - binding index, derived from                    
-      //                 Rate::GetStaticUniformIndex, and               
-      //                 Rate::GetDynamicUniformIndex respectively      
-      //    @param {2} - name of the uniform buffer instance, derived   
-      //                 from Rate::GetToken                            
-      //    @param {3} - the list of actual variables                   
+      // one tag available                                              
+      //    @param {0} set index, should be 0 for static uniforms,      
+      //               and 1 for dynamic uniforms                       
+      //    @param {1} binding index, derived from                      
+      //               Rate::GetStaticUniformIndex, and                 
+      //               Rate::GetDynamicUniformIndex respectively        
+      //    @param {2} name of the uniform buffer instance, derived     
+      //               from Rate::GetToken                              
+      //    @param {3} the list of actual variables                     
       constexpr auto layout = R"shader(
          layout(set = {0}, binding = {1})
          uniform UniformBuffer{2} {{
@@ -339,7 +338,7 @@ void Material::GenerateUniforms() {
 
          const GLSL type {tag.GetType()};
          const GLSL name {tag.GetTag()};
-         body += Text::TemplateRt("{} {};", type, name);
+         body += TemplateRt("{} {};", type, name);
          if (&tag != &tags.Last())
             body += '\n';
          names << name;
@@ -350,12 +349,12 @@ void Material::GenerateUniforms() {
 
       GLSL ubo;
       if (rate.IsStaticUniform()) {
-         ubo = Text::TemplateRt(layout,
+         ubo = TemplateRt(layout,
             0, rate.GetStaticUniformIndex(), GLSL {rate}, body
          );
       }
       else if (rate.IsDynamicUniform()) {
-         ubo = Text::TemplateRt(layout,
+         ubo = TemplateRt(layout,
             1, rate.GetDynamicUniformIndex(), GLSL {rate}, body
          );
       }
@@ -384,10 +383,10 @@ void Material::GenerateUniforms() {
          continue;
 
       // Define each sampler using this layout                          
-      //    @param {0} - binding index, each unique texture view should 
-      //                 get a unique index                             
-      //    @param {1} - sampler type, deduced from the tag data type 
-      //    @param {2} - the tag name, extracted from tag id        
+      //    @param {0} binding index, each unique texture view should   
+      //               get a unique index                               
+      //    @param {1} sampler type, deduced from the tag data type     
+      //    @param {2} the tag name, extracted from tag id              
       constexpr auto layout = R"shader(
          layout(set = 2, binding = {0})
          uniform {1} {2}{0};
@@ -490,7 +489,7 @@ void Material::GenerateOutputs() {
 }
 
 /// Initialize the material by using a shadertoy snippet                      
-///   @param code - the code to port                                          
+///   @param code the code to port                                            
 void Material::InitializeFromShadertoy(const GLSL& code) {
    Logger::Verbose("Code seems to be from shadertoy.com - porting:");
    Logger::Verbose(code.Pretty());
@@ -502,7 +501,7 @@ void Material::InitializeFromShadertoy(const GLSL& code) {
    Commit(Rate::Pixel, ShaderToken::Defines,
       "#define iFragment vec2(gl_FragCoord.x, iResolution.y - gl_FragCoord.y)");
 
-   // Maps a code token to an input tag by using a macro              
+   // Maps a code token to an input tag by using a macro                
    auto integrate = [&](Tag const& tag, Token const& keyword) {
       if (not code.FindKeyword(keyword))
          return;
@@ -516,7 +515,7 @@ void Material::InitializeFromShadertoy(const GLSL& code) {
          Text::TemplateRt(layout, keyword, input));
    };
 
-   // Satisfy tags                                                    
+   // Satisfy tags                                                      
    integrate(Tags::Time  {}, "iTime");
    integrate(Tags::Size  {}, "iResolution");
    integrate(Tags::Image {}, "iChannel0");
