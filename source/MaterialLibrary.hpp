@@ -1,5 +1,5 @@
 ///                                                                           
-/// Langulus::Module::Assets::Materials                                       
+/// Langulus::Module::Art::Materials                                          
 /// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
@@ -15,7 +15,6 @@
 ///   Material library                                                        
 ///                                                                           
 /// Manages and produces Material(s)                                          
-///                                                                           
 struct MaterialLibrary final : Things::ArtModule {
    using CTTI_Abstract  = No;
    using CTTI_Bases     = Things::ArtModule;

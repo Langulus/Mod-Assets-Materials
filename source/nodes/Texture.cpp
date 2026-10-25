@@ -1,5 +1,5 @@
 ///                                                                           
-/// Langulus::Module::Assets::Materials                                       
+/// Langulus::Module::Art::Materials                                          
 /// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
@@ -15,7 +15,7 @@ using namespace Nodes;
 
 
 /// Texture node descriptor-constructor                                       
-///   @param describe - the node descriptor                                   
+///   @param describe the node descriptor                                     
 Texture::Texture(Describe describe)
    : Downcastable {this}
    , Node       {*describe} {
@@ -40,7 +40,7 @@ Texture::Texture(Describe describe)
          mTexture = CreateTexture(c);
          VERBOSE_NODE("Texture generator changed to: ", mTexture);
       }
-      else Logger::Warning(Self(), "Ignored recipe: ", c);
+      else Logger::Warning(this, ": Ignored recipe: ", c);
    });
    
    // Consider all other provided data                                  
@@ -60,7 +60,7 @@ Texture::Texture(Describe describe)
          mTextureId = data.AsCast<Index>();
          VERBOSE_NODE("Texture id changed to: ", mTextureId);
       }
-      else Logger::Warning(Self(), "Ignored data: ", data);
+      else Logger::Warning(this, ": Ignored data: ", data);
    });
 }
 
@@ -72,19 +72,19 @@ void Texture::Detach() {
 }
 
 /// Create a texture from the provided descriptor                             
-///   @param descriptor - the descriptor for the texture                      
+///   @param descriptor the descriptor for the texture                        
 ///   @return the produced texture                                            
 auto Texture::CreateTexture(Many const& descriptor) -> Ref<Things::Image> {
-   auto local = Recipe::From<Things::Image>(descriptor);
+   auto local = Recipe::For<Things::Image>(descriptor);
    local << Tags::Parent {this}; // Ref {this}
    Verbs::Create creator {&local};
    return GetMaterial()->RunIn(creator)->As<Things::Image*>();
 }
 
 /// Assembles a GLSL texture(...) function                                    
-///   @param sampler - sampler token                                          
-///   @param uv - texture coordinates                                         
-///   @param result - the resulting color format                              
+///   @param sampler sampler token                                            
+///   @param uv texture coordinates                                           
+///   @param result the resulting color format                                
 ///   @return generated texture call                                          
 auto GetPixel(const GLSL& sampler, const GLSL& uv, DMeta result) -> GLSL {
    LglsAssert(result, "Unknown texture format");
@@ -98,9 +98,9 @@ auto GetPixel(const GLSL& sampler, const GLSL& uv, DMeta result) -> GLSL {
 }
 
 /// Turn a keyframe and all of its dependencies to GLSL code                  
-///   @param frameMap - the texture channel keyframes                         
-///   @param keyIdx - the index of the keyframe                               
-///   @param uv - the texture coordinate symbol                               
+///   @param frameMap the texture channel keyframes                           
+///   @param keyIdx the index of the keyframe                                 
+///   @param uv the texture coordinate symbol                                 
 ///   @return the generated GLSL code                                         
 auto Texture::GenerateKeyframe(Temporal const&) -> GLSL {
    GLSL symbol;
@@ -172,8 +172,8 @@ auto Texture::GenerateKeyframe(Temporal const&) -> GLSL {
 }
 
 /// Generate sampler definitions                                              
-///   @param frameMap - the keyframe map to generate                          
-///   @param uv - the texture coordinate symbol                               
+///   @param frameMap the keyframe map to generate                            
+///   @param uv the texture coordinate symbol                                 
 ///   @return the generated GLSL code                                         
 /*GLSL Texture::GenerateDefinition(KeyframeMap* frameMap, const GLSL& uv) {
    if (frameMap->IsEmpty())

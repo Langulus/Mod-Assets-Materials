@@ -1,5 +1,5 @@
 ///                                                                           
-/// Langulus::Module::Assets::Materials                                       
+/// Langulus::Module::Art::Materials                                          
 /// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
@@ -11,17 +11,15 @@
 
 namespace Nodes
 {
-
    ///                                                                        
    ///   Value node                                                           
    ///                                                                        
    ///   Just a node that allows modification of inputs/outputs and execution 
    /// of verbs in a temporary context. Also supports keyframes via the verb  
    /// interface - you can execute verbs with time/frequency charge           
-   ///                                                                        
    struct Value final : Node {
-      using CTTI_Abstract = No;
-      LANGULUS_BASES(Node);
+      using CTTI_Abstract  = No;
+      using CTTI_Bases     = Node;
 
    private:
       Temporal mKeyframes;
@@ -31,5 +29,4 @@ namespace Nodes
 
       Symbol const& Generate();
    };
-
-} // namespace Nodes
+}

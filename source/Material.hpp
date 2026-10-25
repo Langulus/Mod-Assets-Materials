@@ -1,5 +1,5 @@
 ///                                                                           
-/// Langulus::Module::Assets::Materials                                       
+/// Langulus::Module::Art::Materials                                          
 /// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
@@ -42,12 +42,13 @@ public:
    using CTTI_Bases    = Things::Material;
    using CTTI_Ability  = Verbs::Create;
 
-   Material(Things::AssetModule*, Many const&);
+   Material(Things::ArtModule*, Many const&);
    ~Material();
 
+   void Refresh() override {}
+   bool Generate(TMeta, size_t = 0) override;
+
    void Create(Verb&);
-   void Refresh() {}
-   bool Generate(TMeta, size_t = 0);
 
    auto GetLOD(LOD const&) const -> Ref<Things::Material> override;
    auto GetDefaultRate() const noexcept -> RefreshRate;

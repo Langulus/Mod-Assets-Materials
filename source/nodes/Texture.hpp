@@ -1,5 +1,5 @@
 ///                                                                           
-/// Langulus::Module::Assets::Materials                                       
+/// Langulus::Module::Art::Materials                                          
 /// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
@@ -11,17 +11,15 @@
 
 namespace Nodes
 {
-
    ///                                                                        
    ///   Texture node                                                         
    ///                                                                        
-   /// Utilizes available sampler tags, sets up uniform samplers and loads  
+   /// Utilizes available sampler tags, sets up uniform samplers and loads    
    /// or generates static textures if required. Supports texture animations  
    /// of all kinds, solid colors, etc.                                       
-   ///                                                                        
    struct Texture final : Node {
-      using CTTI_Abstract = No;
-      LANGULUS_BASES(Node);
+      using CTTI_Abstract  = No;
+      using CTTI_Bases     = Node;
 
    private:
       Temporal mKeyframes;
@@ -38,21 +36,20 @@ namespace Nodes
       auto CreateTexture(Many const&) -> Ref<Things::Image>;
       auto GenerateKeyframe(Temporal const&) -> GLSL;
    };
-
-} // namespace Nodes
+}
 
 
 /// Get pixel from sampler                                                    
-///   @param {0} - sampler name                                               
-///   @param {1} - texture coordinates                                        
+///   @param {0} sampler name                                                 
+///   @param {1} texture coordinates                                          
 constexpr Token GetPixelFunction = R"shader(
    texture({0}, {1})
 )shader";
 
 /// Texture flow function                                                     
-///   @param {0} - first keyframe code                                        
-///   @param {1} - intermediate keyframe branches                             
-///   @param {2} - last keyframe code                                         
+///   @param {0} first keyframe code                                          
+///   @param {1} intermediate keyframe branches                               
+///   @param {2} last keyframe code                                           
 constexpr Token TextureFlowFunction = R"shader(
    vec4 TextureFlow(in float startTime, in float time, in vec2 uv) {{
       if (time <= startTime) {{
@@ -68,8 +65,8 @@ constexpr Token TextureFlowFunction = R"shader(
 )shader";
 
 /// Keyframe without texture transition                                       
-///   @param {0} - frame end time                                             
-///   @param {1} - GetPixelFunction function call                             
+///   @param {0} frame end time                                               
+///   @param {1} GetPixelFunction function call                               
 constexpr Token TextureFlowBranch = R"shader(
    else if (time < {0}) {{
       return {1};
@@ -77,11 +74,11 @@ constexpr Token TextureFlowBranch = R"shader(
 )shader";
 
 /// Keyframe with transition                                                  
-///   @param {0} - frame end time                                             
-///   @param {1} - frame start time                                           
-///   @param {2} - frame length (end - start)                                 
-///   @param {3} - GetPixelFunction function call from start side             
-///   @param {4} - GetPixelFunction function call from end side               
+///   @param {0} frame end time                                               
+///   @param {1} frame start time                                             
+///   @param {2} frame length (end - start)                                   
+///   @param {3} GetPixelFunction function call from start side               
+///   @param {4} GetPixelFunction function call from end side                 
 constexpr Token TextureFlowBranchMix = R"shader(
    else if (time < {0}) {{
       const float ratio = (time - {1}) / {2};

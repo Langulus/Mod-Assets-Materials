@@ -1,5 +1,5 @@
 ///                                                                           
-/// Langulus::Module::Assets::Materials                                       
+/// Langulus::Module::Art::Materials                                          
 /// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
@@ -13,10 +13,10 @@ using namespace Nodes;
 
 
 /// Raymarcher node descriptor-constructor                                    
-///   @param desc - raymarch descriptor                                       
+///   @param desc raymarch descriptor                                         
 Raymarch::Raymarch(Describe&& descriptor)
    : Downcastable {this}
-   , Node {*descriptor} {
+   , Node         {*descriptor} {
    // Extract RaymarchConfig.mDetail                                    
    mDescriptor.ExtractTag<Tags::Count>(mDetail);
    LglsAssert(mDetail > 0, "Bad raymarch iterations", mDetail);

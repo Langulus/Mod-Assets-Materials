@@ -1,5 +1,5 @@
 ///                                                                           
-/// Langulus::Module::Assets::Materials                                       
+/// Langulus::Module::Art::Materials                                          
 /// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
@@ -13,10 +13,10 @@ using namespace Nodes;
 
 
 /// Camera node descriptor-constructor                                        
-///   @param desc - the camera node descriptor                                
+///   @param desc the camera node descriptor                                  
 Camera::Camera(Describe descriptor)
    : Downcastable {this}
-   , Node       {*descriptor} { }
+   , Node         {*descriptor} { }
 
 /// Generate the camera code                                                  
 ///   @return the output symbol                                               
@@ -25,7 +25,7 @@ auto Camera::Generate() -> Symbol const& {
    Descend();
    AddDefine("CameraResult", CameraResult);
 
-   // Check tags in descriptor to figure out what kind of camera we   
+   // Check tags in descriptor to figure out what kind of camera we     
    // are creating                                                      
    bool explicitCamera = false;
    mDescriptor.ForEachDeep([&](const Tags::View& view) {

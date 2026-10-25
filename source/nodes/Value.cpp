@@ -1,5 +1,5 @@
 ///                                                                           
-/// Langulus::Module::Assets::Materials                                       
+/// Langulus::Module::Art::Materials                                          
 /// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
@@ -12,10 +12,10 @@ using namespace Nodes;
 
 
 /// Value node constructor                                                    
-///   @param parent - the node's parent                                       
+///   @param parent the node's parent                                         
 Value::Value(Node* parent)
    : Downcastable {this}
-   , Node {parent, {}} {}
+   , Node         {parent, {}} {}
 
 /// Generate code for the value - turn any verbs executed on it to their GLSL 
 /// code equivalent, and add animation functions if such are needed.          

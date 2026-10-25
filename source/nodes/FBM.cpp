@@ -1,5 +1,5 @@
 ///                                                                           
-/// Langulus::Module::Assets::Materials                                       
+/// Langulus::Module::Art::Materials                                          
 /// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
@@ -13,10 +13,10 @@ using namespace Nodes;
 
 
 /// FBM node descriptor-constructor                                           
-///   @param desc - node descriptor                                           
+///   @param desc node descriptor                                             
 FBM::FBM(Describe&& descriptor)
    : Downcastable {this}
-   , Node {*descriptor} {
+   , Node         {*descriptor} {
    // Extract number of octaves                                         
    mDescriptor.ExtractTag<Tags::Count>(mOctaveCount);
    LglsAssert(mOctaveCount >= 1, "Bad FBM cycle count", mOctaveCount);

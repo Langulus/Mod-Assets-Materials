@@ -1,5 +1,5 @@
 ///                                                                           
-/// Langulus::Module::Assets::Materials                                       
+/// Langulus::Module::Art::Materials                                          
 /// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
@@ -12,11 +12,11 @@ using namespace Nodes;
 
 
 /// Root node creation                                                        
-///   @param producer - the producer material                                 
-///   @param desc - the node descriptor                                       
+///   @param producer the producer material                                   
+///   @param desc the node descriptor                                         
 Root::Root(Material* producer, Many const& desc)
    : Downcastable {this}
-   , Node       {producer, desc} {
+   , Node         {producer, desc} {
    // Satisfy the rest of the descriptor                                
    // This is just a root node, so we can safely create anything in it  
    producer->Couple(desc); //TODO crappy solution

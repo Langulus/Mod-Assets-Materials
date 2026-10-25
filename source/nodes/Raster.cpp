@@ -1,5 +1,5 @@
 ///                                                                           
-/// Langulus::Module::Assets::Materials                                       
+/// Langulus::Module::Art::Materials                                          
 /// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
@@ -14,10 +14,10 @@ using namespace Nodes;
 
 
 /// Rasterizer node creation                                                  
-///   @param desc - the rasterizer descriptor                                 
+///   @param desc the rasterizer descriptor                                   
 Raster::Raster(Describe&& descriptor)
    : Downcastable {this}
-   , Node {*descriptor} {
+   , Node         {*descriptor} {
    // Extract settings                                                  
    mDescriptor.ExtractTag<Tags::Bilateral>(mBilateral);
    mDescriptor.ExtractTag<Tags::Signed>(mSigned);
@@ -31,7 +31,7 @@ Raster::Raster(Describe&& descriptor)
 
    if (not mTopology) {
       // Rasterizing triangles by default                               
-      mTopology = MetaOf<A::Triangle>();
+      mTopology = MetaDataOf<Triangle>();
    }
 }
 
@@ -66,9 +66,9 @@ Symbol const& Raster::GeneratePerPixel() {
    AddDefine("RasterizeResult",
       RasterResult);
    AddDefine("RasterizeTriangle",
-      Text::TemplateRt(RasterTriangle, culling));
+      TemplateRt(RasterTriangle, culling));
    AddDefine("RasterizeTriangleList",
-      Text::TemplateRt(RasterTriangleList, scenes[0].mCount, scenes[0].mCode));
+      TemplateRt(RasterTriangleList, scenes[0].mCount, scenes[0].mCode));
 
    return ExposeData<Raster>("Rasterize({})", MetaOf<Camera>());
 }

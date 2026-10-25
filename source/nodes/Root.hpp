@@ -1,5 +1,5 @@
 ///                                                                           
-/// Langulus::Module::Assets::Materials                                       
+/// Langulus::Module::Art::Materials                                          
 /// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
@@ -11,17 +11,14 @@
 
 namespace Nodes
 {
-
    ///                                                                        
    ///   Root node                                                            
-   ///                                                                        
    struct Root final : Node {
       using CTTI_Abstract = No;
-      LANGULUS_BASES(Node);
+      using CTTI_Bases    = Node;
 
       Root(Material*, Many const&);
 
       auto Generate() -> Symbol const&;
    };
-
-} // namespace Nodes
+}

@@ -1,5 +1,5 @@
 ///                                                                           
-/// Langulus::Module::Assets::Materials                                       
+/// Langulus::Module::Art::Materials                                          
 /// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
@@ -33,8 +33,6 @@ namespace Langulus::CT
            Inner::ConvertibleToGLSLByOperator<T>
         or Inner::ConvertibleToGLSLByConstructor<T>) and ...);
 }*/
-
-using namespace Things;
 
 
 ///                                                                           
@@ -165,7 +163,7 @@ namespace Langulus::CTTI
       static constexpr bool SkipElements = false;
    };
 
-   /// Rule for serializing GLSL to Text. Wraps it in GLSL"" symbols.         
+   /// Rule for serializing GLSL to Text. Wraps it in GLSL{} symbols.         
    template<>
    struct SerializationRule<Annies::Text, GLSL> {
       using S = Serializer<Annies::Text>;
@@ -173,9 +171,9 @@ namespace Langulus::CTTI
 
       static void Serialize(GLSL const& item, Annies::Text& out, Context*) {
          out += "GLSL";
-         out += Serial::OpenString.Token;
+         out += Serial::OpenCode.Token;
          out += item;
-         out += Serial::CloseString.Token;
+         out += Serial::CloseCode.Token;
       }
    };
 }
@@ -195,10 +193,10 @@ LANGULUS_MORPHISM_CUSTOM(bool, { return from ? "true" : "false"; }, GLSL);
 LANGULUS_MORPHISM_CONCEPT_CUSTOM(CT::Deep, { return GLSL::Scope(from); }, GLSL);
 
 /// Convert DMeta -> GLSL                                                     
-LANGULUS_MORPHISM_CUSTOM(Langulus::RTTI::DMeta, { return GLSL::Type(from); }, GLSL);
+LANGULUS_MORPHISM_CUSTOM(RTTI::DMeta, { return GLSL::Type(from); }, GLSL);
 
 /// Convert TMeta -> GLSL                                                     
-LANGULUS_MORPHISM_CUSTOM(Langulus::RTTI::TMeta, { return Annies::Text("tag") + from.GetName(); }, GLSL);
+LANGULUS_MORPHISM_CUSTOM(RTTI::TMeta, { return Annies::Text("tag") + from.GetName(); }, GLSL);
 
 /// Convert CMeta -> GLSL                                                     
-LANGULUS_MORPHISM_CUSTOM(Langulus::RTTI::CMeta, { TODO(); return from.GetName(); }, GLSL);
+LANGULUS_MORPHISM_CUSTOM(RTTI::CMeta, { TODO(); return from.GetName(); }, GLSL);

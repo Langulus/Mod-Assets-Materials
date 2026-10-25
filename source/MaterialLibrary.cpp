@@ -1,5 +1,5 @@
 ///                                                                           
-/// Langulus::Module::Assets::Materials                                       
+/// Langulus::Module::Art::Materials                                          
 /// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
@@ -46,13 +46,13 @@ LANGULUS_DEFINE_MODULE(
 MaterialLibrary::MaterialLibrary(Runtime* runtime, Many const&)
    : Downcastable {this}
    , Module     {runtime} {
-   Logger::Verbose(Self(), "Initializing...");
+   Logger::Verbose(this, ": Initializing...");
    Math::RegisterNormals();
    Math::RegisterPrimitives();
    Math::RegisterAngles();
    Math::RegisterTraits();
    Math::RegisterVerbs();
-   Logger::Verbose(Self(), "Initialized");
+   Logger::Verbose(this, ": Initialized");
 }
 
 /// First stage destruction                                                   

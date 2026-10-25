@@ -1,5 +1,5 @@
 ///                                                                           
-/// Langulus::Module::Assets::Materials                                       
+/// Langulus::Module::Art::Materials                                          
 /// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
@@ -13,11 +13,11 @@
 /// Material construction                                                     
 ///   @param producer - the producer                                          
 ///   @param desc - instructions for configuring the material                 
-Material::Material(Things::AssetModule* producer, Many const& desc)
+Material::Material(Things::ArtModule* producer, Many const& desc)
    : Downcastable   {this}
    , ProducedFrom {producer, desc}
    , mRoot        {this, desc} {
-   Logger::Verbose(Self(), "Initializing...");
+   Logger::Verbose(this, ": Initializing...");
 
    // Extract default rate if any                                       
    if (not desc.ExtractTag<Tags::Rate>(mDefaultRate))
@@ -32,9 +32,9 @@ Material::Material(Things::AssetModule* producer, Many const& desc)
             [&](RefreshRate  i) noexcept { commonRate = i; },
             [&](Tag const& i) noexcept {
                // Add material input/output                             
-               if (tag.IsTrait<Tags::Input>())
+               if (tag.IsTag<Tags::Input>())
                   AddInput(commonRate, i, true);
-               else if (tag.IsTrait<Tags::Output>())
+               else if (tag.IsTag<Tags::Output>())
                   AddOutput(commonRate, i, true);
                else
                   TODO(); // Add constants?
@@ -44,13 +44,13 @@ Material::Material(Things::AssetModule* producer, Many const& desc)
    });
 
    mRoot.Dump();
-   Logger::Verbose(Self(), "Initialized");
+   Logger::Verbose(this, ": Initialized");
 }
 
 /// Create nodes inside the material                                          
 ///   @param verb - creation verb                                             
 Material::~Material() {
-   Logger::Verbose(Self(), "Destroying...");
+   Logger::Verbose(this, ": Destroying...");
    mDescriptor.Reset();
 }
 
@@ -99,8 +99,8 @@ bool Material::Generate(TMeta tag, size_t) {
       // Write shader version to all relevant codes                     
       stage.code.SetVersion("450");
 
-      Logger::Verbose(Self(), "Stage (", ShaderStage::Names[stage.id], "):\n");
-      Logger::Verbose(Self(), stage.code.Pretty());
+      Logger::Verbose(this, ": Stage (", ShaderStage::Names[stage.id], "):\n");
+      Logger::Verbose(this, stage.code.Pretty());
    });
 
    return true;
@@ -168,10 +168,10 @@ const GLSL& Material::GetStage(size_t stage) const {
 void Material::ForEachStage(auto&& call) {
    using F = Deref<decltype(call)>;
    using A = ArgumentOf<F>;
-   static_assert(CT::Same<A, GLSL> or CT::Exact<A, Stage>,
+   static_assert(Same<A, GLSL> or CT::Exact<A, Stage>,
       "Function argument must be of type GLSL");
 
-   if constexpr (CT::Same<A, GLSL>) {
+   if constexpr (Same<A, GLSL>) {
       for (size_t i = 0; i < ShaderStage::Counter; ++i)
          call(GetStage(i));
    }
@@ -216,7 +216,7 @@ GLSL Material::AddInput(RefreshRate rate, Tag const& t, bool allowDuplicates) {
    // Add the new input                                                 
    inputs << proto;
    const auto symbol = GenerateInputName(rate, proto);
-   if (t.IsTrait<Tags::Image>())
+   if (t.IsTag<Tags::Image>())
       ++mConsumedSamplers;
 
    VERBOSE_NODE("Added input ", Logger::Cyan, proto.GetTag(),
@@ -275,7 +275,7 @@ void Material::AddDefine(RefreshRate rate, Token const& name, const GLSL& code) 
 ///   @param tag - the tag tag for the input                              
 ///   @return the variable name to access the input                           
 GLSL Material::GenerateInputName(RefreshRate rate, Tag const& tag) const {
-   if (tag.IsTrait<Tags::Image>()) {
+   if (tag.IsTag<Tags::Image>()) {
       // Samplers are handled differently                               
       return {tag.GetTag(), mConsumedSamplers};
    }
@@ -331,7 +331,7 @@ void Material::GenerateUniforms() {
       TMany<GLSL> names;
       for (auto& tag : tags) {
          // Skip textures for now                                       
-         if (tag.IsTrait<Tags::Image>())
+         if (tag.IsTag<Tags::Image>())
             continue;
 
          LglsAssert(tag.IsTyped(), "Uniform is not typed");
@@ -380,7 +380,7 @@ void Material::GenerateUniforms() {
    auto& tags = GetInputs(Rate::Renderable);
    for (auto& tag : tags) {
       // Skip anything BUT textures                                     
-      if (not tag.IsTrait<Tags::Image>())
+      if (not tag.IsTag<Tags::Image>())
          continue;
 
       // Define each sampler using this layout                          

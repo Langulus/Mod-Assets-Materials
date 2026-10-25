@@ -1,5 +1,5 @@
 ///                                                                           
-/// Langulus::Module::Assets::Materials                                       
+/// Langulus::Module::Art::Materials                                          
 /// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
@@ -11,10 +11,10 @@ using namespace Nodes;
 
 
 /// Raycaster node descriptor-constructor                                     
-///   @param desc - raycast descriptor                                        
+///   @param desc raycast descriptor                                          
 Raycast::Raycast(Describe&& descriptor)
    : Downcastable {this}
-   , Node {*descriptor} { }
+   , Node         {*descriptor} { }
 
 /// Generate the raycaster code                                               
 ///   @return the raycaster function template                                 

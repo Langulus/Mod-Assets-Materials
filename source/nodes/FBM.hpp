@@ -1,5 +1,5 @@
 ///                                                                           
-/// Langulus::Module::Assets::Materials                                       
+/// Langulus::Module::Art::Materials                                          
 /// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
@@ -11,14 +11,11 @@
 
 namespace Nodes
 {
-
    ///                                                                        
    ///   Fractal Brownian Motion node                                         
-   ///                                                                        
    struct FBM final : Node {
-      using CTTI_Abstract = No;
-      LANGULUS_BASES(Node);
-      LANGULUS_CONVERTS_TO(Text);
+      using CTTI_Abstract  = No;
+      using CTTI_Bases     = Node;
 
    private:
       // Code used to generate octaves                                  
@@ -34,15 +31,15 @@ namespace Nodes
       Symbol const& Generate();
       operator Text() const;
    };
+}
 
-} // namespace Nodes
-
+LANGULUS_MORPHISM(Nodes::FBM, Annies::Text);
 
 /// FBM function template                                                     
-///   @param {0} - unique ID for the FBM function, used only in case of       
-///                multiple FBM nodes in hierarchy                            
-///   @param {1} - argument(s) for the FBM function                           
-///   @param {2} - octave code                                                
+///   @param {0} unique ID for the FBM function, used only in case of         
+///      multiple FBM nodes in hierarchy                                      
+///   @param {1} argument(s) for the FBM function                             
+///   @param {2} octave code                                                  
 constexpr Token FBMTemplate = R"shader(
    float FBM{0}(vec2 uv) {{
       const mat2 m = mat2(1.6, 1.2, -1.2, 1.6);
@@ -53,8 +50,8 @@ constexpr Token FBMTemplate = R"shader(
 )shader";
 
 /// FBM octave template                                                       
-///   @param {0} - mass tag for the current octave                          
-///   @param {1} - octave code to execute                                     
+///   @param {0} mass tag for the current octave                              
+///   @param {1} octave code to execute                                       
 constexpr Token FBMOctave = R"shader(
       f += {0} * {1};
 )shader";
@@ -65,9 +62,9 @@ constexpr Token FBMRotate = R"shader(
 )shader";
 
 /// FBM usage template                                                        
-///   @param {0} - unique ID for the FBM function, used only in case of       
-///                multiple FBM nodes in hierarchy                            
-///   @param {1} - argument(s) for the FBM function                           
+///   @param {0} unique ID for the FBM function, used only in case of         
+///      multiple FBM nodes in hierarchy                                      
+///   @param {1} argument(s) for the FBM function                             
 constexpr Token FBMUsage = R"shader(
       FBM{0}({1})
 )shader";

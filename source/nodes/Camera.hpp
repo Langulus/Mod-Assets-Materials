@@ -1,5 +1,5 @@
 ///                                                                           
-/// Langulus::Module::Assets::Materials                                       
+/// Langulus::Module::Art::Materials                                          
 /// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
@@ -11,19 +11,17 @@
 
 namespace Nodes
 {
-
    ///                                                                        
    ///   Camera node                                                          
    ///                                                                        
    struct Camera final : Node {
-      using CTTI_Abstract = No;
-      LANGULUS_BASES(Node);
+      using CTTI_Abstract  = No;
+      using CTTI_Bases     = Node;
 
       Camera(Describe);
       auto Generate() -> Symbol const&;
    };
-
-} // namespace Nodes
+}
 
 
 /// CameraResult shader structure                                             
@@ -38,10 +36,10 @@ constexpr Token CameraResult = R"shader(
 )shader";
 
 /// PerPixel Camera() shader function                                         
-///   @param {0} - resolution symbol (vec2)                                   
-///   @param {1} - view transformation symbol (mat4)                          
-///   @param {2} - field of view symbol (horizontal, in radians)              
-///   @param {3} - projection transformation symbol (mat4)                    
+///   @param {0} resolution symbol (vec2)                                     
+///   @param {1} view transformation symbol (mat4)                            
+///   @param {2} field of view symbol (horizontal, in radians)                
+///   @param {3} projection transformation symbol (mat4)                      
 constexpr Token CameraFuncPerPixel = R"shader(
    CameraResult Camera() {{
       CameraResult result;
@@ -55,8 +53,8 @@ constexpr Token CameraFuncPerPixel = R"shader(
 )shader";
 
 /// PerVertex Camera() shader function                                        
-///   @param {0} - view transformation (mat4)                                 
-///   @param {1} - vertex position (vec4)                                     
+///   @param {0} view transformation (mat4)                                   
+///   @param {1} vertex position (vec4)                                       
 constexpr Token CameraFuncPerVertex = R"shader(
    CameraResult Camera() {{
       const mat4 invView = invert({0});
@@ -68,7 +66,7 @@ constexpr Token CameraFuncPerVertex = R"shader(
 )shader";
 
 /// Default Camera() shader function (PerPixel)                               
-///   @param {0} - resolution symbol (vec2)                                   
+///   @param {0} resolution symbol (vec2)                                     
 constexpr Token CameraFuncDefault = R"shader(
    CameraResult Camera() {{
       CameraResult result;

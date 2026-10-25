@@ -1,5 +1,5 @@
 ///                                                                           
-/// Langulus::Module::Assets::Materials                                       
+/// Langulus::Module::Art::Materials                                          
 /// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
@@ -11,10 +11,10 @@ using namespace Nodes;
 
 
 /// Light node creation                                                       
-///   @param desc - descriptor for the node                                   
+///   @param desc descriptor for the node                                     
 Light::Light(Describe&& descriptor)
    : Downcastable {this}
-   , Node {*descriptor} { }
+   , Node         {*descriptor} { }
 
 /// Generate the light functionality                                          
 ///   @return the light function template                                     

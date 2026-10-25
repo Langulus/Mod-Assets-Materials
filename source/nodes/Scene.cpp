@@ -1,5 +1,5 @@
 ///                                                                           
-/// Langulus::Module::Assets::Materials                                       
+/// Langulus::Module::Art::Materials                                          
 /// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
@@ -16,10 +16,10 @@ using namespace Nodes;
 
 
 /// Scene node descriptor-constructor                                         
-///   @param desc - the node descriptor                                       
+///   @param desc the node descriptor                                         
 Scene::Scene(Describe&& descriptor)
-   : /*Resolvable {this}
-   ,*/ Node {*descriptor} {
+   : Downcastable {this}
+   , Node         {*descriptor} {
    // Notice how we don't satisfy the rest of the descriptor            
    // How the scene is generated depends on whether we're rasterizing,  
    // raymarching, raytracing, etc.                                     
@@ -100,9 +100,9 @@ Symbol const& Scene::GenerateLines() {
    return ExposeData<Scene>("cLines");
 }
 
-/// Interpret a recipe as an SDF function                                  
-///   @param what - the recipe to reinterpret                              
-///   @param global - place where global definitions go                       
+/// Interpret a recipe as an SDF function                                     
+///   @param what the recipe to reinterpret                                   
+///   @param global place where global definitions go                         
 ///   @return the generated scene function call                               
 GLSL InterpretAsSDF(Recipe const&, Material&) {
    TODO();

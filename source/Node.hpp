@@ -1,5 +1,5 @@
 ///                                                                           
-/// Langulus::Module::Assets::Materials                                       
+/// Langulus::Module::Art::Materials                                          
 /// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
@@ -20,8 +20,7 @@
 //TODO much of the node hierarchy resemles an ordinary Thing hierarchy. think about how to just use Things for these nodes
 struct Node : Things::Part {
 protected:
-   using Material = ::Material;
-   friend struct ::Material;
+   friend struct Material;
    friend struct Nodes::FBM;
 
    // The children that this node leads to                              
@@ -53,7 +52,7 @@ protected:
    // The normalized descriptor                                         
    Neat mDescriptor;
 
-   struct DefaultTrait {
+   struct DefaultTag {
       DMeta mType;
       RefreshRate mRate;
    };
@@ -96,7 +95,7 @@ public:
    auto GetStage() const -> size_t;
    auto GetMaterial() const noexcept -> Material*;
    auto GetLibrary() const noexcept -> MaterialLibrary*;
-   static auto GetDefaultTag(TMeta) -> DefaultTrait;
+   static auto GetDefaultTag(TMeta) -> DefaultTag;
    static auto DecayToGLSLType(DMeta) -> DMeta;
 
    template<bool TWOSIDED = true>

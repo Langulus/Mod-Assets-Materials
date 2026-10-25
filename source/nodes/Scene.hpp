@@ -1,5 +1,5 @@
 ///                                                                           
-/// Langulus::Module::Assets::Materials                                       
+/// Langulus::Module::Art::Materials                                          
 /// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
@@ -11,7 +11,6 @@
 
 namespace Nodes
 {
-
    ///                                                                        
    ///   Scene node                                                           
    ///                                                                        
@@ -19,8 +18,8 @@ namespace Nodes
    /// by adding signed distance field functions, or triangles/lines          
    ///                                                                        
    struct Scene final : Node {
-      using CTTI_Abstract = No;
-      LANGULUS_BASES(Node);
+      using CTTI_Abstract  = No;
+      using CTTI_Bases     = Node;
 
       Scene(Describe&&);
 
@@ -29,8 +28,7 @@ namespace Nodes
       Symbol const& GenerateLines();
       Symbol const& GenerateTriangles();
    };
-
-} // namespace Nodes
+}
 
 
 ///                                                                           
@@ -54,7 +52,7 @@ constexpr Token LineList = R"shader(
 
 
 /// SDF scene function                                                        
-///   @param {0} - scene code                                                 
+///   @param {0} scene code                                                   
 constexpr Token SceneFunction = R"shader(
    float Scene(in vec3 point) {{
       return {0};
@@ -69,8 +67,8 @@ constexpr Token SDFUnion = R"shader(
 )shader";
 
 /// Signed distance union function usage                                      
-///   @param {0} - first scene element                                        
-///   @param {1} - second scene element                                       
+///   @param {0} first scene element                                          
+///   @param {1} second scene element                                         
 constexpr Token SDFUnionUsage = R"shader(
    SDFUnion(
       {0},

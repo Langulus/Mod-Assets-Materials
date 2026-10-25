@@ -1,5 +1,5 @@
 ///                                                                           
-/// Langulus::Module::Assets::Materials                                       
+/// Langulus::Module::Art::Materials                                          
 /// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
@@ -167,7 +167,7 @@ auto Node::GetSymbol(this C&& self, TMeta t, DMeta d, RefreshRate r, CT::Index a
          if (not pair.GetKey()->CastsTo(d))
             continue;
 
-         auto& candidates = pair.GetValue();
+         auto& candidates = pair.GetVal();
          if (i and i.IsSpecial()) {
             // Pick a special index                                     
             auto& candidate = candidates[i];
@@ -202,30 +202,28 @@ auto Node::GetSymbol(this C&& self, TMeta t, DMeta d, RefreshRate r, CT::Index a
 /// Select a symbol from the node hierarchy                                   
 /// Checks local symbols first, then climbs up the hierarchy up to Root,      
 /// where it starts selecting global material inputs/constants                
-///   @tparam T - tag type filter (use void to disable)                       
-///   @tparam D - data type filter (use void to disable)                      
-///   @param r - rate filter                                                  
-///   @param i - index filter                                                 
+///   @tparam T tag type filter (use void to disable)                         
+///   @tparam D data type filter (use void to disable)                        
+///   @param r rate filter                                                    
+///   @param i index filter                                                   
 ///   @return a pointer to the symbol, or nullptr if not found                
 template<class T, class D, class C>
-auto Node::GetSymbol(this C&& self, RefreshRate r, int i) -> LglsMutIf(C, Symbol*) {
-   static_assert(CT::Void<T> or CT::Tag<T>,
+auto Node::GetSymbol(this C&& self, RefreshRate r, CT::Index auto i) -> LglsMutIf(C, Symbol*) {
+   static_assert(CT::Void<T> or CT::DefineTag<T>,
       "T must be either tag, or void");
-   static_assert(CT::Void<D> or CT::Data<D>,
+   static_assert(CT::Void<D> or CT::NotVoid<D>,
       "D must be either data type, or void");
 
-   return GetSymbol(MetaOf<T>(), MetaOf<D>(), r, i);
+   return self.GetSymbol(MetaTagOf<T>(), MetaDataOf<D>(), r, i);
 }
 
 /// Get the refresh rate of the node                                          
-LANGULUS(INLINED)
-auto Node::GetRate() const noexcept -> RefreshRate {
+inline auto Node::GetRate() const noexcept -> RefreshRate {
    return mRate;
 }
 
 /// Execute a function for each symbol in the inputs                          
-///   @tparam F - function signature (deducible)                              
-///   @param call - the function to call for each symbol                      
+///   @param call the function to call for each symbol                        
 ///   @return the number of execution of call                                 
 template<class F>
 size_t Node::ForEachInput(F&& call) {
@@ -235,7 +233,7 @@ size_t Node::ForEachInput(F&& call) {
 
    size_t counter = 0;
    for (auto pair : mLocalsT) {
-      for (auto& symbol : pair.GetValue()) {
+      for (auto& symbol : *pair.GetVal()) {
          if constexpr (CT::Bool<R>) {
             if (not call(symbol))
                return counter;
@@ -246,7 +244,7 @@ size_t Node::ForEachInput(F&& call) {
    }
 
    for (auto pair : mLocalsD) {
-      for (auto& symbol : pair.GetValue()) {
+      for (auto& symbol : *pair.GetVal()) {
          if constexpr (CT::Bool<R>) {
             if (not call(symbol))
                return counter;
@@ -260,18 +258,17 @@ size_t Node::ForEachInput(F&& call) {
 }
 
 /// Execute a function for each symbol in the outputs                         
-///   @tparam F - function signature (deducible)                              
-///   @param call - the function to call for each symbol                      
+///   @param call the function to call for each symbol                        
 ///   @return the number of execution of call                                 
 template<class F>
 size_t Node::ForEachOutput(F&& call) {
    using A = ArgumentOf<F>;
    using R = ReturnOf<F>;
-   static_assert(CT::Same<A, Symbol>, "Function argument must be a Symbol");
+   static_assert(Same<A, Symbol>, "Function argument must be a Symbol");
 
    size_t counter {};
    for (auto pair : mOutputsT) {
-      for (auto& symbol : pair.GetValue()) {
+      for (auto& symbol : *pair.GetVal()) {
          if constexpr (CT::Bool<R>) {
             if (not call(symbol))
                return counter;
@@ -282,7 +279,7 @@ size_t Node::ForEachOutput(F&& call) {
    }
 
    for (auto pair : mOutputsD) {
-      for (auto& symbol : pair.GetValue()) {
+      for (auto& symbol : *pair.GetVal()) {
          if constexpr (CT::Bool<R>) {
             if (not call(symbol))
                return counter;

@@ -1,5 +1,5 @@
 ///                                                                           
-/// Langulus::Module::Assets::Materials                                       
+/// Langulus::Module::Art::Materials                                          
 /// Copyright (c) 2016 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
@@ -11,10 +11,10 @@ using namespace Nodes;
 
 
 /// Raytracer node descriptor-constructor                                     
-///   @param desc - raytrace descriptor                                       
+///   @param desc raytrace descriptor                                         
 Raytrace::Raytrace(Describe descriptor)
    : Downcastable {this}
-   , Node       {*descriptor} { }
+   , Node         {*descriptor} { }
 
 /// Generate raytracer code                                                   
 ///   @return the output symbol                                               
