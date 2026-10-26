@@ -65,14 +65,14 @@ Symbol const& FBM::Generate() {
 
       // Generate shader code for octaves                               
       auto& symbol = temporary.Generate();
-      octaves += Text::TemplateRt(FBMOctave, f, symbol.mCode);
+      octaves += Text::Format(FBMOctave, f, symbol.mCode);
       if (i < mOctaveCount - 1)
          octaves += FBMRotate;
       f *= mBaseWeight;
    }
 
    // Define the FBM function                                           
-   AddDefine("FBM", Text::TemplateRt(FBMTemplate, "", "", octaves));
+   AddDefine("FBM", Text::Format(FBMTemplate, "", "", octaves));
 
    // Expose the FBM function template for use by the other nodes       
    return ExposeData<Real>("FBM({})", Tags::Place::OfType<Vec2>());

@@ -42,7 +42,7 @@ auto Camera::Generate() -> Symbol const& {
          // the projection per pixel. This allows for optically         
          // realistic rendering (near and far planes are not flat)      
          AddDefine("Camera",
-            Text::TemplateRt(CameraFuncPerPixel, *symRes, *symView, *symFov, *symProj));
+            Text::Format(CameraFuncPerPixel, *symRes, *symView, *symFov, *symProj));
          explicitCamera = true;
       }
       else if (mRate == Rate::Vertex) {
@@ -51,8 +51,7 @@ auto Camera::Generate() -> Symbol const& {
 
          // Combine vertex position with the view matrix to from        
          // the projection per vertex                                   
-         AddDefine("Camera",
-            Text::TemplateRt(CameraFuncPerVertex, *symView, *symPos));
+         AddDefine("Camera", Text::Format(CameraFuncPerVertex, *symView, *symPos));
          explicitCamera = true;
       }
       else TODO();
@@ -63,7 +62,7 @@ auto Camera::Generate() -> Symbol const& {
       Logger::Warning("No explicit camera defined - using default 2D screen projection");
       mRate = Rate::Pixel;
       auto symRes = GetSymbol<Tags::Size, Vec2>(Rate::Tick);
-      AddDefine("Camera", Text::TemplateRt(CameraFuncDefault, *symRes));
+      AddDefine("Camera", Text::Format(CameraFuncDefault, *symRes));
    }
 
    // Expose the results to the rest of the nodes                       

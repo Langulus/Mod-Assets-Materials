@@ -152,7 +152,7 @@ GLSL& Material::GetStage(size_t stage) {
          "Bad stage commited");
    })
 
-   return (*stages)[stage].Get<GLSL>();
+   return *(*stages)[stage].Get<GLSL>();
 }
 
 /// Get a GLSL stage (const)                                                  
@@ -286,7 +286,7 @@ GLSL Material::GenerateInputName(RefreshRate rate, Tag const& tag) const {
    // Uniform name inside a uniform buffer                              
    auto rateTxt = static_cast<Text>(rate);
    auto lastns = rateTxt.Find<true>(':');
-   return TemplateRt("Per{}.{}", rateTxt.Select(lastns + 1), tag.GetTag());
+   return Text::Format("Per{}.{}", rateTxt.Select(lastns + 1), tag.GetTag());
 }
 
 /// Generate output name                                                      
@@ -338,7 +338,7 @@ void Material::GenerateUniforms() {
 
          const GLSL type {tag.GetType()};
          const GLSL name {tag.GetTag()};
-         body += TemplateRt("{} {};", type, name);
+         body += Text::Format("{} {};", type, name);
          if (&tag != &tags.Last())
             body += '\n';
          names << name;
@@ -349,12 +349,12 @@ void Material::GenerateUniforms() {
 
       GLSL ubo;
       if (rate.IsStaticUniform()) {
-         ubo = TemplateRt(layout,
+         ubo = Text::Format(layout,
             0, rate.GetStaticUniformIndex(), GLSL {rate}, body
          );
       }
       else if (rate.IsDynamicUniform()) {
-         ubo = TemplateRt(layout,
+         ubo = Text::Format(layout,
             1, rate.GetDynamicUniformIndex(), GLSL {rate}, body
          );
       }
@@ -394,7 +394,7 @@ void Material::GenerateUniforms() {
 
       const GLSL type {tag.GetType()};
       const GLSL name {tag.GetTag()};
-      const auto ubo = Text::TemplateRt(layout, textureNumber, type, name);
+      const auto ubo = Text::Format(layout, textureNumber, type, name);
 
       // Add texture to each stage it is used in                        
       ForEachStage([&](GLSL& code) {
@@ -424,8 +424,7 @@ void Material::GenerateInputs() {
                input.GetTag(), ": ", vkt, " (decayed from ", 
                input.GetType(), ")"
             );
-            LANGULUS_THROW(Material,
-               "Unsupported base for shader attribute");
+            throw Exception("Unsupported base for shader attribute");
          }
 
          // Format the vertex attribute                                 
@@ -439,7 +438,7 @@ void Material::GenerateInputs() {
 
          const GLSL type {vkt};
          const GLSL name {GenerateInputName(rate, input)};
-         const auto definition = Text::TemplateRt(layout, location, type, name);
+         const auto definition = Text::Format(layout, location, type, name);
 
          // Add input to code                                           
          Commit(rate, ShaderToken::Input, definition);
@@ -464,8 +463,7 @@ void Material::GenerateOutputs() {
                output.GetTag(), ": ", vkt, " (decayed from ",
                output.GetType(), ")"
             );
-            LANGULUS_THROW(Material,
-               "Unsupported base for shader output");
+            throw Exception("Unsupported base for shader output");
          }
 
          // Format the output                                           
@@ -479,7 +477,7 @@ void Material::GenerateOutputs() {
 
          const GLSL type {vkt};
          const GLSL name {GenerateOutputName(rate, output)};
-         const auto definition = Text::TemplateRt(layout, location, type, name);
+         const auto definition = Text::Format(layout, location, type, name);
 
          // Add output to code                                          
          Commit(rate, ShaderToken::Output, definition);
@@ -512,7 +510,7 @@ void Material::InitializeFromShadertoy(const GLSL& code) {
       )shader";
 
       Commit(Rate::Pixel, ShaderToken::Defines,
-         Text::TemplateRt(layout, keyword, input));
+         Text::Format(layout, keyword, input));
    };
 
    // Satisfy tags                                                      

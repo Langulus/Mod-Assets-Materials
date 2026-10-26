@@ -66,9 +66,9 @@ Symbol const& Raster::GeneratePerPixel() {
    AddDefine("RasterizeResult",
       RasterResult);
    AddDefine("RasterizeTriangle",
-      TemplateRt(RasterTriangle, culling));
+      Text::Format(RasterTriangle, culling));
    AddDefine("RasterizeTriangleList",
-      TemplateRt(RasterTriangleList, scenes[0].mCount, scenes[0].mCode));
+      Text::Format(RasterTriangleList, scenes[0].mCount, scenes[0].mCode));
 
    return ExposeData<Raster>("Rasterize({})", MetaOf<Camera>());
 }
@@ -108,5 +108,5 @@ Symbol const& Raster::Generate() {
    else if (mRate == Rate::Pixel)
       return GeneratePerPixel();
    else
-      LANGULUS_THROW(Material, "Bad rate for rasterizer");
+      throw Exception("Bad rate for rasterizer");
 }

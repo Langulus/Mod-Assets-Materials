@@ -88,7 +88,7 @@ auto Texture::CreateTexture(Many const& descriptor) -> Ref<Things::Image> {
 ///   @return generated texture call                                          
 auto GetPixel(const GLSL& sampler, const GLSL& uv, DMeta result) -> GLSL {
    LglsAssert(result, "Unknown texture format");
-   const auto pixel = Text::TemplateRt(GetPixelFunction, sampler, uv);
+   const auto pixel = Text::Format(GetPixelFunction, sampler, uv);
    switch (result->GetMemberCount()) {
    case 1:           return pixel + ".rrrr";
    case 2:           return pixel + ".rgrg";

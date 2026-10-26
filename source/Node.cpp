@@ -192,7 +192,7 @@ void Node::ArithmeticVerb(Verb& verb, Token const& pos, Token const& neg, Token 
    if (not verb and inverse and unary.size()) {
       // No argument, so an unary minus sign                            
       ForEachOutput([&success,&unary](Symbol& symbol) {
-         symbol.mCode = TemplateRt(unary, symbol.mCode);
+         symbol.mCode = Text::Format(unary, symbol.mCode);
          success = true;
       });
 
@@ -213,13 +213,13 @@ void Node::ArithmeticVerb(Verb& verb, Token const& pos, Token const& neg, Token 
 
             if (neg.empty() or not inverse) {
                ForEachOutput([&](Symbol& symbol) {
-                  symbol.mCode = TemplateRt(pos, symbol.mCode, code);
+                  symbol.mCode = Text::Format(pos, symbol.mCode, code);
                   success = true;
                });
             }
             else {
                ForEachOutput([&](Symbol& symbol) {
-                  symbol.mCode = TemplateRt(neg, symbol.mCode, code);
+                  symbol.mCode = Text::Format(neg, symbol.mCode, code);
                   success = true;
                });
             }
@@ -287,7 +287,7 @@ void Node::Randomize(Verb& verb) {
          else
             TODO();
 
-         symbol.mCode = TemplateRt("SimplexNoise1({})", symbol.mCode);
+         symbol.mCode = Text::Format("SimplexNoise1({})", symbol.mCode);
          success = true;
       }
       else TODO();
@@ -395,21 +395,21 @@ GLSL ConvertSymbol(Tag const& tag, const GLSL& symbol, DMeta as, Real filler) {
    // Matrix types                                                      
    if (from->template CastsTo<AM4>()) {
       if (as->template CastsTo<AM3>())
-         return Text::TemplateRt(TypeX, "mat3", symbol);
+         return Text::Format(TypeX, "mat3", symbol);
       else if (as->template CastsTo<AM2>())
-         return Text::TemplateRt(TypeX, "mat2", symbol);
+         return Text::Format(TypeX, "mat2", symbol);
    }
    else if (from->template CastsTo<AM3>()) {
       if (as->template CastsTo<AM4>())
-         return Text::TemplateRt(MatXtoMatY, "mat4", symbol, filler);
+         return Text::Format(MatXtoMatY, "mat4", symbol, filler);
       else if (as->template CastsTo<AM2>())
-         return Text::TemplateRt(TypeX, "mat2", symbol);
+         return Text::Format(TypeX, "mat2", symbol);
    }
    else if (from->template CastsTo<AM2>()) {
       if (as->template CastsTo<AM4>())
-         return Text::TemplateRt(Mat2toMat4, symbol, filler);
+         return Text::Format(Mat2toMat4, symbol, filler);
       else if (as->template CastsTo<AM3>())
-         return Text::TemplateRt(MatXtoMatY, "mat3", symbol, filler);
+         return Text::Format(MatXtoMatY, "mat3", symbol, filler);
    }
    // Vector types                                                      
    else if (from->template CastsTo<AV4>()) {
@@ -446,9 +446,9 @@ GLSL ConvertSymbol(Tag const& tag, const GLSL& symbol, DMeta as, Real filler) {
       if (as->template CastsTo<AV4>())
          return {"vec4(vec3(", symbol, "), 1.0)"};
       else if (as->template CastsTo<AV3>())
-         return Text::TemplateRt(TypeX, "vec3", symbol);
+         return Text::Format(TypeX, "vec3", symbol);
       else if (as->template CastsTo<AV2>())
-         return Text::TemplateRt(TypeX, "vec2", symbol);
+         return Text::Format(TypeX, "vec2", symbol);
       else if (as->template CastsTo<AV1>() or as->template CastsTo<A::Number>())
          return symbol;
    }

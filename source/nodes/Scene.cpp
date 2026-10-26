@@ -96,7 +96,7 @@ Symbol const& Scene::GenerateLines() {
    //      ... N times                                                  
    //   );                                                              
    AddDefine("Line", LineStruct);
-   AddDefine("cLines", Text::TemplateRt(LineList, countCombined, lines));
+   AddDefine("cLines", Text::Format(LineList, countCombined, lines));
    return ExposeData<Scene>("cLines");
 }
 
@@ -131,13 +131,13 @@ Symbol const& Scene::GenerateSDF() {
       AddDefine("SDFUnion", SDFUnion);
 
       // Nest the union function for each new element                   
-      scene = Text::TemplateRt(SDFUnionUsage, scene, element);
+      scene = Text::Format(SDFUnionUsage, scene, element);
    });
 
    LglsAssert(scene, "SDF scene is empty");
 
    // Define the scene function                                         
-   AddDefine("Scene", Text::TemplateRt(SceneFunction, scene));
+   AddDefine("Scene", Text::Format(SceneFunction, scene));
 
    // Expose scene usage                                                
    return ExposeTag<Tags::D, float>("Scene({})", Tags::Place::OfType<Vec3>());
@@ -215,6 +215,6 @@ Symbol const& Scene::GenerateTriangles() {
    //      ... N times                                                  
    //   );                                                              
    AddDefine("Triangle", TriangleStruct);
-   AddDefine("cTriangles", Text::TemplateRt(TriangleList, countCombined, triangles));
+   AddDefine("cTriangles", Text::Format(TriangleList, countCombined, triangles));
    return ExposeData<Scene>("cTriangles");
 }
