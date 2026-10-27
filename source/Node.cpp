@@ -78,33 +78,30 @@ void Node::InnerCreate() {
    if (mDescriptor.ExtractTag<Tags::Rate>(mRate)) {
       VERBOSE_NODE("Rate changed (via tag) to: ", mRate);
    }
-
-   // Create all sub recipes                                            
-   mDescriptor.ForEachRecipe([&](Recipe const& c) {
-      NodeFromConstruct(c);
-   });
    
    // Consider all provided data                                        
-   mDescriptor.ForEachTail([&](Many const& data) {
-      if (data.CastsTo<Flow::Code>()) {
-         // Execute code snippet                                        
-         auto const& subcode = data.Get<Flow::Code>();
-         VERBOSE_NODE_TAB("Executing subcode: ", subcode);
-         Run(subcode);
-      }
-      else if (data.CastsTo<Rate>()) {
+   mDescriptor.ForEach(
+      [&](Recipe const& r) {
+         // Create all sub recipes                                      
+         NodeFromRecipe(r);
+      },
+      [&](Flow::Code const& c) {
+         // Execute all code snippets                                   
+         VERBOSE_NODE_TAB("Executing subcode: ", c);
+         Run(c);
+      },
+      [&](Rate const& r) {
          // Set rate through data only                                  
-         mRate = data.Get<Rate>();
+         mRate = r;
          VERBOSE_NODE("Rate changed (via data) to: ", mRate);
       }
-      else Logger::Warning(this, ": Ignored data: ", data);
-   });
+   );
 }
 
 /// Create a child node from a recipe                                         
 ///   @param recipe the recipe to satisfy                                     
 ///   @return a pointer to the child node                                     
-auto Node::NodeFromConstruct(Recipe const& recipe) -> Node* {
+auto Node::NodeFromRecipe(Recipe const& recipe) -> Node* {
    if (not recipe.CastsTo<Node>()) {
       Logger::Warning(this, ": Ignored recipe: ", recipe);
       return {};
@@ -123,7 +120,7 @@ auto Node::NodeFromConstruct(Recipe const& recipe) -> Node* {
 /// Get material library                                                      
 ///   @return a pointer to the manager                                        
 auto Node::GetLibrary() const noexcept -> MaterialLibrary* {
-   return mMaterial->GetProducer().As<MaterialLibrary>();
+   return mMaterial->GetProducer().As<MaterialLibrary*>();
 }
 
 /// Create new nodes                                                          
@@ -132,10 +129,10 @@ void Node::Create(Verb& verb) {
    verb.ForEachDeep([&](Many const& group) {
       group.ForEach(
          [&](DMeta type) {
-            verb << NodeFromConstruct(Recipe {type});
+            verb << NodeFromRecipe(Recipe {type});
          },
          [&](Recipe const& content) {
-            verb << NodeFromConstruct(content);
+            verb << NodeFromRecipe(content);
          }
       );
    });
@@ -207,7 +204,7 @@ void Node::ArithmeticVerb(Verb& verb, Token const& pos, Token const& neg, Token 
    verb.ForEachDeep([&](Many const& group) {
       group.Apply([&](auto const& element) {
          try {
-            const auto code = element.AsCast<GLSL>();
+            const auto code = element.template As<GLSL>();
             if (not code)
                return;
 
@@ -337,7 +334,7 @@ void Node::Dump() const {
       return;
    }
 
-   const auto scope = Logger::VerboseTab(this);
+   auto _ = Logger::VerboseScoped(this);
    for (auto child : mChildren)
       child->Dump();
 }
@@ -345,9 +342,9 @@ void Node::Dump() const {
 /// Opens node debugging scope                                                
 ///   @return the openning string                                             
 Text Node::DebugBegin() const {
-   Code result;
+   Flow::Code result;
    result += GetToken();
-   result += Code::Operator::OpenScope;
+   result += Serial::OpenScope.Token;
    result += mRate;
    return result;
 }
@@ -355,8 +352,8 @@ Text Node::DebugBegin() const {
 /// Closes node debugging scope                                               
 ///   @return the closing string                                              
 Text Node::DebugEnd() const {
-   Code result;
-   result += Code::Operator::CloseScope;
+   Flow::Code result;
+   result += Serial::CloseScope.Token;
    return result;
 }
 
@@ -368,17 +365,17 @@ Text Node::DebugEnd() const {
 ///   @return the new symbol                                                  
 GLSL ConvertSymbol(Tag const& tag, const GLSL& symbol, DMeta as, Real filler) {
    auto from = tag.GetType();
-   if (from->CastsTo(as))
+   if (from.CastsTo(as))
       return symbol;
    
-   using AM4 = A::MatrixOfSize<4>;
-   using AM3 = A::MatrixOfSize<3>;
-   using AM2 = A::MatrixOfSize<2>;
+   using AM4 = MatrixOfSize<4>;
+   using AM3 = MatrixOfSize<3>;
+   using AM2 = MatrixOfSize<2>;
 
-   using AV4 = A::VectorOfSize<4>;
-   using AV3 = A::VectorOfSize<3>;
-   using AV2 = A::VectorOfSize<2>;
-   using AV1 = A::VectorOfSize<1>;
+   using AV4 = VectorOfSize<4>;
+   using AV3 = VectorOfSize<3>;
+   using AV2 = VectorOfSize<2>;
+   using AV1 = VectorOfSize<1>;
 
    constexpr Token TypeX = "{0}({1})";
    constexpr Token MatXtoMatY =

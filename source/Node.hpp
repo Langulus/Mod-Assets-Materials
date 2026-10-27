@@ -121,7 +121,7 @@ public:
    
 protected:
    void InnerCreate();
-   auto NodeFromConstruct(Recipe const&) -> Node*;
+   auto NodeFromRecipe(Recipe const&) -> Node*;
 
    Text DebugBegin() const;
    Text DebugEnd() const;

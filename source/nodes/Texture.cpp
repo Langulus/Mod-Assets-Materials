@@ -55,9 +55,9 @@ Texture::Texture(Describe describe)
          mTexture = CreateTexture(data.As<Text>());
          VERBOSE_NODE("Texture generator changed to: ", mTexture);
       }
-      else if (data.CastsTo<A::Number>()) {
+      else if (data.CastsTo<Number>()) {
          // Set texture id                                              
-         mTextureId = data.AsCast<Index>();
+         mTextureId = data.As<Index::At>();
          VERBOSE_NODE("Texture id changed to: ", mTextureId);
       }
       else Logger::Warning(this, ": Ignored data: ", data);
