@@ -88,7 +88,7 @@ void Node::InnerCreate() {
       [&](Flow::Code const& c) {
          // Execute all code snippets                                   
          VERBOSE_NODE_TAB("Executing subcode: ", c);
-         Run(c);
+         Verbs::Do {c.Parse()}.In(this).Run();
       },
       [&](Rate const& r) {
          // Set rate through data only                                  
@@ -120,7 +120,7 @@ auto Node::NodeFromRecipe(Recipe const& recipe) -> Node* {
 /// Get material library                                                      
 ///   @return a pointer to the manager                                        
 auto Node::GetLibrary() const noexcept -> MaterialLibrary* {
-   return mMaterial->GetProducer().As<MaterialLibrary*>();
+   return const_cast<MaterialLibrary*>(mMaterial->GetProducer().As<MaterialLibrary*>());
 }
 
 /// Create new nodes                                                          
@@ -274,12 +274,13 @@ void Node::Randomize(Verb& verb) {
    bool success = false;
    ForEachOutput([&](Symbol& symbol) {
       DMeta itype = symbol.mTag.GetType();
+      DMeta number_based = MetaDataOf<Number>();
 
       // Call the appropriate noise function                            
-      if (otype->template CastsTo<Number>(1)) {
-         if (itype->template CastsTo<Number>(2))
+      if (otype.CastsTo(number_based, 1)) {
+         if (itype.CastsTo(number_based, 2))
             AddDefine("SimplexNoise1", TSimplex<1, 2, float>::template Hash<true>());
-         else if (itype->template CastsTo<Number>(3))
+         else if (itype.CastsTo(number_based, 3))
             AddDefine("SimplexNoise1", TSimplex<1, 3, float>::template Hash<true>());
          else
             TODO();
@@ -368,14 +369,16 @@ GLSL ConvertSymbol(Tag const& tag, const GLSL& symbol, DMeta as, Real filler) {
    if (from.CastsTo(as))
       return symbol;
    
-   using AM4 = MatrixOfSize<4>;
-   using AM3 = MatrixOfSize<3>;
-   using AM2 = MatrixOfSize<2>;
+   RTTI::DMeta number_based = MetaDataOf<Number>();
 
-   using AV4 = VectorOfSize<4>;
-   using AV3 = VectorOfSize<3>;
-   using AV2 = VectorOfSize<2>;
-   using AV1 = VectorOfSize<1>;
+   RTTI::DMeta AM4 = MetaDataOf<MatrixOfSize<4>>();
+   RTTI::DMeta AM3 = MetaDataOf<MatrixOfSize<3>>();
+   RTTI::DMeta AM2 = MetaDataOf<MatrixOfSize<2>>();
+()
+   RTTI::DMeta AV4 = MetaDataOf<VectorOfSize<4>>();
+   RTTI::DMeta AV3 = MetaDataOf<VectorOfSize<3>>();
+   RTTI::DMeta AV2 = MetaDataOf<VectorOfSize<2>>();
+   RTTI::DMeta AV1 = MetaDataOf<VectorOfSize<1>>();
 
    constexpr Token TypeX = "{0}({1})";
    constexpr Token MatXtoMatY =
@@ -390,63 +393,63 @@ GLSL ConvertSymbol(Tag const& tag, const GLSL& symbol, DMeta as, Real filler) {
            "{1}[3], 0.0, {2})";
 
    // Matrix types                                                      
-   if (from->template CastsTo<AM4>()) {
-      if (as->template CastsTo<AM3>())
+   if (from.CastsTo(AM4)) {
+      if (as.CastsTo(AM3))
          return Text::Format(TypeX, "mat3", symbol);
-      else if (as->template CastsTo<AM2>())
+      else if (as.CastsTo(AM2))
          return Text::Format(TypeX, "mat2", symbol);
    }
-   else if (from->template CastsTo<AM3>()) {
-      if (as->template CastsTo<AM4>())
+   else if (from.CastsTo(AM3)) {
+      if (as.CastsTo(AM4))
          return Text::Format(MatXtoMatY, "mat4", symbol, filler);
-      else if (as->template CastsTo<AM2>())
+      else if (as.CastsTo(AM2))
          return Text::Format(TypeX, "mat2", symbol);
    }
-   else if (from->template CastsTo<AM2>()) {
-      if (as->template CastsTo<AM4>())
+   else if (from.CastsTo(AM2)) {
+      if (as.CastsTo(AM4))
          return Text::Format(Mat2toMat4, symbol, filler);
-      else if (as->template CastsTo<AM3>())
+      else if (as.CastsTo(AM3))
          return Text::Format(MatXtoMatY, "mat3", symbol, filler);
    }
    // Vector types                                                      
-   else if (from->template CastsTo<AV4>()) {
-      if (as->template CastsTo<AV4>())
+   else if (from.CastsTo(AV4)) {
+      if (as.CastsTo(AV4))
          return symbol;
-      else if (as->template CastsTo<AV3>())
+      else if (as.CastsTo(AV3))
          return {symbol, ".xyz"};
-      else if (as->template CastsTo<AV2>())
+      else if (as.CastsTo(AV2))
          return {symbol, ".xy"};
-      else if (as->template CastsTo<AV1>() or as->template CastsTo<A::Number>())
+      else if (as.CastsTo(AV1) or as.CastsTo(number_based))
          return {symbol, ".x"};
    }
-   else if (from->template CastsTo<AV3>()) {
-      if (as->template CastsTo<AV4>())
+   else if (from.CastsTo(AV3)) {
+      if (as.CastsTo(AV4))
          return {"vec4(", symbol, ", 1.0)"};
-      else if (as->template CastsTo<AV3>())
+      else if (as.CastsTo(AV3))
          return symbol;
-      else if (as->template CastsTo<AV2>())
+      else if (as.CastsTo(AV2))
          return {symbol, ".xy"};
-      else if (as->template CastsTo<AV1>() or as->template CastsTo<A::Number>())
+      else if (as.CastsTo(AV1) or as.CastsTo(number_based))
          return {symbol, ".x"};
    }
-   else if (from->template CastsTo<AV2>()) {
-      if (as->template CastsTo<AV4>())
+   else if (from.CastsTo(AV2)) {
+      if (as.CastsTo(AV4))
          return {"vec4(", symbol, ", ", filler, ", 1.0)"};
-      else if (as->template CastsTo<AV3>())
+      else if (as.CastsTo(AV3))
          return {"vec3(", symbol, ", ", filler, ")"};
-      else if (as->template CastsTo<AV2>())
+      else if (as.CastsTo(AV2))
          return symbol;
-      else if (as->template CastsTo<AV1>() or as->template CastsTo<A::Number>())
+      else if (as.CastsTo(AV1) or as.CastsTo(number_based))
          return {symbol, ".x"};
    }
-   else if (from->template CastsTo<AV1>() or from->template CastsTo<A::Number>()) {
-      if (as->template CastsTo<AV4>())
+   else if (from.CastsTo(AV1) or from.CastsTo(number_based)) {
+      if (as.CastsTo(AV4))
          return {"vec4(vec3(", symbol, "), 1.0)"};
-      else if (as->template CastsTo<AV3>())
+      else if (as.CastsTo(AV3))
          return Text::Format(TypeX, "vec3", symbol);
-      else if (as->template CastsTo<AV2>())
+      else if (as.CastsTo(AV2))
          return Text::Format(TypeX, "vec2", symbol);
-      else if (as->template CastsTo<AV1>() or as->template CastsTo<A::Number>())
+      else if (as.CastsTo(AV1) or as.CastsTo(number_based))
          return symbol;
    }
 
