@@ -121,18 +121,18 @@ Text GLSL::Pretty() const {
 
          size_t lt = 0;
          for (; lt < linedigits - CountDigits(line); ++lt)
-            segment.GetRaw()[lt] = ' ';
+            segment[lt] = ' ';
 
-         ::std::to_chars(segment.GetRaw() + lt, segment.GetRaw() + linedigits, line);
-         segment.GetRaw()[linedigits] = '|';
-         segment.GetRaw()[linedigits + 1] = ' ';
+         ::std::to_chars(segment + lt, segment + linedigits, line);
+         segment[linedigits] = '|';
+         segment[linedigits + 1] = ' ';
 
          // Insert line text                                            
          if (size)
-            ::std::memcpy(segment.GetRaw() + linedigits + 2, GetRaw() + lstart, size);
+            ::std::memcpy(segment + linedigits + 2, GetRaw() + lstart, size);
 
          // Add new-line character at the end                           
-         segment.GetRaw()[size + linedigits + 2] = '\n';
+         segment[size + linedigits + 2] = '\n';
 
          ++line;
          lstart = lend = i + 1;

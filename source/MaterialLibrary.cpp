@@ -50,7 +50,7 @@ MaterialLibrary::MaterialLibrary(Runtime* runtime, Many const&)
    Math::RegisterNormals();
    Math::RegisterPrimitives();
    Math::RegisterAngles();
-   Math::RegisterTraits();
+   Math::RegisterTags();
    Math::RegisterVerbs();
    Logger::Verbose(this, ": Initialized");
 }
