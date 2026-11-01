@@ -23,7 +23,7 @@ namespace Nodes
 
    private:
       Temporal mKeyframes;
-      Index mTextureId = IndexNone;
+      Index::At mTextureId = IndexNone;
       Ref<Things::Image> mTexture;
 
    public:

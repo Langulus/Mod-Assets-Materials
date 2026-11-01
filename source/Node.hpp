@@ -8,6 +8,8 @@
 #pragma once
 #include "Symbol.hpp"
 #include <Langulus/Neat.hpp>
+#include <Langulus/Verbs/Create.hpp>
+#include <Langulus/Verbs/Select.hpp>
 #include <Langulus/Verbs/Add.hpp>
 #include <Langulus/Verbs/Multiply.hpp>
 #include <Langulus/Verbs/Modulate.hpp>

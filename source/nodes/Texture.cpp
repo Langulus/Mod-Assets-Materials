@@ -18,7 +18,7 @@ using namespace Nodes;
 ///   @param describe the node descriptor                                     
 Texture::Texture(Describe describe)
    : Downcastable {this}
-   , Node       {*describe} {
+   , Node         {*describe} {
    // Create any subnodes here, it is allowed                           
    // This will also execute any encountered [subcode], and set rate    
    InnerCreate();
@@ -36,7 +36,8 @@ Texture::Texture(Describe describe)
    
    // Create texture generators from sub-recipes                     
    mDescriptor.ForEachRecipe([&](Recipe const& c) {
-      if (c.CastsTo<Things::Image>() or c.CastsTo<Things::File>()) {
+      const auto target = c.GetTarget();
+      if (target.CastsTo(MetaDataOf<Things::Image>()) or target.CastsTo(MetaDataOf<Things::File>())) {
          mTexture = CreateTexture(c);
          VERBOSE_NODE("Texture generator changed to: ", mTexture);
       }
@@ -50,7 +51,7 @@ Texture::Texture(Describe describe)
          mTexture = data.As<Things::Image*>();
          VERBOSE_NODE("Texture generator changed to: ", mTexture);
       }
-      else if (data.CastsTo<Text>() and not data.CastsTo<Code>()) {
+      else if (data.CastsTo<Text>() and not data.CastsTo<Flow::Code>()) {
          // Any other text is considered a texture filename             
          mTexture = CreateTexture(data.As<Text>());
          VERBOSE_NODE("Texture generator changed to: ", mTexture);
@@ -77,8 +78,7 @@ void Texture::Detach() {
 auto Texture::CreateTexture(Many const& descriptor) -> Ref<Things::Image> {
    auto local = Recipe::For<Things::Image>(descriptor);
    local << Tags::Parent {this}; // Ref {this}
-   Verbs::Create creator {&local};
-   return GetMaterial()->RunIn(creator)->As<Things::Image*>();
+   return Verbs::Create(&local).In(GetMaterial())->As<Things::Image*>();
 }
 
 /// Assembles a GLSL texture(...) function                                    
@@ -89,7 +89,7 @@ auto Texture::CreateTexture(Many const& descriptor) -> Ref<Things::Image> {
 auto GetPixel(const GLSL& sampler, const GLSL& uv, DMeta result) -> GLSL {
    LglsAssert(result, "Unknown texture format");
    const auto pixel = Text::Format(GetPixelFunction, sampler, uv);
-   switch (result->GetMemberCount()) {
+   switch (result.GetMembers().size()) {
    case 1:           return pixel + ".rrrr";
    case 2:           return pixel + ".rgrg";
    case 3: case 4:   return pixel;

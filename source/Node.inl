@@ -82,8 +82,9 @@ size_t Node::ForEachChild(F&& call) {
 template<CT::DefineTag T, CT::NotVoid D>
 auto Node::AddLocal(D&& value, Token const& variable) -> Symbol const& {
    const auto meta = MetaTagOf<T>();
-   mLocalsT[meta] << Symbol::Variable<T>(mRate, LglsFwd(value), variable);
-   return mLocalsT[meta].Last();
+   return *mLocalsT[meta].Emplace(
+      Symbol::Variable<T>(mRate, LglsFwd(value), variable)
+   );
 }
 
 /// Add a literal to the node, with a specific tag and value                  

@@ -48,7 +48,7 @@ Symbol const& FBM::Generate() {
    Descend();
 
    // Generate octaves                                                  
-   Real f {mBaseWeight};
+   Real f = mBaseWeight;
    GLSL octaves;
    for (size_t i = 0; i < mOctaveCount && mBaseWeight != 0; ++i) {
       // Make a temporary node for each octave, we don't want any       
@@ -61,7 +61,7 @@ Symbol const& FBM::Generate() {
       temporary.template AddLocal<Tags::Place>(Vec2 {}, "uv");
 
       // Run octave code for this node                                  
-      temporary.Run(mCode);
+      Verbs::Do(mCode).In(temporary).Run();
 
       // Generate shader code for octaves                               
       auto& symbol = temporary.Generate();
