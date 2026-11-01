@@ -539,6 +539,6 @@ void Material::InitializeFromShadertoy(const GLSL& code) {
    )shader");
 
    // Add output color per pixel                                        
-   auto output = AddOutput(Rate::Pixel, Tags::Color::OfType<Vec4>(), false);
+   auto output = AddOutput(Rate::Pixel, Tags::Color::Typed<Vec4>(), false);
    Commit(Rate::Pixel, ShaderToken::Colorize, output + " = ShadertoyMain();");
 }

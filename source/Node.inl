@@ -67,7 +67,7 @@ size_t Node::RemoveChild(Node* node) {
 ///   @return the number of successul executions of the call                  
 template<class F>
 size_t Node::ForEachChild(F&& call) {
-   auto counter = mChildren.ForEach(LglsFwd(call));
+   size_t counter = mChildren.ForEach(LglsFwd(call));
    for (auto child : mChildren)
       counter += child->ForEachChild(LglsFwd(call));
    return counter;
@@ -135,7 +135,8 @@ auto Node::ExposeTag(Token const& pattern, auto&&...a) -> Symbol& {
 ///   @param i index filter                                                   
 ///   @return a pointer to the symbol, or nullptr if not found                
 template<class C>
-auto Node::GetSymbol(this C&& self, TMeta t, DMeta d, RefreshRate r, CT::Index auto i) -> LglsMutIf(C, Symbol*) {
+auto Node::GetSymbol(this C&& self, TMeta t, DMeta d, RefreshRate r, Index::At i)
+-> LglsMutIf(C, Symbol*) {
    size_t nth = i.IsSpecial() ? 0 : static_cast<size_t>(i.index);
 
    if (t) {
@@ -208,12 +209,8 @@ auto Node::GetSymbol(this C&& self, TMeta t, DMeta d, RefreshRate r, CT::Index a
 ///   @param i index filter                                                   
 ///   @return a pointer to the symbol, or nullptr if not found                
 template<class T, class D, class C>
-auto Node::GetSymbol(this C&& self, RefreshRate r, CT::Index auto i) -> LglsMutIf(C, Symbol*) {
-   static_assert(CT::Void<T> or CT::DefineTag<T>,
-      "T must be either tag, or void");
-   static_assert(CT::Void<D> or CT::NotVoid<D>,
-      "D must be either data type, or void");
-
+auto Node::GetSymbol(this C&& self, RefreshRate r, Index::At i)
+-> LglsMutIf(C, Symbol*) {
    return self.GetSymbol(MetaTagOf<T>(), MetaDataOf<D>(), r, i);
 }
 
@@ -266,7 +263,7 @@ size_t Node::ForEachOutput(F&& call) {
    using R = ReturnOf<F>;
    static_assert(Same<A, Symbol>, "Function argument must be a Symbol");
 
-   size_t counter {};
+   size_t counter = 0;
    for (auto pair : mOutputsT) {
       for (auto& symbol : *pair.GetVal()) {
          if constexpr (CT::Bool<R>) {

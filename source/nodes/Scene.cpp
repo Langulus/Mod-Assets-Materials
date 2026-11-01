@@ -43,7 +43,7 @@ Symbol const& Scene::GenerateLines() {
    size_t countCombined = 0;
 
    // Get the lines of each geometry recipe                             
-   mDescriptor.ForEachRecipe([&](Recipe const& c) {
+   mDescriptor.ForEach([&](Recipe const& c) {
       if (not c.CastsTo<Things::Mesh>())
          return;
 
@@ -51,7 +51,7 @@ Symbol const& Scene::GenerateLines() {
       // and rasterizer requires it, so we create them                  
       // We generate color, too                                         
       auto geometryDescriptor = c;
-      geometryDescriptor <<= MetaOf<A::Line>();
+      geometryDescriptor <<= MetaOf<Line>();
       geometryDescriptor <<= MetaOf<Vec3>();
       geometryDescriptor <<= MetaOf<RGBA>();
 
@@ -76,19 +76,19 @@ Symbol const& Scene::GenerateLines() {
          if (countCombined > 0)
             lines += ", \n";
          lines += "     Line(";
-         lines += position.As<Vec3>(0);
+         lines += position.AsAt<Vec3>(0);
          lines += ", ";
-         lines += color.As<Vec4>(0);
+         lines += color.AsAt<Vec4>(0);
          lines += ", ";
-         lines += position.As<Vec3>(1);
+         lines += position.AsAt<Vec3>(1);
          lines += ", ";
-         lines += color.As<Vec4>(1);
+         lines += color.AsAt<Vec4>(1);
          lines += ")";
          ++countCombined;
       }
    });
 
-   LglsAssert(countCombined, Material, "No lines available");
+   LglsAssert(countCombined, "No lines available");
 
    // Aggregate all lines in an array:                                  
    // const Line cLines[N] = Line[N](                                   
@@ -115,7 +115,7 @@ Symbol const& Scene::GenerateSDF() {
    GLSL scene;
 
    // Get the SDF code for each geometry recipe                         
-   mDescriptor.ForEachRecipe([&](Recipe const& c) {
+   mDescriptor.ForEach([&](Recipe const& c) {
       if (not c.CastsTo<Things::Mesh>())
          return;
 
@@ -140,7 +140,7 @@ Symbol const& Scene::GenerateSDF() {
    AddDefine("Scene", Text::Format(SceneFunction, scene));
 
    // Expose scene usage                                                
-   return ExposeTag<Tags::D, float>("Scene({})", Tags::Place::OfType<Vec3>());
+   return ExposeTag<Tags::D, float>("Scene({})", Tags::Place::Typed<Vec3>());
 }
 
 /// Generate scene code                                                       
@@ -150,7 +150,7 @@ Symbol const& Scene::GenerateTriangles() {
    size_t countCombined = 0;
 
    // Get the triangles of each geometry recipe                         
-   mDescriptor.ForEachRecipe([&](Recipe const& c) {
+   mDescriptor.ForEach([&](Recipe const& c) {
       if (not c.CastsTo<Things::Mesh>())
          return;
 

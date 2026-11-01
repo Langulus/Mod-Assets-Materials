@@ -19,7 +19,7 @@ namespace Nodes
 
    private:
       // Code used to generate octaves                                  
-      Code mCode;
+      Flow::Code mCode;
       // Base weight value                                              
       Real mBaseWeight {0.5};
       // Number of octaves                                              

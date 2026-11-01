@@ -16,7 +16,7 @@
 ///   @param arguments... the arguments for the pattern                       
 ///   @return the symbol instance                                             
 template<CT::NotVoid T, class...ARGS>
-Symbol Symbol::Function(Rate rate, Token const& pattern, ARGS&&...arguments) {
+Symbol Symbol::Function(RRate rate, Token const& pattern, ARGS&&...arguments) {
    LglsAssumeDev(rate != Rate::Auto, "Rate should be resolved");
    TemplateCheck(pattern, arguments...);
 
@@ -34,7 +34,7 @@ Symbol Symbol::Function(Rate rate, Token const& pattern, ARGS&&...arguments) {
 ///   @param value the value of the literal                                   
 ///   @return the symbol instance                                             
 template<CT::DefineTag T, CT::NotVoid D>
-Symbol Symbol::Literal(Rate rate, D&& value) {
+Symbol Symbol::Literal(RRate rate, D&& value) {
    LglsAssumeDev(rate != Rate::Auto, "Rate should be resolved");
 
    Symbol s;
@@ -50,7 +50,7 @@ Symbol Symbol::Literal(Rate rate, D&& value) {
 ///   @param name the variable token                                          
 ///   @return the symbol instance                                             
 template<CT::DefineTag T, CT::NotVoid D>
-Symbol Symbol::Variable(Rate rate, D&& value, Token const& name) {
+Symbol Symbol::Variable(RRate rate, D&& value, Token const& name) {
    LglsAssumeDev(rate != Rate::Auto, "Rate should be resolved");
 
    Symbol s;
@@ -65,7 +65,7 @@ Symbol Symbol::Variable(Rate rate, D&& value, Token const& name) {
 ///   @param r the rate this symbol needs to be at (or lower)                 
 ///      use Rate::Auto for no filter                                         
 ///   @return true if this symbol matches the filter requirements             
-inline bool Symbol::MatchesFilter(DMeta d, Rate r) const noexcept {
+inline bool Symbol::MatchesFilter(DMeta d, RRate r) const noexcept {
    LglsAssumeDev(mRate != Rate::Auto, "Rate should be resolved");
    return (!d || mTag.CastsTo(d)) && (r == Rate::Auto || r <= mRate);
 }

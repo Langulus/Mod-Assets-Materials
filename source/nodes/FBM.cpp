@@ -34,9 +34,9 @@ FBM::FBM(Describe&& descriptor)
 
 /// For logging                                                               
 FBM::operator Text() const {
-   Code result;
+   Flow::Code result;
    result += Node::DebugBegin();
-   result += Text {", ", mOctaveCount, " octaves of ", mCode};
+   result += Text::Format(", {} octaves of {}", mOctaveCount, mCode);
    result += Node::DebugEnd();
    return result;
 }
@@ -75,5 +75,5 @@ Symbol const& FBM::Generate() {
    AddDefine("FBM", Text::Format(FBMTemplate, "", "", octaves));
 
    // Expose the FBM function template for use by the other nodes       
-   return ExposeData<Real>("FBM({})", Tags::Place::OfType<Vec2>());
+   return ExposeData<Real>("FBM({})", Tags::Place::Typed<Vec2>());
 }

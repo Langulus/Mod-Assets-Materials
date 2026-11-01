@@ -109,10 +109,12 @@ public:
    size_t ForEachChild(F&&);
 
    template<class C>
-   auto GetSymbol(this C&&, TMeta, DMeta = nullptr, RefreshRate = Rate::Auto, CT::Index auto = Index::Last) -> LglsMutIf(C, Symbol*);
+   auto GetSymbol(this C&&, TMeta, DMeta = nullptr, RRate = Rate::Auto, Index::At = Index::Last)
+      -> LglsMutIf(C, Symbol*);
 
    template<class = void, class = void, class C>
-   auto GetSymbol(this C&&, RefreshRate = Rate::Auto, CT::Index auto = Index::Last) -> LglsMutIf(C, Symbol*);
+   auto GetSymbol(this C&&, RRate = Rate::Auto, Index::At = Index::Last)
+      -> LglsMutIf(C, Symbol*);
 
    template<class F>
    size_t ForEachInput(F&&);

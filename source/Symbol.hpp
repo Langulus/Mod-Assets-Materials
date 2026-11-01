@@ -11,7 +11,6 @@
 
 using RTTI::DMeta;
 using RTTI::TMeta;
-using Rate = RefreshRate;
 
 
 ///                                                                           
@@ -19,10 +18,9 @@ using Rate = RefreshRate;
 ///                                                                           
 /// Transfers data from one node to another. Can be an expression, a literal, 
 /// a name to a variable, or a template to a function call                    
-///                                                                           
 struct Symbol {
    // The rate at which this symbol is recomputed                       
-   Rate mRate = Rate::Auto;
+   RRate mRate = Rate::Auto;
 
    // The tag (if any), the data type (if any), and the value (if       
    // the symbol is a constant/literal). If this symbol represents a    
@@ -60,15 +58,15 @@ public:
       , mArguments{NestIntentOf(other, other->mArguments)} {}
 
    template<CT::NotVoid, class...ARGS>
-   static Symbol Function(Rate, Token const&, ARGS&&...);
+   static Symbol Function(RRate, Token const&, ARGS&&...);
 
    template<CT::DefineTag, CT::NotVoid D>
-   static Symbol Literal(Rate, D&&);
+   static Symbol Literal(RRate, D&&);
 
    template<CT::DefineTag, CT::NotVoid D>
-   static Symbol Variable(Rate, D&&, Token const&);
+   static Symbol Variable(RRate, D&&, Token const&);
 
-   bool MatchesFilter(DMeta, Rate) const noexcept;
+   bool MatchesFilter(DMeta, RRate) const noexcept;
 
    GLSL Generate(const Node*) const;
 
@@ -103,9 +101,7 @@ using Symbols = TMany<Symbol>;
 
 namespace fmt
 {
-   ///                                                                        
    /// Extend FMT to be capable of log/fill templates with symbols            
-   ///                                                                        
    template<>
    struct formatter<Symbol> {
       template<class CONTEXT>
