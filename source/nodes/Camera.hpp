@@ -13,7 +13,6 @@ namespace Nodes
 {
    ///                                                                        
    ///   Camera node                                                          
-   ///                                                                        
    struct Camera final : Node {
       using CTTI_Abstract  = No;
       using CTTI_Bases     = Node;

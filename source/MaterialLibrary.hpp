@@ -27,7 +27,7 @@ private:
    Ref<Things::Folder> mFolder;
 
 public:
-   MaterialLibrary(Runtime*, Many const&);
+   MaterialLibrary(Runtime*, Neat const&);
 
    void RequestGarbageCollection() {}
 

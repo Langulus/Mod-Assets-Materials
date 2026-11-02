@@ -41,11 +41,11 @@ LANGULUS_DEFINE_MODULE(
 
 
 /// Module construction                                                       
-///   @param runtime - the runtime that owns the module                       
-///   @param descriptor - instructions for configuring the module             
-MaterialLibrary::MaterialLibrary(Runtime* runtime, Many const&)
+///   @param runtime the runtime that owns the module                         
+///   @param descriptor instructions for configuring the module               
+MaterialLibrary::MaterialLibrary(Runtime* runtime, Neat const&)
    : Downcastable {this}
-   , Module     {runtime} {
+   , Module       {runtime} {
    Logger::Verbose(this, ": Initializing...");
    Math::RegisterNormals();
    Math::RegisterPrimitives();
@@ -61,7 +61,7 @@ void MaterialLibrary::Teardown() {
 }
 
 /// Create/Destroy materials                                                  
-///   @param verb - the creation/destruction verb                             
+///   @param verb the creation/destruction verb                               
 void MaterialLibrary::Create(Verb& verb) {
    mMaterials.Create(this, verb);
 }

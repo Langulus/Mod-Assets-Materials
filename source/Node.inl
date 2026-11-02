@@ -136,7 +136,7 @@ auto Node::ExposeTag(Token const& pattern, auto&&...a) -> Symbol& {
 ///   @param i index filter                                                   
 ///   @return a pointer to the symbol, or nullptr if not found                
 template<class C>
-auto Node::GetSymbol(this C&& self, TMeta t, DMeta d, RefreshRate r, Index::At i)
+auto Node::GetSymbol(this C&& self, TMeta t, DMeta d, RRate r, Index::At i)
 -> LglsMutIf(C, Symbol*) {
    size_t nth = i.IsSpecial() ? 0 : static_cast<size_t>(i.index);
 
@@ -144,7 +144,7 @@ auto Node::GetSymbol(this C&& self, TMeta t, DMeta d, RefreshRate r, Index::At i
       // Filter by tags                                                 
       const auto foundt = self.mLocalsT.Find(t);
       if (foundt) {
-         auto& candidates = self.mLocalsT.GetValue(foundt);
+         auto& candidates = foundt.GetVal();
          if (i and i.IsSpecial()) {
             // Pick a special index                                     
             auto& candidate = candidates[i];
@@ -210,13 +210,13 @@ auto Node::GetSymbol(this C&& self, TMeta t, DMeta d, RefreshRate r, Index::At i
 ///   @param i index filter                                                   
 ///   @return a pointer to the symbol, or nullptr if not found                
 template<class T, class D, class C>
-auto Node::GetSymbol(this C&& self, RefreshRate r, Index::At i)
+auto Node::GetSymbol(this C&& self, RRate r, Index::At i)
 -> LglsMutIf(C, Symbol*) {
    return self.GetSymbol(MetaTagOf<T>(), MetaDataOf<D>(), r, i);
 }
 
 /// Get the refresh rate of the node                                          
-inline auto Node::GetRate() const noexcept -> RefreshRate {
+inline auto Node::GetRate() const noexcept -> RRate {
    return mRate;
 }
 

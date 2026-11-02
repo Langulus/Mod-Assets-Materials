@@ -42,7 +42,7 @@ public:
    using CTTI_Bases    = Things::Material;
    using CTTI_Ability  = Verbs::Create;
 
-   Material(Things::ArtModule*, Many const&);
+   Material(Things::ArtModule*, Neat const&);
    ~Material();
 
    void Refresh() override {}

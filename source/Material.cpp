@@ -13,7 +13,7 @@
 /// Material construction                                                     
 ///   @param producer the producer                                            
 ///   @param desc instructions for configuring the material                   
-Material::Material(Things::ArtModule* producer, Many const& desc)
+Material::Material(Things::ArtModule* producer, Neat const& desc)
    : Downcastable {this}
    , ProducedFrom {producer, desc}
    , mRoot        {this, desc} {
@@ -209,7 +209,7 @@ GLSL Material::AddInput(RefreshRate rate, Tag const& t, bool allowDuplicates) {
    if (not allowDuplicates) {
       auto found = inputs.Find(proto);
       if (found)
-         return GenerateInputName(rate, inputs[found]);
+         return GenerateInputName(rate, *found);
    }
 
    // Add the new input                                                 
@@ -249,7 +249,7 @@ GLSL Material::AddOutput(RefreshRate rate, Tag const& t, bool allowDuplicates) {
    if (not allowDuplicates) {
       auto found = outputs.Find(proto);
       if (found)
-         return GenerateOutputName(rate, outputs[found]);
+         return GenerateOutputName(rate, *found);
    }
 
    // Add the new output                                                
