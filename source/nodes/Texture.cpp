@@ -27,25 +27,28 @@ Texture::Texture(Describe describe)
    if (mDescriptor.ExtractTag<Tags::Image>(mTextureId))
       VERBOSE_NODE("Texture id changed to: ", mTextureId);
 
-   // Extract Tags::File, if any                                      
-   Many file; mDescriptor.ExtractTag<Tags::Path>(file);
+   // Extract Tags::File, if any                                        
+   Many file;
+   mDescriptor.ExtractTag<Tags::Path>(file);
    if (file) {
       mTexture = CreateTexture(file);
       VERBOSE_NODE("Texture generator changed to: ", mTexture);
    }
    
-   // Create texture generators from sub-recipes                     
-   mDescriptor.ForEachRecipe([&](Recipe const& c) {
+   // Create texture generators from sub-recipes                        
+   mDescriptor.ForEach([&](Recipe const& c) {
       const auto target = c.GetTarget();
-      if (target.CastsTo(MetaDataOf<Things::Image>()) or target.CastsTo(MetaDataOf<Things::File>())) {
+
+      if (target.CastsTo(MetaDataOf<Things::Image>())
+      or  target.CastsTo(MetaDataOf<Things::File>())) {
          mTexture = CreateTexture(c);
          VERBOSE_NODE("Texture generator changed to: ", mTexture);
       }
       else Logger::Warning(this, ": Ignored recipe: ", c);
    });
    
-   // Consider all other provided data                                  
-   mDescriptor.ForEachTail([&](Many const& data) {
+   // Consider all other relevant data                                  
+   mDescriptor.ForEachData([this](Many const& data) {
       if (data.CastsTo<Things::Image>()) {
          // Reuse a texture generator directly                          
          mTexture = data.As<Things::Image*>();

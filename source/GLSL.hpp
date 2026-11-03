@@ -140,14 +140,20 @@ public:
 
    static GLSL Template(size_t);
    //static bool IsOperator(char);
+
    template<CT::NotVoid T>
-   static GLSL Type();
+   static GLSL FromType();
+   static GLSL FromType(DMeta);
+
+   template<CT::DefineTag T>
+   static GLSL FromTag();
+   static GLSL FromTag(DMeta);
+
+   static GLSL FromScope(CT::Deep auto const&);
 
    bool IsDefined(Token const&) const;
    auto FindKeyword(Text const&) const -> size_t;
    Text Pretty() const;
-   static GLSL Type(DMeta);
-   static GLSL Scope(CT::Deep auto const&);
 
    GLSL& Define(Token const&);
    GLSL& SetVersion(Token const&);
@@ -190,13 +196,13 @@ namespace Langulus::CTTI
 LANGULUS_MORPHISM_CUSTOM(bool, { return from ? "true" : "false"; }, GLSL);
 
 /// Convert Deep -> GLSL                                                      
-LANGULUS_MORPHISM_CONCEPT_CUSTOM(CT::Deep, { return GLSL::Scope(from); }, GLSL);
+LANGULUS_MORPHISM_CONCEPT_CUSTOM(CT::Deep, { return GLSL::FromScope(from); }, GLSL);
 
 /// Convert DMeta -> GLSL                                                     
-LANGULUS_MORPHISM_CUSTOM(RTTI::DMeta, { return GLSL::Type(from); }, GLSL);
+LANGULUS_MORPHISM_CUSTOM(RTTI::DMeta, { return GLSL::FromType(from); }, GLSL);
 
 /// Convert TMeta -> GLSL                                                     
-LANGULUS_MORPHISM_CUSTOM(RTTI::TMeta, { return Annies::Text("tag") + from.GetName(); }, GLSL);
+LANGULUS_MORPHISM_CUSTOM(RTTI::TMeta, { return GLSL::FromTag(from); }, GLSL);
 
 /// Convert CMeta -> GLSL                                                     
 LANGULUS_MORPHISM_CUSTOM(RTTI::CMeta, { TODO(); return from.GetName(); }, GLSL);

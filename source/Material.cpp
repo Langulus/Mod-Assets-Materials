@@ -29,7 +29,7 @@ Material::Material(Things::ArtModule* producer, Neat const& desc)
 
       tag.ForEachDeep([&](Many const& part) {
          part.ForEach(
-            [&](RefreshRate i) noexcept { commonRate = i; },
+            [&](RRate       i) noexcept { commonRate = i; },
             [&](Tag const&  i) noexcept {
                // Add material input/output                             
                if (tag.IsTag<Tags::Input>())
@@ -115,7 +115,7 @@ auto Material::GetLOD(LOD const&) const -> Ref<Things::Material> {
 
 /// Get default material rate                                                 
 ///   @return the rate                                                        
-auto Material::GetDefaultRate() const noexcept -> RefreshRate {
+auto Material::GetDefaultRate() const noexcept -> RRate {
    return mDefaultRate;
 }
 
@@ -123,7 +123,7 @@ auto Material::GetDefaultRate() const noexcept -> RefreshRate {
 ///	@param stage the shader stage to commit to                              
 ///   @param place the shader token to commit changes at                      
 ///   @param addition the code to commit                                      
-void Material::Commit(RefreshRate rate, Token const& place, Token const& addition) {
+void Material::Commit(RRate rate, Token const& place, Token const& addition) {
    const auto stage = rate.GetStageIndex();
    auto& code = GetStage(stage);
    if (not code) {
@@ -185,12 +185,12 @@ void Material::ForEachStage(F&& call) {
 ///   @param t the input to add                                               
 ///   @param allowDuplicates whether multiple such tags are allowed           
 ///   @return the generated symbol name                                       
-GLSL Material::AddInput(RefreshRate rate, Tag const& t, bool allowDuplicates) {
+GLSL Material::AddInput(RRate rate, Tag const& t, bool allowDuplicates) {
    // Get local rate and type, if any                                   
    DMeta type;
    t.ForEachDeep(
-      [&](RefreshRate r) noexcept { rate = r; },
-      [&](DMeta       r) noexcept { type = r; }
+      [&](RRate r) noexcept { rate = r; },
+      [&](DMeta r) noexcept { type = r; }
    );
 
    // An input must always be declared with a rate, and that rate       
@@ -228,12 +228,12 @@ GLSL Material::AddInput(RefreshRate rate, Tag const& t, bool allowDuplicates) {
 ///   @param t the output to add                                              
 ///   @param allowDuplicates whether multiple such tags are allowed           
 ///   @return the generated symbol name                                       
-GLSL Material::AddOutput(RefreshRate rate, Tag const& t, bool allowDuplicates) {
+GLSL Material::AddOutput(RRate rate, Tag const& t, bool allowDuplicates) {
    // Get local rate and type, if any                                   
    DMeta type;
    t.ForEachDeep(
-      [&](RefreshRate r) noexcept { rate = r; },
-      [&](DMeta       r) noexcept { type = r; }
+      [&](RRate r) noexcept { rate = r; },
+      [&](DMeta r) noexcept { type = r; }
    );
 
    LglsAssert(rate.IsShaderStage(),
@@ -264,7 +264,7 @@ GLSL Material::AddOutput(RefreshRate rate, Tag const& t, bool allowDuplicates) {
 ///   @param rate the shader stage to place code at                           
 ///   @param name the name of the definition (to check for duplicated)        
 ///   @param code the code to insert                                          
-void Material::AddDefine(RefreshRate rate, Token const& name, const GLSL& code) {
+void Material::AddDefine(RRate rate, Token const& name, const GLSL& code) {
    const auto stageIndex = rate.GetStageIndex();
    mDefinitions[stageIndex][name] << code;
 }
@@ -273,37 +273,36 @@ void Material::AddDefine(RefreshRate rate, Token const& name, const GLSL& code) 
 ///   @param rate the rate at which the input is declared                     
 ///   @param tag the tag tag for the input                                    
 ///   @return the variable name to access the input                           
-GLSL Material::GenerateInputName(RefreshRate rate, Tag const& tag) const {
+GLSL Material::GenerateInputName(RRate rate, Tag const& tag) const {
    if (tag.IsTag<Tags::Image>()) {
       // Samplers are handled differently                               
-      return {tag.GetTag(), mConsumedSamplers};
+      return Text::Format("{}{}", tag.GetTag(), mConsumedSamplers);
    }
    else if (not rate.IsUniform()) {
       // Name is for a vertex attribute or varying                      
-      return {"in", tag.GetTag()};
+      return Text::Format("in{}", tag.GetTag());
    }
 
    // Uniform name inside a uniform buffer                              
-   auto rateTxt = static_cast<Text>(rate);
-   auto lastns = rateTxt.Find<true>(':');
-   return Text::Format("Per{}.{}", rateTxt.Select(lastns + 1), tag.GetTag());
+   return Text::Format("Per{}.{}", Text::NamedLast(rate), tag.GetTag());
 }
 
 /// Generate output name                                                      
 ///   @param rate the rate at which the output is declared                    
 ///   @param tag the tag tag for the output                                   
 ///   @return the variable name to access the output                          
-GLSL Material::GenerateOutputName(RefreshRate rate, Tag const& tag) const {
-   LglsAssert(rate.IsShaderStage(), "Can't have an output outside a shader stage rate");
-   return {"out", tag.GetTag()};
+GLSL Material::GenerateOutputName(RRate rate, Tag const& tag) const {
+   LglsAssert(rate.IsShaderStage(),
+      "Can't have an output outside a shader stage rate");
+   return Text::Format("out{}", tag.GetTag());
 }
 
 /// Generate uniform buffer descriptions for all shader stages                
 void Material::GenerateUniforms() {
    // Scan all uniform rates:                                           
    // Tick, Pass, Camera, Level, Renderable, Instance                   
-   for (size_t i = 0; i < RefreshRate::UniformCount; ++i) {
-      const RefreshRate rate = i + RefreshRate::UniformBegin;
+   for (size_t i = 0; i < RRate::UniformCount; ++i) {
+      const RRate rate = i + RRate::UniformBegin;
       auto& tags = GetInputs(i);
       if (not tags)
          continue;
@@ -336,10 +335,10 @@ void Material::GenerateUniforms() {
          LglsAssert(tag.IsTyped(), "Uniform is not typed");
          LglsAssert(tag.GetTag(), "Uniform has undefined tag");
 
-         const GLSL type {tag.GetType()};
-         const GLSL name {tag.GetTag()};
-         body += Text::Format("{} {};", type, name);
-         if (&tag != &tags.Last())
+         const auto type = GLSL::FromType(tag.GetType());
+         const auto name = GLSL::FromTag (tag.GetTag() );
+         body += GLSL::Format("{} {};", type, name);
+         if (&tag != &tags[Index::Last])
             body += '\n';
          names << name;
       }
@@ -349,13 +348,13 @@ void Material::GenerateUniforms() {
 
       GLSL ubo;
       if (rate.IsStaticUniform()) {
-         ubo = Text::Format(layout,
-            0, rate.GetStaticUniformIndex(), GLSL {rate}, body
+         ubo = GLSL::Format(layout,
+            0, rate.GetStaticUniformIndex(), rate, body
          );
       }
       else if (rate.IsDynamicUniform()) {
-         ubo = Text::Format(layout,
-            1, rate.GetDynamicUniformIndex(), GLSL {rate}, body
+         ubo = GLSL::Format(layout,
+            1, rate.GetDynamicUniformIndex(), rate, body
          );
       }
       else LglsError("Uniform rate neither static, nor dynamic");
@@ -392,9 +391,9 @@ void Material::GenerateUniforms() {
          uniform {1} {2}{0};
       )shader";
 
-      const GLSL type {tag.GetType()};
-      const GLSL name {tag.GetTag()};
-      const auto ubo = Text::Format(layout, textureNumber, type, name);
+      const auto type = GLSL::FromType(tag.GetType());
+      const auto name = GLSL::FromTag (tag.GetTag() );
+      const auto ubo  = Text::Format(layout, textureNumber, type, name);
 
       // Add texture to each stage it is used in                        
       ForEachStage([&](GLSL& code) {
@@ -411,7 +410,7 @@ void Material::GenerateUniforms() {
 /// Generate vertex attributes (aka vertex shader inputs)                     
 void Material::GenerateInputs() {
    for (size_t i = 0; i < ShaderStage::Counter; ++i) {
-      const RefreshRate rate = RefreshRate::StagesBegin + i;
+      const RRate rate = RRate::StagesBegin + i;
       auto const& inputs = GetInputs(rate);
       size_t location = 0;
 
@@ -436,8 +435,8 @@ void Material::GenerateInputs() {
             in {1} {2};
          )shader";
 
-         const GLSL type {vkt};
-         const GLSL name {GenerateInputName(rate, input)};
+         const auto type = GLSL::FromType(vkt);
+         const auto name = GenerateInputName(rate, input);
          const auto definition = Text::Format(layout, location, type, name);
 
          // Add input to code                                           
@@ -450,7 +449,7 @@ void Material::GenerateInputs() {
 /// Generate shader outputs                                                   
 void Material::GenerateOutputs() {
    for (size_t i = 0; i < ShaderStage::Counter; ++i) {
-      const RefreshRate rate = RefreshRate::StagesBegin + i;
+      const RRate rate = RRate::StagesBegin + i;
       auto const& outputs = GetOutputs(rate);
       size_t location = 0;
 
@@ -475,8 +474,8 @@ void Material::GenerateOutputs() {
             out {1} {2};
          )shader";
 
-         const GLSL type {vkt};
-         const GLSL name {GenerateOutputName(rate, output)};
+         const auto type = GLSL::FromType(vkt);
+         const auto name = GenerateOutputName(rate, output);
          const auto definition = Text::Format(layout, location, type, name);
 
          // Add output to code                                          

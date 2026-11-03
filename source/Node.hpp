@@ -32,7 +32,7 @@ protected:
    Material* mMaterial {};
 
    // The rate at which this node is refreshed                          
-   RefreshRate mRate = Rate::Auto;
+   RRate mRate = Rate::Auto;
 
    // Local variables, usually used by selection verbs, when executing  
    // Code in the context of the Node                                   
@@ -56,7 +56,7 @@ protected:
 
    struct DefaultTag {
       DMeta mType;
-      RefreshRate mRate;
+      RRate mRate;
    };
 
    static inline const Symbol NoSymbol {};
@@ -93,7 +93,7 @@ public:
 
    virtual Symbol const& Generate() = 0;
 
-   auto GetRate() const noexcept -> RefreshRate;
+   auto GetRate() const noexcept -> RRate;
    auto GetStage() const -> size_t;
    auto GetMaterial() const noexcept -> Material*;
    auto GetLibrary() const noexcept -> MaterialLibrary*;

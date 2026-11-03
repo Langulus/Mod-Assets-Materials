@@ -7,6 +7,7 @@
 ///                                                                           
 #pragma once
 #include "../Node.hpp"
+#include <Langulus/CppAPI/Image.hpp>
 
 
 namespace Nodes
@@ -23,7 +24,7 @@ namespace Nodes
 
    private:
       Temporal mKeyframes;
-      Index::At mTextureId = IndexNone;
+      Index::At mTextureId = Index::None;
       Ref<Things::Image> mTexture;
 
    public:

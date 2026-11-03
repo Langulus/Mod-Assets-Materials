@@ -17,7 +17,7 @@
 struct Material final : Things::Material {
 private:
    // Default material rate                                             
-   RefreshRate mDefaultRate = Rate::Pixel;
+   RRate mDefaultRate = Rate::Pixel;
 
    // Consumed bindings                                                 
    size_t mConsumedSamplers = 0;
@@ -51,7 +51,7 @@ public:
    void Create(Verb&);
 
    auto GetLOD(LOD const&) const -> Ref<Things::Material> override;
-   auto GetDefaultRate() const noexcept -> RefreshRate;
+   auto GetDefaultRate() const noexcept -> RRate;
    auto GetStage(size_t) -> GLSL&;
    auto GetStage(size_t) const -> GLSL const&;
 
@@ -62,14 +62,14 @@ public:
 
    template<class F>
    void ForEachStage(F&&);
-   void Commit   (RefreshRate, Token const&, Token const&);
-   GLSL AddInput (RefreshRate, Tag const&, bool allowDuplicates);
-   GLSL AddOutput(RefreshRate, Tag const&, bool allowDuplicates);
-   void AddDefine(RefreshRate, Token const&, const GLSL&);
+   void Commit   (RRate, Token const&, Token const&);
+   GLSL AddInput (RRate, Tag   const&, bool allowDuplicates);
+   GLSL AddOutput(RRate, Tag   const&, bool allowDuplicates);
+   void AddDefine(RRate, Token const&, const GLSL&);
 
 private:
-   GLSL GenerateInputName (RefreshRate, Tag const&) const;
-   GLSL GenerateOutputName(RefreshRate, Tag const&) const;
+   GLSL GenerateInputName (RRate, Tag const&) const;
+   GLSL GenerateOutputName(RRate, Tag const&) const;
    void GenerateUniforms();
    void GenerateInputs();
    void GenerateOutputs();

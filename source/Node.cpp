@@ -90,7 +90,7 @@ void Node::InnerCreate() {
          VERBOSE_NODE_TAB("Executing subcode: ", c);
          Verbs::Do {c.Parse()}.In(this).Run();
       },
-      [&](Rate const& r) {
+      [&](RRate const& r) {
          // Set rate through data only                                  
          mRate = r;
          VERBOSE_NODE("Rate changed (via data) to: ", mRate);
@@ -145,7 +145,7 @@ void Node::Select(Verb& verb) {
    if (verb.GetMass() <= 0)
       return;
 
-   RefreshRate rateFilter = Rate::Auto;
+   RRate rateFilter = Rate::Auto;
    Index::At index = Index::None;
    TMeta traitFilter = {};
    DMeta dataFilter = {};
@@ -153,7 +153,7 @@ void Node::Select(Verb& verb) {
    // Collect filters from verb argument                                
    verb.ForEachDeep([&](Many const& group) {
       group.ForEach(
-         [&](RefreshRate  r) noexcept { rateFilter = r; },
+         [&](RRate        r) noexcept { rateFilter = r; },
          [&](Index::At    i) noexcept { index = i; },
          [&](Real         i)          { index = static_cast<Index::At>(i); },
          [&](TMeta        t) noexcept { traitFilter = t; },
@@ -374,7 +374,7 @@ GLSL ConvertSymbol(Tag const& tag, const GLSL& symbol, DMeta as, Real filler) {
    RTTI::DMeta AM4 = MetaDataOf<MatrixOfSize<4>>();
    RTTI::DMeta AM3 = MetaDataOf<MatrixOfSize<3>>();
    RTTI::DMeta AM2 = MetaDataOf<MatrixOfSize<2>>();
-()
+   
    RTTI::DMeta AV4 = MetaDataOf<VectorOfSize<4>>();
    RTTI::DMeta AV3 = MetaDataOf<VectorOfSize<3>>();
    RTTI::DMeta AV2 = MetaDataOf<VectorOfSize<2>>();
@@ -416,35 +416,35 @@ GLSL ConvertSymbol(Tag const& tag, const GLSL& symbol, DMeta as, Real filler) {
       if (as.CastsTo(AV4))
          return symbol;
       else if (as.CastsTo(AV3))
-         return {symbol, ".xyz"};
+         return Text::Format("{}.xyz", symbol);
       else if (as.CastsTo(AV2))
-         return {symbol, ".xy"};
+         return Text::Format("{}.xy", symbol);
       else if (as.CastsTo(AV1) or as.CastsTo(number_based))
-         return {symbol, ".x"};
+         return Text::Format(".x", symbol);
    }
    else if (from.CastsTo(AV3)) {
       if (as.CastsTo(AV4))
-         return {"vec4(", symbol, ", 1.0)"};
+         return Text::Format("vec4({}, 1.0)", symbol);
       else if (as.CastsTo(AV3))
          return symbol;
       else if (as.CastsTo(AV2))
-         return {symbol, ".xy"};
+         return Text::Format("{}.xy", symbol);
       else if (as.CastsTo(AV1) or as.CastsTo(number_based))
-         return {symbol, ".x"};
+         return Text::Format("{}.x", symbol);
    }
    else if (from.CastsTo(AV2)) {
       if (as.CastsTo(AV4))
-         return {"vec4(", symbol, ", ", filler, ", 1.0)"};
+         return Text::Format("vec4({}, {}, 1.0)", symbol, filler);
       else if (as.CastsTo(AV3))
-         return {"vec3(", symbol, ", ", filler, ")"};
+         return Text::Format("vec3({}, {})", symbol, filler);
       else if (as.CastsTo(AV2))
          return symbol;
       else if (as.CastsTo(AV1) or as.CastsTo(number_based))
-         return {symbol, ".x"};
+         return Text::Format("{}.x", symbol);
    }
    else if (from.CastsTo(AV1) or from.CastsTo(number_based)) {
       if (as.CastsTo(AV4))
-         return {"vec4(vec3(", symbol, "), 1.0)"};
+         return Text::Format("vec4(vec3({}), 1.0)", symbol);
       else if (as.CastsTo(AV3))
          return Text::Format(TypeX, "vec3", symbol);
       else if (as.CastsTo(AV2))
