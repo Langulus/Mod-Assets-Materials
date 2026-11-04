@@ -51,7 +51,7 @@ Material::Material(Things::ArtModule const* producer, Neat const& desc)
 ///   @param verb creation verb                                               
 Material::~Material() {
    Logger::Verbose(this, ": Destroying...");
-   mDescriptor.Reset();
+   //mDescriptor.Reset(); //should be done automatically on teardown?
 }
 
 /// Create nodes inside the material                                          

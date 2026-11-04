@@ -158,7 +158,7 @@ Symbol const& Scene::GenerateTriangles() {
       // and rasterizer requires it, so we create them                  
       // We generate color, too                                         
       auto geometryDescriptor = c;
-      geometryDescriptor <<= MetaOf<A::Triangle>();
+      geometryDescriptor <<= MetaOf<Triangle>();
       geometryDescriptor <<= MetaOf<Vec3>();
       geometryDescriptor <<= MetaOf<Normal>();
       geometryDescriptor <<= MetaOf<Sampler2>();
@@ -189,19 +189,19 @@ Symbol const& Scene::GenerateTriangles() {
          if (countCombined > 0)
             triangles += ", \n";
          triangles += "     Triangle(";
-         triangles += position.As<Vec3>(0);
+         triangles += position.AsAt<Vec3>(0);
          triangles += ", ";
-         triangles += texture.As<Vec2>(0);
+         triangles += texture.AsAt<Vec2>(0);
          triangles += ", ";
-         triangles += position.As<Vec3>(1);
+         triangles += position.AsAt<Vec3>(1);
          triangles += ", ";
-         triangles += texture.As<Vec2>(1);
+         triangles += texture.AsAt<Vec2>(1);
          triangles += ", ";
-         triangles += position.As<Vec3>(2);
+         triangles += position.AsAt<Vec3>(2);
          triangles += ", ";
-         triangles += texture.As<Vec2>(2);
+         triangles += texture.AsAt<Vec2>(2);
          triangles += ", ";
-         triangles += normal.As<Vec3>(0);
+         triangles += normal.AsAt<Vec3>(0);
          triangles += ")";
          ++countCombined;
       }

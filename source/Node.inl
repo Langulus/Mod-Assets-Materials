@@ -231,7 +231,7 @@ size_t Node::ForEachInput(F&& call) {
 
    size_t counter = 0;
    for (auto pair : mLocalsT) {
-      for (auto& symbol : *pair.GetVal()) {
+      for (auto& symbol : pair.GetVal()) {
          if constexpr (CT::Bool<R>) {
             if (not call(symbol))
                return counter;
@@ -242,7 +242,7 @@ size_t Node::ForEachInput(F&& call) {
    }
 
    for (auto pair : mLocalsD) {
-      for (auto& symbol : *pair.GetVal()) {
+      for (auto& symbol : pair.GetVal()) {
          if constexpr (CT::Bool<R>) {
             if (not call(symbol))
                return counter;
@@ -266,7 +266,7 @@ size_t Node::ForEachOutput(F&& call) {
 
    size_t counter = 0;
    for (auto pair : mOutputsT) {
-      for (auto& symbol : *pair.GetVal()) {
+      for (auto& symbol : pair.GetVal()) {
          if constexpr (CT::Bool<R>) {
             if (not call(symbol))
                return counter;
@@ -277,7 +277,7 @@ size_t Node::ForEachOutput(F&& call) {
    }
 
    for (auto pair : mOutputsD) {
-      for (auto& symbol : *pair.GetVal()) {
+      for (auto& symbol : pair.GetVal()) {
          if constexpr (CT::Bool<R>) {
             if (not call(symbol))
                return counter;

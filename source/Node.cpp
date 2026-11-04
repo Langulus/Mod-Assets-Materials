@@ -481,7 +481,7 @@ Node::DefaultTag Node::GetDefaultTag(TMeta tag) {
 
    auto found = properties.Find(tag);
    if (found)
-      return *properties.GetVal(found);
+      return properties.GetVal(found);
 
    LglsError("Undefined default tag: ", tag);
    return {};
