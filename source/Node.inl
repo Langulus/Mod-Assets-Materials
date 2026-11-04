@@ -129,7 +129,7 @@ auto Node::ExposeTag(Token const& pattern, auto&&...a) -> Symbol& {
 
 /// Select a symbol from the node hierarchy.                                  
 /// Checks local symbols first, then climbs up the hierarchy up to Root,      
-/// where it starts selecting global material inputs/constants.               
+/// where it starts picking on global material inputs/constants.              
 ///   @param t tag type filter                                                
 ///   @param d data type filter                                               
 ///   @param r rate filter                                                    

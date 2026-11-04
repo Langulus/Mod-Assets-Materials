@@ -65,7 +65,7 @@ SCENARIO("Shader generation", "[materials]") {
             REQUIRE(producedMaterial.GetCount() == 1);
             REQUIRE(producedMaterial.CastsTo<Things::Material>(1));
             REQUIRE(producedMaterial.IsSparse());
-            REQUIRE(root.GetUnits().GetCount() == 1);
+            REQUIRE(root.GetParts().GetCount() == 1);
          }
 
       #if LANGULUS_FEATURE(MANAGED_REFLECTION)
@@ -79,7 +79,7 @@ SCENARIO("Shader generation", "[materials]") {
             REQUIRE(producedMaterial.GetCount() == 1);
             REQUIRE(producedMaterial.CastsTo<Things::Material>(1));
             REQUIRE(producedMaterial.IsSparse());
-            REQUIRE(root.GetUnits().GetCount() == 1);
+            REQUIRE(root.GetParts().GetCount() == 1);
          }
       #endif
 
