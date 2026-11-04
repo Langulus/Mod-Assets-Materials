@@ -147,7 +147,7 @@ public:
 
    template<CT::DefineTag T>
    static GLSL FromTag();
-   static GLSL FromTag(DMeta);
+   static GLSL FromTag(TMeta);
 
    static GLSL FromScope(CT::Deep auto const&);
 

@@ -13,7 +13,7 @@
 /// Material construction                                                     
 ///   @param producer the producer                                            
 ///   @param desc instructions for configuring the material                   
-Material::Material(Things::ArtModule* producer, Neat const& desc)
+Material::Material(Things::ArtModule const* producer, Neat const& desc)
    : Downcastable {this}
    , ProducedFrom {producer, desc}
    , mRoot        {this, desc} {
