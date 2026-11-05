@@ -22,8 +22,7 @@ Raster::Raster(Describe&& descriptor)
    mDescriptor.ExtractTag<Tags::Bilateral>(mBilateral);
    mDescriptor.ExtractTag<Tags::Signed>(mSigned);
    mDescriptor.ExtractTag<Tags::Topology>(mTopology);
-   mDescriptor.ExtractTag<Tags::Min>(mDepth.mMin);
-   mDescriptor.ExtractTag<Tags::Max>(mDepth.mMax);
+   mDescriptor.ExtractTag<Tags::Range>(mDepth);
 
    // Extract rasterizer body                                           
    //mDescriptor.ExtractData(mCode);

@@ -65,7 +65,7 @@ public:
    void Commit   (RRate, Token const&, Token const&);
    GLSL AddInput (RRate, Tag   const&, bool allowDuplicates);
    GLSL AddOutput(RRate, Tag   const&, bool allowDuplicates);
-   void AddDefine(RRate, Token const&, const GLSL&);
+   void AddDefine(RRate, Token const&, GLSL const&);
 
 private:
    GLSL GenerateInputName (RRate, Tag const&) const;
@@ -73,5 +73,5 @@ private:
    void GenerateUniforms();
    void GenerateInputs();
    void GenerateOutputs();
-   void InitializeFromShadertoy(const GLSL&);
+   void InitializeFromShadertoy(GLSL const&);
 };

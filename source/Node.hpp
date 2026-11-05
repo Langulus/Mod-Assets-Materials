@@ -142,7 +142,7 @@ protected:
    template<CT::DefineTag T, CT::NotVoid D>
    auto ExposeTag(Token const&, auto&&...) -> Symbol&;
 
-   void AddDefine(Token const&, const GLSL&);
+   void AddDefine(Token const&, GLSL const&);
 
    void ArithmeticVerb(Verb&, Token const& pos, Token const& neg = {}, Token const& una = {});
 };

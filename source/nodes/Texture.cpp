@@ -78,7 +78,7 @@ void Texture::Detach() {
 /// Create a texture from the provided descriptor                             
 ///   @param descriptor the descriptor for the texture                        
 ///   @return the produced texture                                            
-auto Texture::CreateTexture(Many const& descriptor) -> Ref<Things::Image> {
+auto Texture::CreateTexture(Many const& descriptor) -> Ref<Things::Image const> {
    auto local = Recipe::For<Things::Image>(descriptor);
    local << Tags::Parent {this}; // Ref {this}
    return Verbs::Create(&local).In(GetMaterial())->As<Things::Image*>();
@@ -89,7 +89,7 @@ auto Texture::CreateTexture(Many const& descriptor) -> Ref<Things::Image> {
 ///   @param uv texture coordinates                                           
 ///   @param result the resulting color format                                
 ///   @return generated texture call                                          
-auto GetPixel(const GLSL& sampler, const GLSL& uv, DMeta result) -> GLSL {
+auto GetPixel(GLSL const& sampler, GLSL const& uv, DMeta result) -> GLSL {
    LglsAssert(result, "Unknown texture format");
    const auto pixel = Text::Format(GetPixelFunction, sampler, uv);
    switch (result.GetMembers().size()) {
@@ -178,7 +178,7 @@ auto Texture::GenerateKeyframe(Temporal const&) -> GLSL {
 ///   @param frameMap the keyframe map to generate                            
 ///   @param uv the texture coordinate symbol                                 
 ///   @return the generated GLSL code                                         
-/*GLSL Texture::GenerateDefinition(KeyframeMap* frameMap, const GLSL& uv) {
+/*GLSL Texture::GenerateDefinition(KeyframeMap* frameMap, GLSL const& uv) {
    if (frameMap->IsEmpty())
       return {};
 

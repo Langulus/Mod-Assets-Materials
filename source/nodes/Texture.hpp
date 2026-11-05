@@ -25,7 +25,7 @@ namespace Nodes
    private:
       Temporal mKeyframes;
       Index::At mTextureId = Index::None;
-      Ref<Things::Image> mTexture;
+      Ref<Things::Image const> mTexture;
 
    public:
       Texture(Describe);
@@ -34,7 +34,7 @@ namespace Nodes
       auto Generate() -> Symbol const&;
 
    private:
-      auto CreateTexture(Many const&) -> Ref<Things::Image>;
+      auto CreateTexture(Many const&) -> Ref<Things::Image const>;
       auto GenerateKeyframe(Temporal const&) -> GLSL;
    };
 }

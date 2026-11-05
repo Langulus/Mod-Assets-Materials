@@ -142,7 +142,7 @@ auto Node::GetSymbol(this C&& self, TMeta t, DMeta d, RRate r, Index::At i)
 
    if (t) {
       // Filter by tags                                                 
-      const auto foundt = self.mLocalsT.Find(t);
+      auto foundt = self.mLocalsT.Find(t);
       if (foundt) {
          auto& candidates = foundt.GetVal();
          if (i and i.IsSpecial()) {

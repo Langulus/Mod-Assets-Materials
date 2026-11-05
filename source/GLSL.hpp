@@ -138,6 +138,14 @@ public:
    template<CT::Number T>
    explicit GLSL(const TQuaternion<T>&);*/
 
+   /// Fill template arguments by first serializing them to GLSL           
+   ///   @param format the template string                                 
+   ///   @param args... the arguments                                      
+   ///   @return the resulting text                                        
+   static GLSL Format(Token const& format, auto&&...args) {
+      return Text::Format(format, Convert<GLSL>(args)...);
+   }
+
    static GLSL Template(size_t);
    //static bool IsOperator(char);
 

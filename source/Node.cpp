@@ -324,7 +324,7 @@ void Node::Descend() {
 /// Add a definition at the node's rate                                       
 ///   @param name the definition name (used to detect duplications)           
 ///   @param code the code snippet to add                                     
-void Node::AddDefine(Token const& name, const GLSL& code) {
+void Node::AddDefine(Token const& name, GLSL const& code) {
    mMaterial->AddDefine(mRate, name, code);
 }
 
@@ -364,7 +364,7 @@ Text Node::DebugEnd() const {
 ///   @param as the type to convert to                                        
 ///   @param filler number for filling empty stuff                            
 ///   @return the new symbol                                                  
-GLSL ConvertSymbol(Tag const& tag, const GLSL& symbol, DMeta as, Real filler) {
+GLSL ConvertSymbol(Tag const& tag, GLSL const& symbol, DMeta as, Real filler) {
    auto from = tag.GetType();
    if (from.CastsTo(as))
       return symbol;

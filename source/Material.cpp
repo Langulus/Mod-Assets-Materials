@@ -158,7 +158,7 @@ GLSL& Material::GetStage(size_t stage) {
 /// Get a GLSL stage (const)                                                  
 ///   @param stage the stage index                                            
 ///   @return the code associated with the stage                              
-const GLSL& Material::GetStage(size_t stage) const {
+GLSL const& Material::GetStage(size_t stage) const {
    return const_cast<Material*>(this)->GetStage(stage);
 }
 
@@ -264,7 +264,7 @@ GLSL Material::AddOutput(RRate rate, Tag const& t, bool allowDuplicates) {
 ///   @param rate the shader stage to place code at                           
 ///   @param name the name of the definition (to check for duplicated)        
 ///   @param code the code to insert                                          
-void Material::AddDefine(RRate rate, Token const& name, const GLSL& code) {
+void Material::AddDefine(RRate rate, Token const& name, GLSL const& code) {
    const auto stageIndex = rate.GetStageIndex();
    mDefinitions[stageIndex][name] << code;
 }
@@ -487,7 +487,7 @@ void Material::GenerateOutputs() {
 
 /// Initialize the material by using a shadertoy snippet                      
 ///   @param code the code to port                                            
-void Material::InitializeFromShadertoy(const GLSL& code) {
+void Material::InitializeFromShadertoy(GLSL const& code) {
    Logger::Verbose("Code seems to be from shadertoy.com - porting:");
    Logger::Verbose(code.Pretty());
 
