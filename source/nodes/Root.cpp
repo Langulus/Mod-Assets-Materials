@@ -14,12 +14,12 @@ using namespace Nodes;
 /// Root node creation                                                        
 ///   @param producer the producer material                                   
 ///   @param desc the node descriptor                                         
-Root::Root(Material* producer, Many const& desc)
+Root::Root(Material const* producer, Neat const& desc)
    : Downcastable {this}
    , Node         {producer, desc} {
    // Satisfy the rest of the descriptor                                
    // This is just a root node, so we can safely create anything in it  
-   producer->Couple(desc); //TODO crappy solution
+   const_cast<Material*>(producer)->Couple(desc); //TODO crappy solution
    InnerCreate();
 }
 

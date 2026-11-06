@@ -17,7 +17,7 @@ namespace Nodes
       using CTTI_Abstract = No;
       using CTTI_Bases    = Node;
 
-      Root(Material*, Many const&);
+      Root(Material const*, Neat const&);
 
       auto Generate() -> Symbol const&;
    };

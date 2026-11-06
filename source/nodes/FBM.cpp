@@ -13,7 +13,7 @@ using namespace Nodes;
 
 
 /// FBM node descriptor-constructor                                           
-///   @param desc node descriptor                                             
+///   @param descriptor node descriptor                                       
 FBM::FBM(Describe&& descriptor)
    : Downcastable {this}
    , Node         {*descriptor} {
@@ -61,7 +61,7 @@ Symbol const& FBM::Generate() {
       temporary.template AddLocal<Tags::Place>(Vec2 {}, "uv");
 
       // Run octave code for this node                                  
-      Verbs::Do(mCode).In(temporary).Run();
+      Verbs::Do(mCode).In(&temporary).Run();
 
       // Generate shader code for octaves                               
       auto& symbol = temporary.Generate();

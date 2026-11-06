@@ -200,6 +200,9 @@ namespace Langulus::CTTI
    }
 }*/
 
+/// Convert std::string_view -> GLSL                                          
+LANGULUS_MORPHISM(std::string_view, GLSL);
+
 /// Convert bool -> GLSL                                                      
 LANGULUS_MORPHISM_CUSTOM(bool, { return from ? "true" : "false"; }, GLSL);
 
@@ -214,3 +217,17 @@ LANGULUS_MORPHISM_CUSTOM(RTTI::TMeta, { return GLSL::FromTag(from); }, GLSL);
 
 /// Convert CMeta -> GLSL                                                     
 LANGULUS_MORPHISM_CUSTOM(RTTI::CMeta, { TODO(); return from.GetName(); }, GLSL);
+
+/// Convert Number -> GLSL                                                    
+LANGULUS_MORPHISM_CONCEPT_CUSTOM(CT::BuiltinNumberUnambiguously, {
+      return Annies::Text::FromNumber(from);
+   },
+   GLSL
+);
+
+/// Convert RRate -> GLSL                                                     
+LANGULUS_MORPHISM_CUSTOM(RRate, {
+      return Annies::Text::NamedLast(from);
+   },
+   GLSL
+);

@@ -17,7 +17,7 @@
 /// Material node construction for Nodes::Root                                
 ///   @param material the parent material                                     
 ///   @param descriptor the node descriptor                                   
-Node::Node(Material* material, Many const& descriptor)
+Node::Node(Material const* material, Neat const& descriptor)
    : Node {descriptor} {
    mMaterial = material;
    mDescriptor = descriptor;
@@ -26,7 +26,7 @@ Node::Node(Material* material, Many const& descriptor)
 /// Material node construction for members/locals                             
 ///   @param parent the parent node                                           
 ///   @param descriptor the node descriptor                                   
-Node::Node(Node* parent, Many const& descriptor)
+Node::Node(Node* parent, Neat const& descriptor)
    : Downcastable {this}
    , mDescriptor  {descriptor} {
    // Add the Node to the hierarchy                                     
@@ -36,7 +36,7 @@ Node::Node(Node* parent, Many const& descriptor)
 
 /// Material node construction used in the rest of the Nodes                  
 ///   @param descriptor the node descriptor                                   
-Node::Node(Many const& descriptor)
+Node::Node(Neat const& descriptor)
    : Downcastable {this}
    , mDescriptor  {descriptor} {
    // Add the Node to the hierarchy                                     
@@ -120,7 +120,7 @@ auto Node::NodeFromRecipe(Recipe const& recipe) -> Node* {
 /// Get material library                                                      
 ///   @return a pointer to the manager                                        
 auto Node::GetLibrary() const noexcept -> MaterialLibrary* {
-   return const_cast<MaterialLibrary*>(mMaterial->GetProducer().As<MaterialLibrary*>());
+   return const_cast<MaterialLibrary*>(mMaterial->GetProducer());
 }
 
 /// Create new nodes                                                          

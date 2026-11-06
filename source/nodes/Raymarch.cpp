@@ -9,6 +9,8 @@
 #include "Scene.hpp"
 #include "Camera.hpp"
 
+#include <Langulus/Annies/Functional/ForEach.hpp>
+
 using namespace Nodes;
 
 

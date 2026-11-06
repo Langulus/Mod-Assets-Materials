@@ -33,7 +33,7 @@ namespace Nodes
    };
 }
 
-LANGULUS_MORPHISM(Nodes::FBM, Annies::Text);
+//LANGULUS_MORPHISM(Nodes::FBM, Annies::Text);
 
 /// FBM function template                                                     
 ///   @param {0} unique ID for the FBM function, used only in case of         

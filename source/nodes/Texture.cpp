@@ -11,6 +11,8 @@
 #include <Langulus/CppAPI/Image.hpp>
 #include <Langulus/CppAPI/IO.hpp>
 
+#include <Langulus/Annies/Functional/ForEach.hpp>
+
 using namespace Nodes;
 
 

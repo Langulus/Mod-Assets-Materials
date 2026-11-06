@@ -29,7 +29,7 @@ protected:
    TMany<Ref<Node>> mChildren;
 
    // The material this node belongs to                                 
-   Material* mMaterial {};
+   Material const* mMaterial = nullptr;
 
    // The rate at which this node is refreshed                          
    RRate mRate = Rate::Auto;
@@ -73,9 +73,9 @@ public:
       Verbs::Randomize
    >;
 
-   Node(Material*, Many const&);
-   Node(Node*, Many const&);
-   Node(Many const&);
+   Node(Material const*, Neat const&);
+   Node(Node*, Neat const&);
+   Node(Neat const&);
    Node(Node&&) = delete;
 
    virtual ~Node();
@@ -95,7 +95,7 @@ public:
 
    auto GetRate() const noexcept -> RRate;
    auto GetStage() const -> size_t;
-   auto GetMaterial() const noexcept -> Material*;
+   auto GetMaterial() const noexcept -> Material const*;
    auto GetLibrary() const noexcept -> MaterialLibrary*;
    static auto GetDefaultTag(TMeta) -> DefaultTag;
    static auto DecayToGLSLType(DMeta) -> DMeta;

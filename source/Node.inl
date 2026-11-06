@@ -12,7 +12,7 @@
 /// Get the material this node belongs to                                     
 ///   @return pointer to the material                                         
 LANGULUS(INLINED)
-auto Node::GetMaterial() const noexcept -> Material* {
+auto Node::GetMaterial() const noexcept -> Material const* {
    return mMaterial;
 }
 
@@ -166,7 +166,7 @@ auto Node::GetSymbol(this C&& self, TMeta t, DMeta d, RRate r, Index::At i)
    else if (d) {
       // Filter by data type                                            
       for (auto pair : self.mLocalsD) {
-         if (not pair.GetKey()->CastsTo(d))
+         if (not pair.GetKey().CastsTo(d))
             continue;
 
          auto& candidates = pair.GetVal();

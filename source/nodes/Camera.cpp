@@ -9,6 +9,8 @@
 #include <Langulus/CppAPI/Graphics.hpp>
 #include <Langulus/Matrices/TMatrix.hpp>
 
+#include <Langulus/Annies/Functional/Deepen.hpp>
+
 using namespace Nodes;
 
 

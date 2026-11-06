@@ -9,6 +9,8 @@
 #include "MaterialLibrary.hpp"
 #include <Langulus/Edit.hpp>
 
+#include <Langulus/Annies/Functional/ForEach.hpp>
+
 
 /// Material construction                                                     
 ///   @param producer the producer                                            
