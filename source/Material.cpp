@@ -10,6 +10,8 @@
 #include <Langulus/Edit.hpp>
 
 #include <Langulus/Annies/Functional/ForEach.hpp>
+#include <Langulus/Annies/Functional/Deepen.hpp>
+#include <Langulus/Annies/Functional/Compare.hpp>
 
 
 /// Material construction                                                     

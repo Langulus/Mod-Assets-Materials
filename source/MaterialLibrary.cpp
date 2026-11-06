@@ -23,6 +23,8 @@
 #include <Langulus/Randomness/SimplexNoise.hpp>
 #include <Langulus/Math/Export.hpp>
 
+#include <Langulus/Annies/Functional/Deepen.hpp>
+
 LANGULUS_DEFINE_MODULE(
    MaterialLibrary, 9, "AssetsMaterials",
    "Module for reading, writing, and generating GLSL/HLSL shaders for visualizing materials", "",

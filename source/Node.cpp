@@ -13,6 +13,10 @@
 #include <Langulus/CppAPI/Graphics.hpp>
 #include <Langulus/CppAPI/Platform.hpp>
 
+#include <Langulus/Annies/Functional/ForEach.hpp>
+#include <Langulus/Annies/Functional/Deepen.hpp>
+#include <Langulus/Annies/Functional/Compare.hpp>
+
 
 /// Material node construction for Nodes::Root                                
 ///   @param material the parent material                                     
@@ -120,7 +124,9 @@ auto Node::NodeFromRecipe(Recipe const& recipe) -> Node* {
 /// Get material library                                                      
 ///   @return a pointer to the manager                                        
 auto Node::GetLibrary() const noexcept -> MaterialLibrary* {
-   return const_cast<MaterialLibrary*>(mMaterial->GetProducer());
+   return const_cast<MaterialLibrary*>(
+      static_cast<MaterialLibrary const*>(mMaterial->GetProducer())
+   );
 }
 
 /// Create new nodes                                                          
@@ -325,7 +331,7 @@ void Node::Descend() {
 ///   @param name the definition name (used to detect duplications)           
 ///   @param code the code snippet to add                                     
 void Node::AddDefine(Token const& name, GLSL const& code) {
-   mMaterial->AddDefine(mRate, name, code);
+   DecvqAllCast(mMaterial)->AddDefine(mRate, name, code);
 }
 
 /// Log the material node hierarchy                                           
@@ -481,7 +487,7 @@ Node::DefaultTag Node::GetDefaultTag(TMeta tag) {
 
    auto found = properties.Find(tag);
    if (found)
-      return properties.GetVal(found);
+      return found.GetVal();
 
    LglsError("Undefined default tag: ", tag);
    return {};

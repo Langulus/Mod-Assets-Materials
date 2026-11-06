@@ -122,7 +122,7 @@ auto Node::ExposeData(Token const& pattern, auto&&...a) -> Symbol& {
 ///   @return the symbol handle                                               
 template<CT::DefineTag T, CT::NotVoid D>
 auto Node::ExposeTag(Token const& pattern, auto&&...a) -> Symbol& {
-   const auto meta = MetaDataOf<T>();
+   const auto meta = MetaTagOf<T>();
    mLocalsT[meta] << Symbol::Function<D>(mRate, pattern, LglsFwd(a)...);
    return mLocalsT[meta][Index::Last];
 }
