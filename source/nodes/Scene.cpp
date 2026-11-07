@@ -12,6 +12,8 @@
 #include <Langulus/Vectors/TNormal.hpp>
 #include <Langulus/Vectors/TSampler.hpp>
 
+#include <Langulus/Annies/Functional/Compare.hpp>
+
 using namespace Nodes;
 
 
