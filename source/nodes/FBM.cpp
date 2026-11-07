@@ -9,6 +9,8 @@
 #include "Value.hpp"
 #include "../Material.hpp"
 
+#include <Langulus/Annies/Functional/Compare.hpp>
+
 using namespace Nodes;
 
 
