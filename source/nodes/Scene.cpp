@@ -6,7 +6,7 @@
 /// SPDX-License-Identifier: GPL-3.0-or-later                                 
 ///                                                                           
 #include "Scene.hpp"
-#include "../Material.hpp"
+#include "../MaterialLibrary.hpp"
 #include <Langulus/CppAPI/Mesh.hpp>
 #include <Langulus/Math/Color.hpp>
 #include <Langulus/Vectors/TNormal.hpp>
@@ -56,8 +56,7 @@ Symbol const& Scene::GenerateLines() {
       geometryDescriptor <<= MetaOf<RGBA>();
 
       // Get the generated geometry art                                 
-      Verbs::Create creator {geometryDescriptor};
-      const auto geometry = mMaterial->RunIn(creator)->As<Things::Mesh*>();
+      const Ref geometry = Verbs::Create(geometryDescriptor).In(mMaterial)->As<Things::Mesh*>();
       const auto count = geometry->GetLineCount();
       for (size_t i = 0; i < count; ++i) {
          // Extract each line, and convert it to shader code            
@@ -104,7 +103,7 @@ Symbol const& Scene::GenerateLines() {
 ///   @param what the recipe to reinterpret                                   
 ///   @param global place where global definitions go                         
 ///   @return the generated scene function call                               
-GLSL InterpretAsSDF(Recipe const&, Material&) {
+GLSL InterpretAsSDF(Recipe const&, Material const&) {
    TODO();
    return {};
 }
@@ -164,8 +163,7 @@ Symbol const& Scene::GenerateTriangles() {
       geometryDescriptor <<= MetaOf<Sampler2>();
 
       // Get the generated geometry art                               
-      Verbs::Create creator {geometryDescriptor};
-      const auto geometry = mMaterial->RunIn(creator)->As<Things::Mesh*>();
+      const Ref geometry = Verbs::Create(geometryDescriptor).In(mMaterial)->As<Things::Mesh*>();
       const auto count = geometry->GetTriangleCount();
       for (size_t i = 0; i < count; ++i) {
          auto position = geometry->template GetTriangleTag<Tags::Place>(i);

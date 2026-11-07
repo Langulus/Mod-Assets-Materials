@@ -16,7 +16,6 @@ namespace Nodes
    ///                                                                        
    /// Can generate shader code that resermbles the described scene, either   
    /// by adding signed distance field functions, or triangles/lines          
-   ///                                                                        
    struct Scene final : Node {
       using CTTI_Abstract  = No;
       using CTTI_Bases     = Node;

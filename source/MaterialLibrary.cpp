@@ -24,6 +24,7 @@
 #include <Langulus/Math/Export.hpp>
 
 #include <Langulus/Annies/Functional/Deepen.hpp>
+#include <Langulus/Annies/Functional/Compare.hpp>
 
 LANGULUS_DEFINE_MODULE(
    MaterialLibrary, 9, "AssetsMaterials",
