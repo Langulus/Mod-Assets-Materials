@@ -7,37 +7,13 @@
 ///                                                                           
 #pragma once
 #include "Export.hpp"
-
-/*struct GLSL;
-
-namespace Langulus::CT
-{
-   namespace Inner
-   {
-      /// Do types have an explicit or implicit cast operator to GLSL         
-      template<class...T>
-      concept ConvertibleToGLSLByOperator = requires (T&...a) {
-         ((a.operator GLSL()), ...); };
-
-      /// Does GLSL has an explicit/implicit constructor that accepts T       
-      template<class...T>
-      concept ConvertibleToGLSLByConstructor = requires (T&...a) {
-         ((GLSL {a}), ...); };
-   }
-
-   /// A GLSL-convertible type is one that has either an implicit or explicit 
-   /// cast operator to GLSL type, or can be used to explicitly initialize a  
-   /// GLSL container                                                         
-   template<class...T>
-   concept ConvertibleToGLSL = ((
-           Inner::ConvertibleToGLSLByOperator<T>
-        or Inner::ConvertibleToGLSLByConstructor<T>) and ...);
-}*/
+#include <Langulus/CT/Quaternion.hpp>
+#include <Langulus/CT/Matrix.hpp>
+#include <Langulus/CT/CustomVector.hpp>
 
 
 ///                                                                           
 ///   GLSL code container & tools                                             
-///                                                                           
 struct GLSL : Text {
    using CTTI_ReflectAs = GLSL;
    using CTTI_Named     = Yes<"GLSL">;
@@ -121,24 +97,6 @@ public:
       this->Absorb(LglsFwd(text));
    }
 
-   //using Text::operator ==;
-
-   /*explicit GLSL(CT::Deep auto const&);
-   explicit GLSL(DMeta meta) : GLSL {GLSL::Type(meta)} {}
-   explicit GLSL(TMeta meta) : Text {"tag", meta.GetName()} {}
-   explicit GLSL(CMeta) {
-      TODO(); //expand the constant
-   }
-
-   template<CT::Number T, size_t C>
-   explicit GLSL(const TVector<T, C>&);
-
-   template<CT::Number T, size_t C, size_t R>
-   explicit GLSL(const TMatrix<T, C, R>&);
-
-   template<CT::Number T>
-   explicit GLSL(const TQuaternion<T>&);*/
-
    /// Fill template arguments by first serializing them to GLSL           
    ///   @param format the template string                                 
    ///   @param args... the arguments                                      
@@ -159,6 +117,9 @@ public:
    static GLSL FromTag(TMeta);
 
    static GLSL FromScope(CT::Deep auto const&);
+   static GLSL FromQuaternion(CT::Quaternion auto const&);
+   static GLSL FromMatrix(CT::Matrix auto const&);
+   static GLSL FromVector(CT::CustomVector auto const&);
 
    bool IsDefined(Token const&) const;
    auto FindKeyword(Text const&) const -> size_t;
@@ -235,3 +196,5 @@ LANGULUS_MORPHISM_CUSTOM(RRate, {
    },
    GLSL
 );
+
+#include "SerializeGLSL.inl"

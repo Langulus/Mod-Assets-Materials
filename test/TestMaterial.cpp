@@ -56,7 +56,7 @@ SCENARIO("Shader generation", "[materials]") {
          );
          
          WHEN("The material is created via abstractions") {
-            auto producedMaterial = root.CreateUnit<Things::Material>(Code(MaterialCode));
+            auto producedMaterial = root.CreatePart<Things::Material>(Code(MaterialCode));
 
             // Update once                                              
             root.Update({});
