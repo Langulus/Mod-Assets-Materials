@@ -55,13 +55,13 @@ void Node::Detach() {
    mDescriptor.Reset();
 
    // Decouple all children from their parent                           
-   for (auto& child : mChildren) {
+   for (auto child : mChildren) {
       VERBOSE_NODE("Decoupling child: ", child);
       child->mParent.Reset();
       VERBOSE_NODE("...", GetReferences(), " uses remain");
    }
 
-   for (auto& child : mChildren) {
+   for (auto child : mChildren) {
       child->Detach();
       VERBOSE_NODE("...", GetReferences(), " uses remain");
    }

@@ -69,14 +69,13 @@ void Material::Create(Verb& verb) {
 ///   @param index tag group to generate                                      
 ///   @return true if data was generated                                      
 bool Material::Generate(TMeta tag, size_t) {
-   const auto found = mDataListMap.Find(tag);
-   if (found)
+   if (mDataListMap.Find(tag))
       return true;
 
    // Reserve shader stages inside the Art's data list map, in the      
    // Tags::Shader bucket. This marks that this material has been       
    // generated from now on, even if a specific stage doesn't exist.    
-   mDataListMap.Merge(tag, DataList {ShaderStage::Counter, GLSL {}});
+   mDataListMap.Merge(tag, DataList{ Data{ShaderStage::Counter}, Data{GLSL {}}});
 
    // If a vertex shader is missing, add a default one                  
    GLSL& vs = GetStage(ShaderStage::Vertex);

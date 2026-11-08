@@ -113,6 +113,7 @@ private:
 
 public:
    using Text::Text;
+   using Text::operator ==;
 
    /// Construction from any kind of text that is an Annies container         
    template<CT::Text T> requires CT::Container<T>
@@ -202,6 +203,9 @@ namespace Langulus::CTTI
 
 /// Convert std::string_view -> GLSL                                          
 LANGULUS_MORPHISM(std::string_view, GLSL);
+
+/// Convert Text -> GLSL                                                      
+LANGULUS_MORPHISM(Annies::Text, GLSL);
 
 /// Convert bool -> GLSL                                                      
 LANGULUS_MORPHISM_CUSTOM(bool, { return from ? "true" : "false"; }, GLSL);
