@@ -12,7 +12,7 @@
 
 /// Convert a block to GLSL code                                              
 ///   @param block the block to convert to GLSL                               
-GLSL GLSL::FromScope(CT::Deep auto const& scope) {
+/*GLSL GLSL::FromScope(CT::Deep auto const& scope) {
    auto& dense_scope = DenseCast(scope);
    if (dense_scope.IsOr())
       throw Exception("GLSL doesn't support OR blocks");
@@ -43,7 +43,7 @@ GLSL GLSL::FromScope(CT::Deep auto const& scope) {
    // Finally, attempt to interpret each element as GLSL and concat     
    TODO();
    return result;
-}
+}*/
 
 /// Vector -> GLSL serializer                                                 
 ///   @param v vector to serialize                                            

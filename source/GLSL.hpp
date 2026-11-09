@@ -116,7 +116,7 @@ public:
    static GLSL FromTag();
    static GLSL FromTag(TMeta);
 
-   static GLSL FromScope(CT::Deep auto const&);
+   //static GLSL FromScope(CT::Deep auto const&);
    static GLSL FromQuaternion(CT::Quaternion auto const&);
    static GLSL FromMatrix(CT::Matrix auto const&);
    static GLSL FromVector(CT::CustomVector auto const&);
@@ -154,13 +154,13 @@ namespace Langulus::CTTI
    };
 }
 
-/*namespace Langulus
+namespace Langulus
 {
    /// Make a GLSL literal                                                    
-   GLSL operator ""_glsl(const char* text, ::std::size_t size) {
+   constexpr GLSL operator ""_glsl(const char* text, ::std::size_t size) {
       return Annies::Text::FromText(text, size);
    }
-}*/
+}
 
 /// Convert std::string_view -> GLSL                                          
 LANGULUS_MORPHISM(std::string_view, GLSL);
@@ -172,7 +172,7 @@ LANGULUS_MORPHISM(Annies::Text, GLSL);
 LANGULUS_MORPHISM_CUSTOM(bool, { return from ? "true" : "false"; }, GLSL);
 
 /// Convert Deep -> GLSL                                                      
-LANGULUS_MORPHISM_CONCEPT_CUSTOM(CT::Deep, { return GLSL::FromScope(from); }, GLSL);
+//LANGULUS_MORPHISM_CONCEPT_CUSTOM(CT::Deep, { return GLSL::FromScope(from); }, GLSL);
 
 /// Convert DMeta -> GLSL                                                     
 LANGULUS_MORPHISM_CUSTOM(RTTI::DMeta, { return GLSL::FromType(from); }, GLSL);
