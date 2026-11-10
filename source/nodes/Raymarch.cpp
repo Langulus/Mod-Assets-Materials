@@ -9,10 +9,6 @@
 #include "Scene.hpp"
 #include "Camera.hpp"
 
-#include <Langulus/Annies/Functional/ForEach.hpp>
-#include <Langulus/Annies/Functional/Deepen.hpp>
-#include <Langulus/Annies/Functional/Compare.hpp>
-
 using namespace Nodes;
 
 
@@ -20,7 +16,7 @@ using namespace Nodes;
 ///   @param desc raymarch descriptor                                         
 Raymarch::Raymarch(Describe&& descriptor)
    : Downcastable {this}
-   , Node         {*descriptor} {
+   , Node         {Neat {descriptor.what}} {
    // Extract RaymarchConfig.mDetail                                    
    mDescriptor.ExtractTag<Tags::Count>(mDetail);
    LglsAssert(mDetail > 0, "Bad raymarch iterations", mDetail);

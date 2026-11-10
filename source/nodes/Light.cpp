@@ -7,8 +7,6 @@
 ///                                                                           
 #include "Light.hpp"
 
-#include <Langulus/Annies/Functional/Compare.hpp>
-
 using namespace Nodes;
 
 
@@ -16,7 +14,7 @@ using namespace Nodes;
 ///   @param desc descriptor for the node                                     
 Light::Light(Describe&& descriptor)
    : Downcastable {this}
-   , Node         {*descriptor} { }
+   , Node         {Neat {descriptor.what}} { }
 
 /// Generate the light functionality                                          
 ///   @return the light function template                                     

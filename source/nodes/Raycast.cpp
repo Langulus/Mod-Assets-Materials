@@ -7,8 +7,6 @@
 ///                                                                           
 #include "Raycast.hpp"
 
-#include <Langulus/Annies/Functional/Compare.hpp>
-
 using namespace Nodes;
 
 
@@ -16,7 +14,7 @@ using namespace Nodes;
 ///   @param desc raycast descriptor                                          
 Raycast::Raycast(Describe&& descriptor)
    : Downcastable {this}
-   , Node         {*descriptor} { }
+   , Node         {Neat {descriptor.what}} { }
 
 /// Generate the raycaster code                                               
 ///   @return the raycaster function template                                 

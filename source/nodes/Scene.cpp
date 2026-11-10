@@ -12,8 +12,6 @@
 #include <Langulus/Vectors/TNormal.hpp>
 #include <Langulus/Vectors/TSampler.hpp>
 
-#include <Langulus/Annies/Functional/Compare.hpp>
-
 using namespace Nodes;
 
 
@@ -21,7 +19,7 @@ using namespace Nodes;
 ///   @param desc the node descriptor                                         
 Scene::Scene(Describe&& descriptor)
    : Downcastable {this}
-   , Node         {*descriptor} {
+   , Node         {Neat {descriptor.what}} {
    // Notice how we don't satisfy the rest of the descriptor            
    // How the scene is generated depends on whether we're rasterizing,  
    // raymarching, raytracing, etc.                                     

@@ -9,9 +9,6 @@
 #include <Langulus/CppAPI/Graphics.hpp>
 #include <Langulus/Matrices/TMatrix.hpp>
 
-#include <Langulus/Annies/Functional/Deepen.hpp>
-#include <Langulus/Annies/Functional/Compare.hpp>
-
 using namespace Nodes;
 
 
@@ -19,7 +16,7 @@ using namespace Nodes;
 ///   @param desc the camera node descriptor                                  
 Camera::Camera(Describe descriptor)
    : Downcastable {this}
-   , Node         {*descriptor} { }
+   , Node         {Neat {descriptor.what}} { }
 
 /// Generate the camera code                                                  
 ///   @return the output symbol                                               

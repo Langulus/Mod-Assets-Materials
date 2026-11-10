@@ -9,8 +9,6 @@
 #include "Value.hpp"
 #include "../Material.hpp"
 
-#include <Langulus/Annies/Functional/Compare.hpp>
-
 using namespace Nodes;
 
 
@@ -18,7 +16,7 @@ using namespace Nodes;
 ///   @param descriptor node descriptor                                       
 FBM::FBM(Describe&& descriptor)
    : Downcastable {this}
-   , Node         {*descriptor} {
+   , Node         {Neat {descriptor.what}} {
    // Extract number of octaves                                         
    mDescriptor.ExtractTag<Tags::Count>(mOctaveCount);
    LglsAssert(mOctaveCount >= 1, "Bad FBM cycle count", mOctaveCount);

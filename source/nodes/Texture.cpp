@@ -11,9 +11,6 @@
 #include <Langulus/CppAPI/Image.hpp>
 #include <Langulus/CppAPI/IO.hpp>
 
-#include <Langulus/Annies/Functional/ForEach.hpp>
-#include <Langulus/Annies/Functional/Compare.hpp>
-
 using namespace Nodes;
 
 
@@ -21,7 +18,7 @@ using namespace Nodes;
 ///   @param describe the node descriptor                                     
 Texture::Texture(Describe describe)
    : Downcastable {this}
-   , Node         {*describe} {
+   , Node         {Neat {describe.what}} {
    // Create any subnodes here, it is allowed                           
    // This will also execute any encountered [subcode], and set rate    
    InnerCreate();
@@ -44,7 +41,7 @@ Texture::Texture(Describe describe)
 
       if (target.CastsTo(MetaDataOf<Things::Image>())
       or  target.CastsTo(MetaDataOf<Things::File>())) {
-         mTexture = CreateTexture(c);
+         mTexture = CreateTexture(c.GetDescriptor());
          VERBOSE_NODE("Texture generator changed to: ", mTexture);
       }
       else Logger::Warning(this, ": Ignored recipe: ", c);

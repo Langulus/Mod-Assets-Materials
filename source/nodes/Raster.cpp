@@ -10,10 +10,6 @@
 #include "Camera.hpp"
 #include <Langulus/CppAPI/Mesh.hpp>
 
-#include <Langulus/Annies/Functional/ForEach.hpp>
-#include <Langulus/Annies/Functional/Deepen.hpp>
-#include <Langulus/Annies/Functional/Compare.hpp>
-
 using namespace Nodes;
 
 
@@ -21,7 +17,7 @@ using namespace Nodes;
 ///   @param desc the rasterizer descriptor                                   
 Raster::Raster(Describe&& descriptor)
    : Downcastable {this}
-   , Node         {*descriptor} {
+   , Node         {Neat {descriptor.what}} {
    // Extract settings                                                  
    mDescriptor.ExtractTag<Tags::Bilateral>(mBilateral);
    mDescriptor.ExtractTag<Tags::Signed>(mSigned);

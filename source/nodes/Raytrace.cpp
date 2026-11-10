@@ -7,8 +7,6 @@
 ///                                                                           
 #include "Raytrace.hpp"
 
-#include <Langulus/Annies/Functional/Compare.hpp>
-
 using namespace Nodes;
 
 
@@ -16,7 +14,7 @@ using namespace Nodes;
 ///   @param desc raytrace descriptor                                         
 Raytrace::Raytrace(Describe descriptor)
    : Downcastable {this}
-   , Node         {*descriptor} { }
+   , Node         {Neat {descriptor.what}} { }
 
 /// Generate raytracer code                                                   
 ///   @return the output symbol                                               
