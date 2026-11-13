@@ -5,7 +5,7 @@
 ///                                                                           
 /// SPDX-License-Identifier: GPL-3.0-or-later                                 
 ///                                                                           
-#include <Langulus/Material.hpp>
+#include <Langulus/CppAPI/Material.hpp>
 #include <Langulus/Testing.hpp>
 
 
@@ -43,7 +43,7 @@ constexpr auto MaterialCode = R"code(
 )code";
 
 
-SCENARIO("Shader generation", "[materials]") {
+SCENARIO("Shader generation") {
    static Allocator::State memoryState;
 
    for (int repeat = 0; repeat != 10; ++repeat) {
