@@ -151,6 +151,7 @@ GLSL& Material::GetStage(size_t stage) {
    LglsAssumeDev(stages->GetCount() == ShaderStage::Counter,
       "Bad material data count");
    IF_SAFE(for (auto& s : *stages) {
+      (void) s;
       LglsAssumeDev(s.IsExact<GLSL>() and s.GetCount() == 1,
          "Bad stage commited");
    })
