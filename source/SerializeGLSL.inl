@@ -221,3 +221,20 @@ inline GLSL GLSL::FromType(DMeta meta) {
 
    throw Exception("Unsupported GLSL type");
 }
+
+namespace Langulus::CTTI
+{
+   /// Rule for serializing GLSL to Text. Wraps it in GLSL"..." symbols.      
+   template<>
+   struct SerializationRule<Annies::Text, GLSL> {
+      using S = Serializer<Annies::Text>;
+      using Context = typename S::Context;
+
+      static void Serialize(GLSL const& glsl, Annies::Text& out, Context*) {
+         out += MetaDataOf<GLSL>().GetShortestUnambiguousToken();
+         out += Serial::OpenString.Token;
+         out += static_cast<Annies::Text const&>(glsl);
+         out += Serial::CloseString.Token;
+      }
+   };
+}
